@@ -1,0 +1,72 @@
+.events-container {
+  padding: 2rem;
+}
+
+.events-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.events-header h1 {
+  font-size: 2rem;
+  font-weight: 500;
+}
+
+.table-container {
+  overflow: auto;
+}
+
+.events-table {
+  width: 100%;
+}
+
+.date-cell {
+  display: flex;
+  align-items: center;
+}
+
+.date-icon {
+  margin-right: 8px;
+  color: #757575;
+}
+
+.mat-column-actions {
+  width: 180px;
+  text-align: right;
+}
+
+.no-events {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  text-align: center;
+  color: #757575;
+}
+
+.no-events-icon {
+  font-size: 4rem;
+  width: 4rem;
+  height: 4rem;
+  margin-bottom: 1rem;
+}
+
+.no-events h2 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Event Type Chip Colors */
+.event-chip-vaccine { background-color: #e3f2fd; color: #1e88e5; }
+.event-chip-medicine { background-color: #fce4ec; color: #d81b60; }
+.event-chip-diary { background-color: #fffde7; color: #fdd835; }
+.event-chip-breed { background-color: #f3e5f5; color: #8e24aa; }
+.event-chip-service { background-color: #e0f2f1; color: #00897b; }
+
+/* Status Chip Colors */
+.status-chip-done { background-color: #e8f5e9; color: #43a047; }
+.status-chip-pending { background-color: #fff3e0; color: #fb8c00; }
+.status-chip-overdue { background-color: #ffebee; color: #e53935; }
