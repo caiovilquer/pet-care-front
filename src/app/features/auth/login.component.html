@@ -1,0 +1,50 @@
+<div class="login-container">
+  <mat-card class="login-card">
+    <mat-card-header>
+      <div mat-card-avatar class="header-image">
+        <mat-icon>pets</mat-icon>
+      </div>
+      <mat-card-title>Pet Care Scheduler</mat-card-title>
+      <mat-card-subtitle>Entre na sua conta</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" formControlName="email" required>
+          <mat-icon matSuffix>email</mat-icon>
+          <mat-error *ngIf="loginForm.get('email')?.hasError('required')">
+            Email é obrigatório
+          </mat-error>
+          <mat-error *ngIf="loginForm.get('email')?.hasError('email')">
+            Email deve ser válido
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Senha</mat-label>
+          <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password" required>
+          <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" type="button">
+            <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+          </button>
+          <mat-error *ngIf="loginForm.get('password')?.hasError('required')">
+            Senha é obrigatória
+          </mat-error>
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" type="submit" 
+                [disabled]="loginForm.invalid || isLoading" class="full-width">
+          {{isLoading ? 'Entrando...' : 'Entrar'}}
+        </button>
+      </form>
+    </mat-card-content>
+
+    <mat-card-actions>
+      <p class="center-text">
+        Não tem uma conta? 
+        <a routerLink="/auth/signup" class="signup-link">Cadastre-se</a>
+      </p>
+    </mat-card-actions>
+  </mat-card>
+</div>
