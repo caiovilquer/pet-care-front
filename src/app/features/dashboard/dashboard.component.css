@@ -1,0 +1,88 @@
+.dashboard-container {
+  padding: 2rem;
+}
+
+.dashboard-header {
+  margin-bottom: 2rem;
+}
+
+.dashboard-header h1 {
+  font-size: 2.5rem;
+  font-weight: 500;
+}
+
+.dashboard-header p {
+  font-size: 1.2rem;
+  color: #666;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  text-align: center;
+}
+
+.stat-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  margin: 0 auto 1rem;
+}
+
+.stat-icon mat-icon {
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+}
+
+.pets-icon { background: linear-gradient(135deg, #42a5f5, #1e88e5); }
+.events-icon { background: linear-gradient(135deg, #ffca28, #ffb300); }
+.urgent-icon { background: linear-gradient(135deg, #ef5350, #e53935); }
+
+.stat-card mat-card-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+
+.stat-card mat-card-subtitle {
+  font-size: 1rem;
+  color: #757575;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 1.5rem;
+}
+
+.recent-pets-card, .recent-events-card {
+  height: 100%;
+}
+
+.no-data {
+  padding: 1rem;
+  text-align: center;
+  color: #999;
+}
+
+mat-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 1rem !important;
+}
+
+.event-icon-vaccine { color: #1e88e5; }
+.event-icon-medicine { color: #d81b60; }
+.event-icon-diary { color: #fdd835; }
+.event-icon-breed { color: #8e24aa; }
+.event-icon-service { color: #00897b; }
