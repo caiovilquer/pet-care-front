@@ -1,0 +1,60 @@
+.pets-container {
+  padding: 2rem;
+}
+
+.pets-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.pets-header h1 {
+  font-size: 2rem;
+  font-weight: 500;
+}
+
+.table-container {
+  overflow: auto;
+}
+
+.pets-table {
+  width: 100%;
+}
+
+.pet-name {
+  display: flex;
+  align-items: center;
+}
+
+.pet-icon {
+  margin-right: 8px;
+  color: #757575;
+}
+
+.mat-column-actions {
+  width: 200px;
+  text-align: right;
+}
+
+.no-pets {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  text-align: center;
+  color: #757575;
+}
+
+.no-pets-icon {
+  font-size: 4rem;
+  width: 4rem;
+  height: 4rem;
+  margin-bottom: 1rem;
+}
+
+.no-pets h2 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
