@@ -1,0 +1,98 @@
+<h2 mat-dialog-title>{{isEdit ? 'Editar Evento' : 'Novo Evento'}}</h2>
+    
+<mat-dialog-content>
+  <form [formGroup]="eventForm">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Pet</mat-label>
+      <mat-select formControlName="petId" required>
+        <mat-option *ngFor="let pet of pets" [value]="pet.id">
+          {{pet.name}} ({{pet.specie}})
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="eventForm.get('petId')?.hasError('required')">
+        Pet é obrigatório
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Tipo do Evento</mat-label>
+      <mat-select formControlName="type" required>
+        <mat-option value="VACCINE">Vacina</mat-option>
+        <mat-option value="MEDICINE">Medicamento</mat-option>
+        <mat-option value="DIARY">Diário</mat-option>
+        <mat-option value="BREED">Reprodução</mat-option>
+        <mat-option value="SERVICE">Serviço</mat-option>
+      </mat-select>
+      <mat-error *ngIf="eventForm.get('type')?.hasError('required')">
+        Tipo é obrigatório
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Descrição</mat-label>
+      <textarea matInput formControlName="description" rows="3" 
+                placeholder="Descreva o evento..." required></textarea>
+      <mat-error *ngIf="eventForm.get('description')?.hasError('required')">
+        Descrição é obrigatória
+      </mat-error>
+    </mat-form-field>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="half-width">
+        <mat-label>Data</mat-label>
+        <input matInput [matDatepicker]="datePicker" formControlName="dateStart" required>
+        <mat-datepicker-toggle matSuffix [for]="datePicker"></mat-datepicker-toggle>
+        <mat-datepicker #datePicker></mat-datepicker>
+        <mat-error *ngIf="eventForm.get('dateStart')?.hasError('required')">
+          Data é obrigatória
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="half-width">
+        <mat-label>Hora</mat-label>
+        <input matInput type="time" formControlName="timeStart" required>
+        <mat-error *ngIf="eventForm.get('timeStart')?.hasError('required')">
+          Hora é obrigatória
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Frequência de Repetição</mat-label>
+      <mat-select formControlName="frequency">
+        <mat-option value="">Não repetir</mat-option>
+        <mat-option *ngFor="let freq of frequencies" [value]="freq.value">
+          {{freq.viewValue}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <div *ngIf="eventForm.get('frequency')?.value" class="form-row">
+      <mat-form-field appearance="outline" class="half-width">
+        <mat-label>A cada</mat-label>
+        <input matInput type="number" formControlName="intervalCount">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="half-width">
+        <mat-label>Repetições (opcional)</mat-label>
+        <input matInput type="number" formControlName="repetitions">
+      </mat-form-field>
+    </div>
+
+    <mat-form-field *ngIf="eventForm.get('frequency')?.value" appearance="outline" class="full-width">
+      <mat-label>Data Final (opcional)</mat-label>
+      <input matInput [matDatepicker]="finalDatePicker" formControlName="finalDate">
+      <mat-datepicker-toggle matSuffix [for]="finalDatePicker"></mat-datepicker-toggle>
+      <mat-datepicker #finalDatePicker></mat-datepicker>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancelar</button>
+  <button mat-raised-button color="primary" 
+          [disabled]="eventForm.invalid || isLoading" 
+          (click)="onSubmit()">
+    {{isLoading ? 'Salvando...' : (isEdit ? 'Salvar' : 'Adicionar')}}
+  </button>
+</mat-dialog-actions>
