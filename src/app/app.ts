@@ -1,12 +1,17 @@
-import { Component, signal } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet],
-  templateUrl: './app.html',
-  styleUrl: './app.css'
+  template: '<router-outlet></router-outlet>',
+  styles: [`
+    :host {
+      display: block;
+      height: 100vh;
+    }
+  `]
 })
 export class App {
-  protected readonly title = signal('pet-care-scheduler-front');
+  title = 'Pet Care Scheduler';
 }
