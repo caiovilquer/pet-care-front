@@ -1,0 +1,13 @@
+.full-width {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+mat-dialog-content {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+mat-dialog-actions {
+  margin-top: 16px;
+}

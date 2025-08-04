@@ -1,0 +1,50 @@
+<h2 mat-dialog-title>{{isEdit ? 'Editar Pet' : 'Adicionar Pet'}}</h2>
+    
+<mat-dialog-content>
+  <form [formGroup]="petForm">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Nome do Pet</mat-label>
+      <input matInput formControlName="name" required>
+      <mat-error *ngIf="petForm.get('name')?.hasError('required')">
+        Nome é obrigatório
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Espécie</mat-label>
+      <mat-select formControlName="specie" required>
+        <mat-option value="Cão">Cão</mat-option>
+        <mat-option value="Gato">Gato</mat-option>
+        <mat-option value="Pássaro">Pássaro</mat-option>
+        <mat-option value="Peixe">Peixe</mat-option>
+        <mat-option value="Hamster">Hamster</mat-option>
+        <mat-option value="Coelho">Coelho</mat-option>
+        <mat-option value="Outro">Outro</mat-option>
+      </mat-select>
+      <mat-error *ngIf="petForm.get('specie')?.hasError('required')">
+        Espécie é obrigatória
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Raça</mat-label>
+      <input matInput formControlName="race">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Data de Nascimento</mat-label>
+      <input matInput [matDatepicker]="picker" formControlName="birthdate">
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancelar</button>
+  <button mat-raised-button color="primary" 
+          [disabled]="petForm.invalid || isLoading" 
+          (click)="onSubmit()">
+    {{isLoading ? 'Salvando...' : (isEdit ? 'Salvar' : 'Adicionar')}}
+  </button>
+</mat-dialog-actions>
