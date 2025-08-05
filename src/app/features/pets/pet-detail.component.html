@@ -1,0 +1,113 @@
+<div class="pet-detail-container" *ngIf="!isLoading && pet; else loadingTemplate">
+  <div class="detail-header">
+    <button mat-button (click)="goBack()" class="back-button">
+      <mat-icon>arrow_back</mat-icon>
+      Voltar para Pets
+    </button>
+    <div class="header-actions">
+      <button mat-button (click)="editPet()">
+        <mat-icon>edit</mat-icon>
+        Editar
+      </button>
+      <button mat-raised-button color="primary" (click)="viewAllEvents()">
+        <mat-icon>event</mat-icon>
+        Ver Eventos
+      </button>
+    </div>
+  </div>
+
+  <!-- Informações Principais -->
+  <mat-card class="pet-info-card">
+    <mat-card-header>
+      <div mat-card-avatar class="pet-avatar">
+        <mat-icon class="pet-icon">pets</mat-icon>
+      </div>
+      <mat-card-title>{{pet.name}}</mat-card-title>
+      <mat-card-subtitle>{{pet.specie}} • {{pet.race || 'Raça não informada'}}</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="pet-details-grid">
+        <div class="detail-item">
+          <mat-icon class="detail-icon">cake</mat-icon>
+          <div class="detail-content">
+            <span class="detail-label">Data de Nascimento</span>
+            <span class="detail-value">{{formatDate(pet.birthdate)}}</span>
+          </div>
+        </div>
+        
+        <div class="detail-item">
+          <mat-icon class="detail-icon">schedule</mat-icon>
+          <div class="detail-content">
+            <span class="detail-label">Idade</span>
+            <span class="detail-value">{{getAgeDisplay(pet.birthdate)}}</span>
+          </div>
+        </div>
+        
+        <div class="detail-item">
+          <mat-icon class="detail-icon">category</mat-icon>
+          <div class="detail-content">
+            <span class="detail-label">Espécie</span>
+            <span class="detail-value">{{pet.specie}}</span>
+          </div>
+        </div>
+        
+        <div class="detail-item" *ngIf="pet.race">
+          <mat-icon class="detail-icon">pets</mat-icon>
+          <div class="detail-content">
+            <span class="detail-label">Raça</span>
+            <span class="detail-value">{{pet.race}}</span>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Eventos Recentes -->
+  <mat-card class="recent-events-card">
+    <mat-card-header>
+      <mat-card-title>Eventos Recentes</mat-card-title>
+      <mat-card-subtitle>Últimos 5 eventos registrados</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div *ngIf="recentEvents.length > 0; else noEvents">
+        <div class="event-item" *ngFor="let event of recentEvents">
+          <div class="event-icon-wrapper">
+            <mat-icon class="event-type-icon">{{getEventIcon(event.type)}}</mat-icon>
+          </div>
+          <div class="event-details">
+            <div class="event-title">{{getEventTypeName(event.type)}}</div>
+            <div class="event-description">{{event.description}}</div>
+            <div class="event-date">{{formatEventDate(event.dateStart)}}</div>
+          </div>
+          <div class="event-status">
+            <mat-chip [class]="getStatusChipClass(event.dateStart, event.status)">
+              {{getEventStatus(event.dateStart, event.status)}}
+            </mat-chip>
+          </div>
+        </div>
+      </div>
+      <ng-template #noEvents>
+        <div class="no-events">
+          <mat-icon class="no-events-icon">event_busy</mat-icon>
+          <p>Nenhum evento registrado ainda.</p>
+        </div>
+      </ng-template>
+    </mat-card-content>
+    <mat-card-actions *ngIf="recentEvents.length > 0">
+      <button mat-button (click)="viewAllEvents()">Ver todos os eventos</button>
+    </mat-card-actions>
+  </mat-card>
+</div>
+
+<ng-template #loadingTemplate>
+  <div class="loading-container">
+    <mat-card>
+      <mat-card-content>
+        <div class="loading-content">
+          <mat-icon class="loading-icon">pets</mat-icon>
+          <p>Carregando detalhes do pet...</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</ng-template>
