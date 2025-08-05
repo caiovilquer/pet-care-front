@@ -13,6 +13,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { TutorService } from '../../core/services/tutor.service';
 import { EventService } from '../../core/services/event.service';
 import { EventStateService } from '../../core/services/event-state.service';
+import { UserStateService } from '../../core/services/user-state.service';
 import { TutorDetailResult } from '../../shared/models/tutor.model';
 import { EventSummary, isEventDone } from '../../core/models/event.model';
 
@@ -37,6 +38,7 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
         <mat-toolbar class="sidenav-header">
           <mat-icon class="logo-icon">pets</mat-icon>
           <span class="logo-text">Pet Care</span>
+          <div class="paw-decoration">🐾</div>
         </mat-toolbar>
         
         <mat-nav-list>
@@ -80,8 +82,17 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
             </mat-icon>
           </button>
           
-          <button mat-icon-button [matMenuTriggerFor]="userMenu">
-            <mat-icon>account_circle</mat-icon>
+          <button mat-icon-button [matMenuTriggerFor]="userMenu" class="avatar-button">
+            <div class="toolbar-avatar">
+              <img *ngIf="currentUser?.avatar; else defaultAvatar" 
+                   [src]="currentUser!.avatar" 
+                   [alt]="(currentUser!.firstName || '') + ' ' + (currentUser!.lastName || '')"
+                   class="avatar-image"
+                   (error)="onAvatarError($event)">
+              <ng-template #defaultAvatar>
+                <mat-icon>account_circle</mat-icon>
+              </ng-template>
+            </div>
           </button>
         </mat-toolbar>
 
@@ -92,17 +103,29 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
     </mat-sidenav-container>
 
     <!-- User Menu -->
-    <mat-menu #userMenu="matMenu">
+    <mat-menu #userMenu="matMenu" class="user-menu">
       <div class="user-info" *ngIf="currentUser">
-        <p class="user-name">{{currentUser.firstName}} {{currentUser.lastName}}</p>
-        <p class="user-email">{{currentUser.email}}</p>
+        <div class="user-avatar">
+          <img *ngIf="currentUser.avatar; else defaultMenuAvatar" 
+               [src]="currentUser.avatar" 
+               [alt]="(currentUser.firstName || '') + ' ' + (currentUser.lastName || '')"
+               class="avatar-image"
+               (error)="onAvatarError($event)">
+          <ng-template #defaultMenuAvatar>
+            <mat-icon>person</mat-icon>
+          </ng-template>
+        </div>
+        <div class="user-details">
+          <p class="user-name">{{currentUser.firstName}} {{currentUser.lastName}}</p>
+          <p class="user-email">{{currentUser.email}}</p>
+        </div>
       </div>
       <mat-divider></mat-divider>
-      <button mat-menu-item routerLink="/profile">
+      <button mat-menu-item routerLink="/profile" class="menu-item">
         <mat-icon>person</mat-icon>
-        <span>Perfil</span>
+        <span>Meu Perfil</span>
       </button>
-      <button mat-menu-item (click)="logout()">
+      <button mat-menu-item (click)="logout()" class="menu-item logout-item">
         <mat-icon>exit_to_app</mat-icon>
         <span>Sair</span>
       </button>
@@ -153,40 +176,76 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
   styles: [`
     .sidenav-container {
       height: 100vh;
+      background: linear-gradient(135deg, #f8faff 0%, #f0f4ff 100%);
     }
 
     .sidenav {
-      width: 250px;
-      background: #f5f5f5;
+      width: 280px;
+      background: linear-gradient(180deg, #ffffff 0%, #f8faff 100%);
+      border-right: 1px solid rgba(76, 175, 80, 0.1);
+      box-shadow: 2px 0 20px rgba(76, 175, 80, 0.08);
     }
 
     .sidenav-header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #4caf50 0%, #66bb6a 50%, #81c784 100%);
       color: white;
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 0 16px;
+      gap: 12px;
+      padding: 20px 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sidenav-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="60" cy="40" r="1.5" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="70" r="1" fill="rgba(255,255,255,0.1)"/><path d="M10,10 Q50,5 90,20" stroke="rgba(255,255,255,0.05)" stroke-width="1" fill="none"/></svg>');
+      pointer-events: none;
     }
 
     .logo-icon {
-      font-size: 24px;
+      font-size: 28px;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-3px); }
     }
 
     .logo-text {
-      font-size: 18px;
-      font-weight: 500;
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .paw-decoration {
+      margin-left: auto;
+      font-size: 16px;
+      opacity: 0.7;
+      animation: float 4s ease-in-out infinite reverse;
     }
 
     .main-toolbar {
       position: sticky;
       top: 0;
       z-index: 1000;
+      background: linear-gradient(90deg, #ffffff 0%, #f8faff 100%);
+      border-bottom: 1px solid rgba(76, 175, 80, 0.1);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     }
 
     .toolbar-title {
-      font-size: 20px;
-      font-weight: 500;
+      font-size: 22px;
+      font-weight: 600;
+      color: #2e7d32;
+      letter-spacing: 0.3px;
     }
 
     .spacer {
@@ -194,75 +253,225 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
     }
 
     .main-content {
-      padding: 24px;
+      padding: 32px;
       min-height: calc(100vh - 64px);
-      background: #fafafa;
+      background: linear-gradient(135deg, #fafffe 0%, #f0fff4 100%);
+      position: relative;
+    }
+
+    .main-content::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(circle at 20% 20%, rgba(76, 175, 80, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(129, 199, 132, 0.03) 0%, transparent 50%);
+      pointer-events: none;
     }
 
     .active {
-      background: rgba(103, 126, 234, 0.1);
-      color: #667eea;
+      background: linear-gradient(135deg, rgba(76, 175, 80, 0.15) 0%, rgba(129, 199, 132, 0.1) 100%);
+      color: #2e7d32;
+      border-radius: 12px;
+      margin: 4px 12px;
+      transform: translateX(4px);
+      box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
     }
 
     .active mat-icon {
-      color: #667eea;
+      color: #2e7d32;
+    }
+
+    mat-nav-list a {
+      margin: 4px 12px;
+      border-radius: 12px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    mat-nav-list a:hover:not(.active) {
+      background: rgba(76, 175, 80, 0.08);
+      transform: translateX(2px);
+    }
+
+    mat-nav-list a mat-icon {
+      color: #4caf50;
+      transition: all 0.3s ease;
+    }
+
+    mat-nav-list a:hover mat-icon {
+      transform: scale(1.1);
     }
 
     .user-info {
-      padding: 16px;
-      background: #f5f5f5;
+      padding: 20px;
+      background: linear-gradient(135deg, #f8faff 0%, #e8f5e8 100%);
+      border-radius: 12px;
+      margin: 8px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .user-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+      overflow: hidden;
+    }
+
+    .user-avatar .avatar-image {
+      width: 48px;
+      height: 48px;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    .user-avatar mat-icon {
+      color: white;
+      font-size: 24px;
+    }
+
+    .user-details {
+      flex: 1;
     }
 
     .user-name {
-      font-weight: 500;
+      font-weight: 600;
       margin: 0;
-      color: #333;
+      color: #2e7d32;
+      font-size: 16px;
     }
 
     .user-email {
-      font-size: 12px;
-      color: #666;
-      margin: 4px 0 0 0;
+      font-size: 13px;
+      color: #66bb6a;
+      margin: 6px 0 0 0;
+      font-weight: 400;
     }
 
+    .menu-item {
+      padding: 12px 20px;
+      transition: all 0.3s ease;
+      border-radius: 8px;
+      margin: 4px 8px;
+    }
+
+    .menu-item:hover {
+      background: rgba(76, 175, 80, 0.1);
+      color: #2e7d32;
+    }
+
+    .menu-item mat-icon {
+      color: #4caf50;
+      margin-right: 12px;
+    }
+
+    .logout-item:hover {
+      background: rgba(244, 67, 54, 0.1);
+      color: #d32f2f;
+    }
+
+    .logout-item:hover mat-icon {
+      color: #d32f2f;
+    }
+
+    /* Estilização moderna dos botões da toolbar */
+    .main-toolbar button {
+      transition: all 0.3s ease;
+      border-radius: 12px;
+    }
+
+    .main-toolbar button:hover {
+      background: rgba(76, 175, 80, 0.1);
+      transform: scale(1.05);
+    }
+
+    .main-toolbar button mat-icon {
+      color: #4caf50;
+    }
+
+    /* Estilização do menu de notificações */
     .notification-header {
-      padding: 16px;
+      padding: 20px;
       display: flex;
       align-items: center;
-      gap: 8px;
-      background: #f8f9fa;
+      gap: 12px;
+      background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+      color: white;
+    }
+
+    .notification-header mat-icon {
+      font-size: 24px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
     }
 
     .notification-header h3 {
       margin: 0;
-      font-size: 16px;
-      color: #333;
-      font-weight: 500;
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
     }
 
     .notification-count {
       font-size: 12px;
-      color: #666;
-      font-weight: normal;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-weight: 500;
     }
 
     .notification-content {
-      max-height: 400px;
+      max-height: 420px;
       overflow-y: auto;
-      min-width: 350px;
+      min-width: 380px;
+      background: #ffffff;
     }
 
     .notification-item {
       display: flex;
       align-items: flex-start;
-      gap: 12px;
-      padding: 12px 16px;
-      border-bottom: 1px solid #f0f0f0;
-      transition: background-color 0.2s;
+      gap: 16px;
+      padding: 16px 20px;
+      border-bottom: 1px solid #f0f8f0;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .notification-item::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: linear-gradient(180deg, #4caf50 0%, #66bb6a 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
     }
 
     .notification-item:hover {
-      background: #f8f9fa;
+      background: linear-gradient(135deg, #f8fff8 0%, #f0fff4 100%);
+      transform: translateX(4px);
+    }
+
+    .notification-item:hover::before {
+      opacity: 1;
     }
 
     .notification-item:last-child {
@@ -271,26 +480,59 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
 
     .event-icon {
       flex-shrink: 0;
-      width: 32px;
-      height: 32px;
+      width: 40px;
+      height: 40px;
       display: flex;
       align-items: center;
       justify-content: center;
       border-radius: 50%;
-      background: #e3f2fd;
+      position: relative;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .event-icon::after {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      border-radius: 50%;
+      background: linear-gradient(45deg, transparent, rgba(255,255,255,0.5), transparent);
+      z-index: -1;
     }
 
     .event-icon mat-icon {
-      font-size: 18px;
-      width: 18px;
-      height: 18px;
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
     }
 
-    .event-icon-vaccine { background: #e8f5e8; color: #4caf50; }
-    .event-icon-medicine { background: #fff3e0; color: #ff9800; }
-    .event-icon-diary { background: #f3e5f5; color: #9c27b0; }
-    .event-icon-breed { background: #fce4ec; color: #e91e63; }
-    .event-icon-service { background: #e1f5fe; color: #03a9f4; }
+    .event-icon-vaccine { 
+      background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c8 100%); 
+      color: #2e7d32; 
+      border: 2px solid rgba(46, 125, 50, 0.2);
+    }
+    .event-icon-medicine { 
+      background: linear-gradient(135deg, #fff8e1 0%, #ffe0b2 100%); 
+      color: #f57c00; 
+      border: 2px solid rgba(245, 124, 0, 0.2);
+    }
+    .event-icon-diary { 
+      background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%); 
+      color: #7b1fa2; 
+      border: 2px solid rgba(123, 31, 162, 0.2);
+    }
+    .event-icon-breed { 
+      background: linear-gradient(135deg, #fce4ec 0%, #f8bbd9 100%); 
+      color: #c2185b; 
+      border: 2px solid rgba(194, 24, 91, 0.2);
+    }
+    .event-icon-service { 
+      background: linear-gradient(135deg, #e1f5fe 0%, #b3e5fc 100%); 
+      color: #0277bd; 
+      border: 2px solid rgba(2, 119, 189, 0.2);
+    }
 
     .event-info {
       flex: 1;
@@ -298,75 +540,189 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
     }
 
     .event-description {
-      font-weight: 500;
-      color: #333;
-      font-size: 14px;
-      margin-bottom: 4px;
+      font-weight: 600;
+      color: #2e7d32;
+      font-size: 15px;
+      margin-bottom: 6px;
+      line-height: 1.4;
     }
 
     .event-date {
-      font-size: 12px;
-      color: #666;
-      margin-bottom: 2px;
+      font-size: 13px;
+      color: #66bb6a;
+      margin-bottom: 4px;
+      font-weight: 500;
     }
 
     .event-pet {
-      font-size: 11px;
-      color: #999;
+      font-size: 12px;
+      color: #81c784;
       font-style: italic;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .event-pet::before {
+      content: '🐾';
+      font-size: 10px;
     }
 
     .view-all-button {
       width: 100%;
       justify-content: center;
-      color: #667eea;
-      font-weight: 500;
+      color: #4caf50;
+      font-weight: 600;
+      padding: 16px;
+      border-radius: 0 0 12px 12px;
+      background: linear-gradient(135deg, #f8fff8 0%, #f0fff4 100%);
+      transition: all 0.3s ease;
+    }
+
+    .view-all-button:hover {
+      background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
     }
 
     .no-notifications {
-      padding: 24px 16px;
+      padding: 32px 24px;
       text-align: center;
-      color: #666;
+      color: #81c784;
+      background: linear-gradient(135deg, #f8fff8 0%, #f0fff4 100%);
     }
 
     .no-notifications-icon {
-      font-size: 48px;
-      width: 48px;
-      height: 48px;
-      color: #ccc;
-      margin-bottom: 8px;
+      font-size: 64px;
+      width: 64px;
+      height: 64px;
+      color: #c8e6c8;
+      margin-bottom: 16px;
+      animation: float 3s ease-in-out infinite;
     }
 
     .no-notifications p {
-      margin: 0 0 16px 0;
-      font-size: 14px;
+      margin: 0 0 20px 0;
+      font-size: 16px;
+      font-weight: 500;
     }
 
     .create-event-button {
       width: 100%;
       justify-content: center;
       color: #4caf50;
+      font-weight: 600;
+      background: rgba(76, 175, 80, 0.1);
+      border-radius: 25px;
+      padding: 12px;
+      transition: all 0.3s ease;
+    }
+
+    .create-event-button:hover {
+      background: #4caf50;
+      color: white;
+      transform: scale(1.05);
+    }
+
+    /* Animação e estilização do sino de notificação */
+    .has-notifications {
+      color: #ff6f00;
+      position: relative;
+    }
+
+    .has-notifications::after {
+      content: '';
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      width: 8px;
+      height: 8px;
+      background: #ff6f00;
+      border-radius: 50%;
+      animation: pulse-dot 2s infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { 
+        transform: scale(1); 
+        opacity: 1; 
+      }
+      50% { 
+        transform: scale(1.3); 
+        opacity: 0.7; 
+      }
     }
 
     .has-notifications {
-      color: #ff9800;
-    }
-
-    /* Animação do sino */
-    .has-notifications {
-      animation: bell-ring 2s ease-in-out infinite;
+      animation: bell-ring 3s ease-in-out infinite;
     }
 
     @keyframes bell-ring {
-      0%, 50%, 100% { transform: rotate(0deg); }
-      10%, 30% { transform: rotate(-10deg); }
-      20%, 40% { transform: rotate(10deg); }
+      0%, 90%, 100% { transform: rotate(0deg); }
+      5%, 15%, 25% { transform: rotate(-8deg); }
+      10%, 20% { transform: rotate(8deg); }
     }
 
+    /* Responsividade e otimizações */
     @media (max-width: 768px) {
-      .sidenav {
-        width: 100%;
-      }
+      .sidenav { width: 100%; }
+      .main-content { padding: 20px 16px; }
+      .notification-content { min-width: 320px; max-height: 350px; }
+      .toolbar-title { font-size: 18px; }
+    }
+
+    @media (max-width: 480px) {
+      .sidenav-header { padding: 16px 20px; }
+      .logo-text { font-size: 18px; }
+      .main-content { padding: 16px 12px; }
+    }
+
+    /* Customizações globais */
+    ::ng-deep .mat-mdc-menu-panel {
+      border-radius: 16px !important;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12) !important;
+      border: 1px solid rgba(76, 175, 80, 0.1) !important;
+      overflow: hidden !important;
+    }
+
+    ::ng-deep .mat-badge-content {
+      background: linear-gradient(135deg, #ff6f00 0%, #ff8f00 100%) !important;
+      color: white !important;
+      font-weight: 600 !important;
+      font-size: 11px !important;
+      min-width: 18px !important;
+      height: 18px !important;
+      line-height: 18px !important;
+    }
+
+    .toolbar-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+    }
+
+    .toolbar-avatar .avatar-image {
+      width: 40px;
+      height: 40px;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    .toolbar-avatar mat-icon {
+      color: white;
+      font-size: 24px;
+    }
+
+    .avatar-button {
+      padding: 4px !important;
+      width: 48px !important;
+      height: 48px !important;
     }
   `]
 })
@@ -375,28 +731,39 @@ export class LayoutComponent implements OnInit, OnDestroy {
   upcomingEventsCount = 0;
   upcomingEventsList: any[] = [];
   private eventUpdateSubscription?: Subscription;
+  private userUpdateSubscription?: Subscription;
 
   constructor(
     private authService: AuthService,
     private tutorService: TutorService,
     private eventService: EventService,
     private eventStateService: EventStateService,
+    private userStateService: UserStateService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadUserProfile();
-    
+
     // Se inscrever para atualizações de eventos
     this.eventUpdateSubscription = this.eventStateService.eventUpdated$.subscribe(() => {
       console.log('Layout: Recebeu notificação de atualização de evento');
       this.refreshNotifications();
+    });
+
+    // Se inscrever para atualizações do perfil do usuário
+    this.userUpdateSubscription = this.userStateService.userUpdated$.subscribe(() => {
+      console.log('Layout: Recebeu notificação de atualização de perfil');
+      this.refreshUserProfile();
     });
   }
 
   ngOnDestroy(): void {
     if (this.eventUpdateSubscription) {
       this.eventUpdateSubscription.unsubscribe();
+    }
+    if (this.userUpdateSubscription) {
+      this.userUpdateSubscription.unsubscribe();
     }
   }
 
@@ -411,7 +778,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
     this.tutorService.getMyProfile().subscribe({
       next: (user) => {
         this.currentUser = user;
-        
+
         // Carregar contagem real de eventos próximos
         if (user.pets && user.pets.length > 0) {
           this.loadUpcomingEventsCount(user.pets);
@@ -428,18 +795,18 @@ export class LayoutComponent implements OnInit, OnDestroy {
 
   private loadUpcomingEventsCount(pets: any[]): void {
     console.log('=== LAYOUT: Carregando contagem de eventos próximos ===');
-    
-    const petEventRequests = pets.map(pet => 
+
+    const petEventRequests = pets.map(pet =>
       this.eventService.listByPet(pet.id)
     );
 
     forkJoin(petEventRequests).subscribe({
       next: (petEventsArrays) => {
         const allEvents: any[] = [];
-        
+
         petEventsArrays.forEach((petEvents, index) => {
           const pet = pets[index];
-          
+
           if (Array.isArray(petEvents)) {
             petEvents.forEach((event: any) => {
               allEvents.push({
@@ -449,31 +816,31 @@ export class LayoutComponent implements OnInit, OnDestroy {
                 dateStart: event.dateStart,
                 petId: pet.id,
                 petName: pet.name,
-                status: event.status || 'PENDING'
+                status: event.status
               });
             });
           }
         });
-        
+
         // Contar apenas eventos próximos (próximos 7 dias)
         const now = new Date();
         const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-        
+
         const upcomingEvents = allEvents.filter(event => {
           const eventDate = new Date(event.dateStart);
           const isNotDone = !isEventDone(event.status);
           const isInFuture = eventDate >= now;
           const isWithinWeek = eventDate <= nextWeek;
-          
+
           return isNotDone && isInFuture && isWithinWeek;
         });
-        
+
         // Ordenar por data (mais próximos primeiro)
         upcomingEvents.sort((a, b) => new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime());
-        
+
         this.upcomingEventsCount = upcomingEvents.length;
         this.upcomingEventsList = upcomingEvents.slice(0, 5); // Mostrar apenas os 5 primeiros
-        
+
         console.log('LAYOUT: Eventos próximos contados:', this.upcomingEventsCount);
         console.log('LAYOUT: Lista de eventos próximos:', this.upcomingEventsList);
       },
@@ -503,18 +870,18 @@ export class LayoutComponent implements OnInit, OnDestroy {
 
   formatEventDate(dateString: string): string {
     if (!dateString) return 'Data inválida';
-    
+
     const eventDate = new Date(dateString);
     const now = new Date();
     const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
     const dayAfterTomorrow = new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000);
-    
+
     // Resetar horas para comparação apenas de datas
     const eventDateOnly = new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate());
     const nowDateOnly = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const tomorrowDateOnly = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate());
     const dayAfterTomorrowDateOnly = new Date(dayAfterTomorrow.getFullYear(), dayAfterTomorrow.getMonth(), dayAfterTomorrow.getDate());
-    
+
     if (eventDateOnly.getTime() === nowDateOnly.getTime()) {
       return `Hoje às ${eventDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
     } else if (eventDateOnly.getTime() === tomorrowDateOnly.getTime()) {
@@ -529,5 +896,30 @@ export class LayoutComponent implements OnInit, OnDestroy {
         minute: '2-digit'
       });
     }
+  }
+
+  onAvatarError(event: any): void {
+    // Esconder a imagem com erro e mostrar o ícone padrão
+    event.target.style.display = 'none';
+  }
+
+  private refreshUserProfile(): void {
+    console.log('Layout: Recarregando perfil do usuário...');
+    this.tutorService.getMyProfile().subscribe({
+      next: (user) => {
+        this.currentUser = user;
+        console.log('Layout: Perfil atualizado:', user);
+        
+        // Também recarregar notificações porque podem ter mudado com novos pets, etc.
+        if (user.pets && user.pets.length > 0) {
+          this.loadUpcomingEventsCount(user.pets);
+        } else {
+          this.upcomingEventsCount = 0;
+        }
+      },
+      error: (error) => {
+        console.error('Layout: Erro ao recarregar perfil:', error);
+      }
+    });
   }
 }

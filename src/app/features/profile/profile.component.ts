@@ -12,6 +12,7 @@ import { forkJoin, Subscription } from 'rxjs';
 import { TutorService } from '../../core/services/tutor.service';
 import { EventService } from '../../core/services/event.service';
 import { EventStateService } from '../../core/services/event-state.service';
+import { UserStateService } from '../../core/services/user-state.service';
 import { TutorDetailResult } from '../../shared/models/tutor.model';
 import { EventSummary, isEventDone } from '../../core/models/event.model';
 
@@ -37,7 +38,13 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
         <mat-card class="profile-card">
           <mat-card-header>
             <div mat-card-avatar class="profile-avatar">
-              <mat-icon>person</mat-icon>
+              <img *ngIf="currentUser?.avatar; else defaultProfileAvatar" 
+                   [src]="currentUser!.avatar" 
+                   [alt]="(currentUser!.firstName || '') + ' ' + (currentUser!.lastName || '')"
+                   class="profile-avatar-image">
+              <ng-template #defaultProfileAvatar>
+                <mat-icon>person</mat-icon>
+              </ng-template>
             </div>
             <mat-card-title>Informações Pessoais</mat-card-title>
             <mat-card-subtitle>Gerencie suas informações de perfil</mat-card-subtitle>
@@ -73,9 +80,11 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
               </mat-form-field>
 
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Observações</mat-label>
-                <textarea matInput formControlName="avatar" rows="3" 
-                          placeholder="Informações adicionais sobre você"></textarea>
+                <mat-label>URL do Avatar</mat-label>
+                <input matInput formControlName="avatar" type="url" 
+                       placeholder="https://exemplo.com/sua-foto.jpg">
+                <mat-icon matSuffix>photo_camera</mat-icon>
+                <mat-hint>Cole aqui a URL da sua foto de perfil</mat-hint>
               </mat-form-field>
 
               <div class="form-actions">
@@ -185,6 +194,13 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
       display: flex;
       align-items: center;
       justify-content: center;
+    }
+
+    .profile-avatar-image {
+      width: 40px;
+      height: 40px;
+      object-fit: cover;
+      border-radius: 50%;
     }
 
     .form-row {
@@ -306,6 +322,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     private tutorService: TutorService,
     private eventService: EventService,
     private eventStateService: EventStateService,
+    private userStateService: UserStateService,
     private snackBar: MatSnackBar
   ) {
     this.profileForm = this.fb.group({
@@ -318,7 +335,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadProfile();
-    
+
     // Se inscrever para atualizações de eventos
     this.eventUpdateSubscription = this.eventStateService.eventUpdated$.subscribe(() => {
       console.log('Profile: Recebeu notificação de atualização de evento');
@@ -349,7 +366,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
           phoneNumber: user.phoneNumber,
           avatar: user.avatar
         });
-        
+
         // Carregar eventos reais dos pets
         if (user.pets && user.pets.length > 0) {
           this.loadEventsForAllPets(user.pets);
@@ -367,7 +384,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   private loadEventsForAllPets(pets: any[]): void {
     console.log('=== PERFIL: Carregando eventos dos pets ===');
     console.log('Pets para carregar eventos:', pets.map(p => ({ id: p.id, name: p.name })));
-    
+
     const petEventRequests = pets.map(pet => {
       console.log(`PERFIL: Fazendo requisição para pet ${pet.id} (${pet.name})`);
       return this.eventService.listByPet(pet.id);
@@ -376,14 +393,14 @@ export class ProfileComponent implements OnInit, OnDestroy {
     forkJoin(petEventRequests).subscribe({
       next: (petEventsArrays) => {
         console.log('PERFIL: Respostas dos eventos por pet:', petEventsArrays);
-        
+
         // Combinar todos os eventos de todos os pets
         const allEvents: EventSummary[] = [];
-        
+
         petEventsArrays.forEach((petEvents, index) => {
           const pet = pets[index];
           console.log(`PERFIL: Pet ${pet.id} (${pet.name}) - Eventos:`, petEvents);
-          
+
           if (Array.isArray(petEvents)) {
             petEvents.forEach((event: any) => {
               allEvents.push({
@@ -397,13 +414,13 @@ export class ProfileComponent implements OnInit, OnDestroy {
             });
           }
         });
-        
+
         console.log('PERFIL: Total de eventos coletados:', allEvents.length);
-        
+
         this.totalEvents = allEvents.length;
         const upcomingEvents = this.getUpcomingEvents(allEvents);
         this.upcomingEvents = upcomingEvents.length;
-        
+
         console.log('PERFIL: Total eventos:', this.totalEvents);
         console.log('PERFIL: Eventos próximos:', this.upcomingEvents);
       },
@@ -418,13 +435,13 @@ export class ProfileComponent implements OnInit, OnDestroy {
   private getUpcomingEvents(events: EventSummary[]): EventSummary[] {
     const now = new Date();
     const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-    
+
     return events.filter(event => {
       const eventDate = new Date(event.dateStart);
       const isNotDone = !isEventDone(event.status);
       const isInFuture = eventDate >= now;
       const isWithinWeek = eventDate <= nextWeek;
-      
+
       return isNotDone && isInFuture && isWithinWeek;
     });
   }
@@ -432,12 +449,15 @@ export class ProfileComponent implements OnInit, OnDestroy {
   onUpdateProfile(): void {
     if (this.profileForm.valid && this.currentUser) {
       this.isUpdating = true;
-      
+
       this.tutorService.updateProfile(this.currentUser.id, this.profileForm.value).subscribe({
         next: (updatedUser) => {
           this.currentUser = updatedUser;
           this.snackBar.open('Perfil atualizado com sucesso!', 'Fechar', { duration: 3000 });
           this.isUpdating = false;
+          
+          // Notificar outros componentes sobre a atualização do perfil
+          this.userStateService.notifyUserUpdated();
         },
         error: () => {
           this.snackBar.open('Erro ao atualizar perfil', 'Fechar', { duration: 3000 });
