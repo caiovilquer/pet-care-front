@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatBadgeModule } from '@angular/material/badge';
+import { MatDividerModule } from '@angular/material/divider';
 import { forkJoin, Subscription } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { TutorService } from '../../core/services/tutor.service';
@@ -30,7 +31,8 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
     MatIconModule,
     MatListModule,
     MatMenuModule,
-    MatBadgeModule
+    MatBadgeModule,
+    MatDividerModule
   ],
   template: `
     <mat-sidenav-container class="sidenav-container">
@@ -56,6 +58,22 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
             <mat-icon matListItemIcon>event</mat-icon>
             <span matListItemTitle>Eventos</span>
           </a>
+          
+          <mat-divider></mat-divider>
+          
+          <h3 class="nav-section-title">Localidades</h3>
+          
+          <a mat-list-item routerLink="/petshops" routerLinkActive="active">
+            <mat-icon matListItemIcon>store</mat-icon>
+            <span matListItemTitle>Petshops</span>
+          </a>
+          
+          <a mat-list-item routerLink="/veterinaries" routerLinkActive="active">
+            <mat-icon matListItemIcon>local_hospital</mat-icon>
+            <span matListItemTitle>Veterinários</span>
+          </a>
+          
+          <mat-divider></mat-divider>
           
           <a mat-list-item routerLink="/profile" routerLinkActive="active">
             <mat-icon matListItemIcon>person</mat-icon>
@@ -723,6 +741,17 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
       padding: 4px !important;
       width: 48px !important;
       height: 48px !important;
+    }
+
+    .nav-section-title {
+      padding: 16px 24px 8px 24px;
+      margin: 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: #4caf50;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      opacity: 0.8;
     }
   `]
 })

@@ -56,6 +56,68 @@ body {
   background: #a8a8a8;
 }
 
+/* Location Detail Dialog Styles */
+.location-detail-dialog .mat-mdc-dialog-container {
+  padding: 0;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.location-detail-dialog .mat-mdc-dialog-surface {
+  border-radius: 16px;
+}
+
+@media (max-width: 768px) {
+  .location-detail-dialog .mat-mdc-dialog-container {
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    border-radius: 0;
+    margin: 0;
+  }
+}
+
+/* Enhanced Material UI Overrides */
+.mat-mdc-tab-group {
+  --mdc-tab-indicator-active-indicator-color: #667eea;
+}
+
+.mat-mdc-tab .mdc-tab__text-label {
+  color: #666;
+}
+
+.mat-mdc-tab.mdc-tab--active .mdc-tab__text-label {
+  color: #667eea;
+}
+
+/* Badge customizations */
+.mat-badge-content {
+  background: #ff4081 !important;
+  color: white !important;
+  font-weight: 600 !important;
+}
+
+/* Card hover effects */
+.mat-mdc-card:hover {
+  transform: translateY(-2px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Chip customizations */
+.mat-mdc-chip {
+  --mdc-chip-container-shape: 16px;
+}
+
+.mat-mdc-chip.service-chip {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.mat-mdc-chip.service-chip:hover {
+  background-color: #bbdefb;
+}
+
 /* Loading animation */
 .loading {
   display: inline-block;
