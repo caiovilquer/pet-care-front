@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -13,6 +13,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { map } from 'rxjs/operators';
 import { EventService } from '../../core/services/event.service';
 import { EventStateService } from '../../core/services/event-state.service';
+import { PetService } from '../../core/services/pet.service';
 import { Event, EventSummary, EventsPage, EventType, isEventDone } from '../../core/models/event.model';
 import { EventFormComponent } from './event-form.component';
 
@@ -40,25 +41,50 @@ export class EventsComponent implements OnInit {
   pageSize = 10;
   displayedColumns: string[] = ['type', 'description', 'dateStart', 'status', 'actions'];
   petId: number | null = null;
+  petName: string = '';
 
   constructor(
     private eventService: EventService,
     private eventStateService: EventStateService,
+    private petService: PetService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
+    console.log('Events Component - ngOnInit iniciado');
     this.route.paramMap.subscribe(params => {
+      console.log('Events Component - Parâmetros da rota:', params);
       const id = params.get('petId');
+      console.log('Events Component - PetId recebido:', id);
       if (id) {
         this.petId = +id;
+        console.log('Events Component - Carregando eventos para pet:', this.petId);
+        this.loadPetName();
         this.loadEventsByPet();
       } else {
+        console.log('Events Component - Carregando todos os eventos');
+        this.petName = '';
         this.loadAllEvents();
       }
     });
+  }
+
+  private loadPetName(): void {
+    if (this.petId) {
+      this.petService.getById(this.petId).subscribe({
+        next: (pet) => {
+          this.petName = pet.name;
+          console.log('Nome do pet carregado:', this.petName);
+        },
+        error: (err) => {
+          console.error('Erro ao carregar dados do pet:', err);
+          this.petName = `Pet #${this.petId}`;
+        }
+      });
+    }
   }
 
   loadAllEvents(): void {
@@ -90,20 +116,30 @@ export class EventsComponent implements OnInit {
       
       this.eventService.listByPet(this.petId).pipe(
         map((events: Event[]): EventSummary[] => {
-          console.log('Eventos recebidos da API:', events);
+          console.log('Eventos recebidos da API para pet:', events);
+          
+          // Debug: verificar cada evento individualmente
+          events.forEach((event, index) => {
+            console.log(`Evento ${index + 1}:`, {
+              id: event.id,
+              description: event.description,
+              status: event.status,
+              type: typeof event.status,
+              statusDefined: event.status !== undefined
+            });
+          });
           
           return events.map(event => {
-            const eventWithPetId = {
+            const eventWithPetId: EventSummary = {
               ...event,
-              petId: this.petId as number,
-              status: (event as any).status || 'PENDING'
+              petId: this.petId as number
             };
             
             console.log(`Evento mapeado:`, {
               id: eventWithPetId.id,
               description: eventWithPetId.description,
               status: eventWithPetId.status,
-              originalStatus: (event as any).status
+              originalEvent: event
             });
             
             return eventWithPetId;
@@ -173,6 +209,7 @@ export class EventsComponent implements OnInit {
     if (confirm(`Tem certeza que deseja excluir este evento?`)) {
       this.eventService.delete(event.id).subscribe({
         next: () => {
+          this.eventStateService.notifyEventUpdated();
           this.snackBar.open('Evento excluído com sucesso!', 'Fechar', { duration: 3000 });
           this.petId ? this.loadEventsByPet() : this.loadAllEvents();
         },
@@ -224,6 +261,10 @@ export class EventsComponent implements OnInit {
         this.snackBar.open('Erro ao atualizar status do evento.', 'Fechar', { duration: 3000 });
       }
     });
+  }
+
+  goBackToAllEvents(): void {
+    this.router.navigate(['/events']);
   }
 
   // UI Helper methods

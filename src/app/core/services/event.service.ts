@@ -24,22 +24,19 @@ export class EventService {
     console.log(`EventService: Buscando todos os eventos - página ${page}, tamanho ${size}`);
     
     return this.http.get<EventsPage>(`${this.apiUrl}?page=${page}&size=${size}`).pipe(
-      map((response: any) => {
+      tap((response: any) => {
         console.log('EventService: Resposta da API getAll:', response);
         
-        // Garantir que cada evento na página tenha o campo status correto
-        const processedItems = response.items.map((event: any) => ({
-          ...event,
-          status: event.status || 'PENDING' as EventStatus
-        }));
-        
-        const processedResponse = {
-          ...response,
-          items: processedItems
-        };
-        
-        console.log('EventService: Página processada:', processedResponse);
-        return processedResponse;
+        // Debug: verificar o status de cada evento
+        response.items?.forEach((event: any, index: number) => {
+          console.log(`EventService - Evento ${index + 1}:`, {
+            id: event.id,
+            status: event.status,
+            statusType: typeof event.status,
+            statusDefined: event.status !== undefined,
+            statusNull: event.status === null
+          });
+        });
       })
     );
   }
@@ -79,17 +76,20 @@ export class EventService {
     console.log(`EventService: Buscando eventos para pet ${petId}`);
     
     return this.http.get<Event[]>(`${this.apiUrl}/pet/${petId}`).pipe(
-      map((events: any[]) => {
+      tap((events: any[]) => {
         console.log(`EventService: Eventos recebidos para pet ${petId}:`, events);
         
-        // Garantir que cada evento tenha o campo status
-        return events.map(event => ({
-          ...event,
-          status: event.status || 'PENDING' as EventStatus
-        }));
-      }),
-      tap(events => {
-        console.log(`EventService: Eventos processados para pet ${petId}:`, events);
+        // Debug: verificar o status de cada evento
+        events.forEach((event: any, index: number) => {
+          console.log(`EventService - Pet ${petId} - Evento ${index + 1}:`, {
+            id: event.id,
+            status: event.status,
+            statusType: typeof event.status,
+            statusDefined: event.status !== undefined,
+            statusNull: event.status === null,
+            fullEvent: event
+          });
+        });
       })
     );
   }

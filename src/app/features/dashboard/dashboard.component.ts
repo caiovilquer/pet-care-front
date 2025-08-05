@@ -133,7 +133,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 description: event.description || this.getEventTypeName(event.type),
                 dateStart: event.dateStart,
                 petId: pet.id,
-                status: event.status || 'PENDING'
+                status: event.status
               });
             });
           } else {
