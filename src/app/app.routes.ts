@@ -30,6 +30,14 @@ export const routes: Routes = [
         loadComponent: () => import('./features/pets/pets.component').then(m => m.PetsComponent)
       },
       {
+        path: 'pets/:id',
+        loadComponent: () => import('./features/pets/pet-detail.component').then(m => m.PetDetailComponent)
+      },
+      {
+        path: 'events/pet/:petId',
+        loadComponent: () => import('./features/events/events.component').then(m => m.EventsComponent)
+      },
+      {
         path: 'events',
         loadComponent: () => import('./features/events/events.component').then(m => m.EventsComponent)
       },
