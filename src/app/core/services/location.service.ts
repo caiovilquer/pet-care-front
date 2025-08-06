@@ -121,10 +121,13 @@ export class LocationService {
             return forkJoin(distanceCalculations).pipe(
               map((placesWithDistances: any) => {
                 // Filtrar por distância real
-                const maxDistanceMeters = params.radius * 1000;
-                const filteredByDistance = placesWithDistances.filter((place: any) => 
-                  (place.distance || 0) <= maxDistanceMeters
-                );
+                // params.radius está em quilômetros, distance do Google Maps também está em quilômetros
+                const maxDistanceKm = params.radius;
+                
+                const filteredByDistance = placesWithDistances.filter((place: any) => {
+                  const distanceInKm = place.distance || 0;
+                  return distanceInKm <= maxDistanceKm;
+                });
                 
                 // Remover duplicatas novamente após cálculo de distância
                 const uniqueResults = this.removeDuplicateResults(filteredByDistance);
@@ -221,10 +224,13 @@ export class LocationService {
             return forkJoin(distanceCalculations).pipe(
               map((placesWithDistances: any) => {
                 // Filtrar por distância real
-                const maxDistanceMeters = params.radius * 1000;
-                const filteredByDistance = placesWithDistances.filter((place: any) => 
-                  (place.distance || 0) <= maxDistanceMeters
-                );
+                // params.radius está em quilômetros, distance do Google Maps também está em quilômetros
+                const maxDistanceKm = params.radius;
+                
+                const filteredByDistance = placesWithDistances.filter((place: any) => {
+                  const distanceInKm = place.distance || 0;
+                  return distanceInKm <= maxDistanceKm;
+                });
                 
                 // Remover duplicatas novamente após cálculo de distância
                 const uniqueResults = this.removeDuplicateResults(filteredByDistance);
