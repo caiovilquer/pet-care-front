@@ -23,10 +23,20 @@ import { LocationService } from '../../core/services/location.service';
     <mat-card class="location-card" [class.open]="isOpen" [class.closed]="!isOpen">
       <div class="card-header">
         <div class="location-image">
-          <img 
-            [src]="location.imageUrl || getDefaultImage()" 
-            [alt]="location.name"
-            (error)="onImageError($event)">
+          <div class="image-container">
+            <img 
+              *ngIf="location.imageUrl; else placeholderImage"
+              [src]="location.imageUrl" 
+              [alt]="location.name"
+              (error)="onImageError($event)"
+              class="location-img">
+            <ng-template #placeholderImage>
+              <div class="placeholder-image">
+                <mat-icon>{{ getTypeIcon() }}</mat-icon>
+                <span class="placeholder-text">{{ getTypeLabel() }}</span>
+              </div>
+            </ng-template>
+          </div>
           <div class="status-badge" [class.open]="isOpen" [class.closed]="!isOpen">
             <mat-icon>{{ isOpen ? 'schedule' : 'schedule_off' }}</mat-icon>
             {{ isOpen ? 'Aberto' : 'Fechado' }}
@@ -195,10 +205,42 @@ import { LocationService } from '../../core/services/location.service';
       flex-shrink: 0;
     }
 
-    .location-image img {
+    .image-container {
+      width: 100%;
+      height: 100%;
+    }
+
+    .location-img {
       width: 100%;
       height: 100%;
       object-fit: cover;
+    }
+
+    .placeholder-image {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #666;
+      border: 2px dashed #ccc;
+    }
+
+    .placeholder-image mat-icon {
+      font-size: 32px;
+      width: 32px;
+      height: 32px;
+      margin-bottom: 8px;
+      opacity: 0.7;
+    }
+
+    .placeholder-text {
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-align: center;
+      opacity: 0.8;
     }
 
     .status-badge {
@@ -496,14 +538,11 @@ export class LocationCardComponent {
     return this.location.type === 'petshop' ? 'Petshop' : 'Veterinário';
   }
 
-  getDefaultImage(): string {
-    return this.location.type === 'petshop' 
-      ? 'assets/images/default-petshop.jpg'
-      : 'assets/images/default-veterinary.jpg';
-  }
-
   onImageError(event: any) {
-    event.target.src = 'assets/images/placeholder.jpg';
+    // Esconder a imagem com erro para mostrar o placeholder
+    event.target.style.display = 'none';
+    // Marcar que houve erro na imagem para mostrar placeholder
+    this.location.imageUrl = undefined;
   }
 
   getServiceLabel(service: string): string {

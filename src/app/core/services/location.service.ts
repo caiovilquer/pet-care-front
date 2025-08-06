@@ -398,7 +398,7 @@ export class LocationService {
       hasVaccination: this.inferServiceFromTypes(place.types || [], 'vaccination'),
       acceptedPetTypes: [PetType.DOG, PetType.CAT],
       services: this.inferServicesFromTypes(place.types || [], 'petshop'),
-      imageUrl: place.photos?.[0],
+      imageUrl: place.photos?.[0] || null,
       openingHours: this.convertGoogleHoursToOpeningHours(place.openingHours)
     };
   }
@@ -433,7 +433,7 @@ export class LocationService {
       specialties: this.inferSpecialtiesFromTypes(place.types || []),
       acceptedPetTypes: [PetType.DOG, PetType.CAT],
       services: this.inferServicesFromTypes(place.types || [], 'veterinary'),
-      imageUrl: place.photos?.[0],
+      imageUrl: place.photos?.[0] || null,
       openingHours: this.convertGoogleHoursToOpeningHours(place.openingHours)
     };
   }

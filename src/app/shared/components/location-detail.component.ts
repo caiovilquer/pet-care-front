@@ -38,10 +38,20 @@ import { of } from 'rxjs';
       <div class="detail-header">
         <div class="header-content">
           <div class="location-image-large">
-            <img 
-              [src]="location.imageUrl || getDefaultImage()" 
-              [alt]="location.name"
-              (error)="onImageError($event)">
+            <div class="image-container">
+              <img 
+                *ngIf="location.imageUrl; else placeholderImage"
+                [src]="location.imageUrl" 
+                [alt]="location.name"
+                (error)="onImageError($event)"
+                class="location-img">
+              <ng-template #placeholderImage>
+                <div class="placeholder-image">
+                  <mat-icon>{{ getTypeIcon() }}</mat-icon>
+                  <span class="placeholder-text">{{ getTypeLabel() }}</span>
+                </div>
+              </ng-template>
+            </div>
             <div class="image-overlay">
               <div class="status-badge" [class.open]="isOpen" [class.closed]="!isOpen">
                 <mat-icon>{{ isOpen ? 'schedule' : 'schedule_off' }}</mat-icon>
@@ -445,10 +455,43 @@ import { of } from 'rxjs';
       flex-shrink: 0;
     }
 
-    .location-image-large img {
+    .image-container {
+      width: 100%;
+      height: 100%;
+    }
+
+    .location-img {
       width: 100%;
       height: 100%;
       object-fit: cover;
+    }
+
+    .placeholder-image {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(240,240,240,0.9) 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255,255,255,0.9);
+      border: 2px dashed rgba(255,255,255,0.5);
+    }
+
+    .placeholder-image mat-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+      margin-bottom: 12px;
+      opacity: 0.8;
+    }
+
+    .placeholder-text {
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-align: center;
+      opacity: 0.9;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
     }
 
     .image-overlay {
@@ -963,14 +1006,11 @@ export class LocationDetailComponent implements OnInit, OnDestroy {
     return this.location.type === 'petshop' ? 'Petshop' : 'Clínica Veterinária';
   }
 
-  getDefaultImage(): string {
-    return this.location.type === 'petshop' 
-      ? 'assets/images/default-petshop.jpg'
-      : 'assets/images/default-veterinary.jpg';
-  }
-
   onImageError(event: any) {
-    event.target.src = 'assets/images/placeholder.jpg';
+    // Esconder a imagem com erro para mostrar o placeholder
+    event.target.style.display = 'none';
+    // Marcar que houve erro na imagem para mostrar placeholder
+    this.location.imageUrl = undefined;
   }
 
   getServiceIcon(service: string): string {
