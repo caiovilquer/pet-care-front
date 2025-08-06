@@ -143,22 +143,48 @@ export class GoogleMapsService {
         const map = new google.maps.Map(document.createElement('div'));
         const service = new google.maps.places.PlacesService(map);
         
+        // Aumentamos o raio em 20% para garantir que encontremos lugares suficientes
+        // antes de aplicar o filtro de distância preciso
+        const searchRadius = Math.min(radius * 1.2, 50000); // Máximo de 50km
+        
         const request: google.maps.places.PlaceSearchRequest = {
           location: new google.maps.LatLng(latitude, longitude),
-          radius: radius,
+          radius: searchRadius,
           type: 'pet_store',
-          keyword: 'petshop pet shop animais'
+          keyword: 'petshop pet shop animais',
+          rankBy: google.maps.places.RankBy.PROMINENCE // Para poder usar radius e obter mais resultados
         };
 
-        return from(new Promise<google.maps.places.PlaceResult[]>((resolve, reject) => {
-          service.nearbySearch(request, (results, status) => {
-            if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-              resolve(results);
-            } else {
-              reject(new Error('Erro ao buscar petshops: ' + status));
-            }
+        // Função para paginar os resultados e obter mais de 20
+        const getAllResults = (accumulator: google.maps.places.PlaceResult[] = []): Promise<google.maps.places.PlaceResult[]> => {
+          return new Promise((resolve, reject) => {
+            service.nearbySearch(request, (results, status, pagination) => {
+              if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+                const newAccumulator = [...accumulator, ...results];
+                
+                // Se temos outra página e não atingimos limite de 60 resultados, continua buscando
+                if (pagination && pagination.hasNextPage && newAccumulator.length < 60) {
+                  // Aguarda um tempo antes de fazer a próxima chamada (exigência da API)
+                  setTimeout(() => {
+                    pagination.nextPage();
+                    getAllResults(newAccumulator)
+                      .then(resolve)
+                      .catch(reject);
+                  }, 2000);
+                } else {
+                  resolve(newAccumulator);
+                }
+              } else if (accumulator.length > 0) {
+                // Se já temos resultados, retorna mesmo com erro
+                resolve(accumulator);
+              } else {
+                reject(new Error('Erro ao buscar petshops: ' + status));
+              }
+            });
           });
-        }));
+        };
+
+        return from(getAllResults());
       }),
       switchMap(places => {
         // Buscar detalhes completos para cada local (incluindo horários)
@@ -175,6 +201,55 @@ export class GoogleMapsService {
   }
 
   /**
+   * Busca lugares próximos usando keywords e tipos específicos
+   * Método especializado para encontrar estabelecimentos que podem não aparecer nas buscas normais
+   */
+  searchByKeyword(latitude: number, longitude: number, radius: number, keywords: string[]): Observable<PlaceResult[]> {
+    return from(this.loadGoogleMaps()).pipe(
+      switchMap(() => {
+        const map = new google.maps.Map(document.createElement('div'));
+        const service = new google.maps.places.PlacesService(map);
+        
+        // Usamos um raio menor para garantir estabelecimentos realmente próximos
+        const request: google.maps.places.TextSearchRequest = {
+          location: new google.maps.LatLng(latitude, longitude),
+          radius: radius,
+          query: keywords.join(' OR '), // Usa OR para buscar qualquer um dos termos
+          type: 'establishment' // Tipo genérico para permitir mais resultados
+        };
+
+        return from(new Promise<google.maps.places.PlaceResult[]>((resolve, reject) => {
+          service.textSearch(request, (results, status, pagination) => {
+            if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+              resolve(results);
+            } else if (status === google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
+              resolve([]); // Retorna array vazio se não encontrou nada
+            } else {
+              reject(new Error('Erro na busca por texto: ' + status));
+            }
+          });
+        }));
+      }),
+      switchMap(places => {
+        // Se não encontrou nada, retorna array vazio
+        if (places.length === 0) {
+          return of([]);
+        }
+        
+        // Buscar detalhes completos para cada local (incluindo horários)
+        const detailRequests = places.map(place => 
+          this.getPlaceDetailsById(place.place_id || '', latitude, longitude)
+        );
+        return forkJoin(detailRequests);
+      }),
+      catchError(error => {
+        console.error('Erro na busca por texto:', error);
+        return of([]);
+      })
+    );
+  }
+
+  /**
    * Busca veterinários próximos usando Google Places API
    */
   searchNearbyVeterinaries(latitude: number, longitude: number, radius: number = 5000): Observable<PlaceResult[]> {
@@ -183,22 +258,48 @@ export class GoogleMapsService {
         const map = new google.maps.Map(document.createElement('div'));
         const service = new google.maps.places.PlacesService(map);
         
+        // Aumentamos o raio em 20% para garantir que encontremos lugares suficientes
+        // antes de aplicar o filtro de distância preciso
+        const searchRadius = Math.min(radius * 1.2, 50000); // Máximo de 50km
+        
         const request: google.maps.places.PlaceSearchRequest = {
           location: new google.maps.LatLng(latitude, longitude),
-          radius: radius,
+          radius: searchRadius,
           type: 'veterinary_care',
-          keyword: 'veterinario clinica veterinaria hospital veterinario'
+          keyword: 'veterinario clinica veterinaria hospital veterinario',
+          rankBy: google.maps.places.RankBy.PROMINENCE // Para poder usar radius e obter mais resultados
         };
 
-        return from(new Promise<google.maps.places.PlaceResult[]>((resolve, reject) => {
-          service.nearbySearch(request, (results, status) => {
-            if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-              resolve(results);
-            } else {
-              reject(new Error('Erro ao buscar veterinários: ' + status));
-            }
+        // Função para paginar os resultados e obter mais de 20
+        const getAllResults = (accumulator: google.maps.places.PlaceResult[] = []): Promise<google.maps.places.PlaceResult[]> => {
+          return new Promise((resolve, reject) => {
+            service.nearbySearch(request, (results, status, pagination) => {
+              if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+                const newAccumulator = [...accumulator, ...results];
+                
+                // Se temos outra página e não atingimos limite de 60 resultados, continua buscando
+                if (pagination && pagination.hasNextPage && newAccumulator.length < 60) {
+                  // Aguarda um tempo antes de fazer a próxima chamada (exigência da API)
+                  setTimeout(() => {
+                    pagination.nextPage();
+                    getAllResults(newAccumulator)
+                      .then(resolve)
+                      .catch(reject);
+                  }, 2000);
+                } else {
+                  resolve(newAccumulator);
+                }
+              } else if (accumulator.length > 0) {
+                // Se já temos resultados, retorna mesmo com erro
+                resolve(accumulator);
+              } else {
+                reject(new Error('Erro ao buscar veterinários: ' + status));
+              }
+            });
           });
-        }));
+        };
+
+        return from(getAllResults());
       }),
       switchMap(places => {
         // Buscar detalhes completos para cada local (incluindo horários)
@@ -229,7 +330,7 @@ export class GoogleMapsService {
             'place_id', 'name', 'formatted_address', 'geometry',
             'rating', 'user_ratings_total', 'business_status',
             'opening_hours', 'formatted_phone_number', 'website',
-            'photos', 'types', 'price_level'
+            'photos', 'types', 'price_level', 'vicinity'
           ]
         };
 

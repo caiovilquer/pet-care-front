@@ -13,7 +13,6 @@ import {
   PetType,
   VeterinarySpecialty
 } from '../models/location.model';
-import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -30,6 +29,30 @@ export class LocationService {
   searchVeterinaries(params: LocationSearchParams): Observable<LocationSearchResponse> {
     return this.searchVeterinariesWithGoogleMaps(params);
   }
+  
+  /**
+   * Busca estabelecimentos muito próximos ou exatamente no CEP
+   */
+  private searchExactAreaPetshops(latitude: number, longitude: number, radius: number): Observable<PlaceResult[]> {
+    return this.googleMapsService.searchByKeyword(
+      latitude,
+      longitude,
+      radius,
+      ['pet_store', 'veterinary_care', 'pet grooming', 'pet shop']
+    );
+  }
+  
+  /**
+   * Busca veterinários muito próximos ou exatamente no CEP
+   */
+  private searchExactAreaVeterinaries(latitude: number, longitude: number, radius: number): Observable<PlaceResult[]> {
+    return this.googleMapsService.searchByKeyword(
+      latitude,
+      longitude,
+      radius,
+      ['veterinary_care', 'veterinario', 'clinica veterinaria', 'hospital veterinario']
+    );
+  }
 
   /**
    * Busca petshops usando Google Maps API
@@ -37,24 +60,45 @@ export class LocationService {
   private searchPetshopsWithGoogleMaps(params: LocationSearchParams): Observable<LocationSearchResponse> {
     return this.googleMapsService.geocodeZipCode(params.zipCode).pipe(
       switchMap(geocodeResult => {
-        const radiusInMeters = params.radius * 1000; // Converter km para metros
-        return this.googleMapsService.searchNearbyPetshops(
+        const radiusInMeters = params.radius * 1000;
+
+        const exactSearch$ = this.searchExactAreaPetshops(
+          geocodeResult.latitude,
+          geocodeResult.longitude,
+          Math.min(500, radiusInMeters / 2)
+        );
+        
+        const regularSearch$ = this.googleMapsService.searchNearbyPetshops(
           geocodeResult.latitude, 
           geocodeResult.longitude, 
           radiusInMeters
-        ).pipe(
+        );
+        
+        return forkJoin({
+          exactResults: exactSearch$,
+          regularResults: regularSearch$
+        }).pipe(
+          map(results => {
+            // Combinar e remover duplicatas usando uma estratégia mais robusta
+            const combinedResults = this.combineAndDeduplicateResults(
+              results.exactResults, 
+              results.regularResults
+            );
+            
+            return combinedResults;
+          }),
           switchMap(googlePlaces => {
             let filteredPlaces = googlePlaces;
 
             // Aplicar filtros
             if (params.isOpenNow) {
-              filteredPlaces = filteredPlaces.filter(place => 
+              filteredPlaces = filteredPlaces.filter((place: any) => 
                 place.openingHours?.openNow === true
               );
             }
 
-            // Calcular distâncias reais para cada local
-            const distanceCalculations = filteredPlaces.map(place =>
+            // Calcular distâncias reais
+            const distanceCalculations = filteredPlaces.map((place: any) =>
               this.googleMapsService.calculateDistance(
                 { lat: geocodeResult.latitude, lng: geocodeResult.longitude },
                 { lat: place.location.lat, lng: place.location.lng }
@@ -75,12 +119,21 @@ export class LocationService {
             );
 
             return forkJoin(distanceCalculations).pipe(
-              map(placesWithDistances => {
+              map((placesWithDistances: any) => {
+                // Filtrar por distância real
+                const maxDistanceMeters = params.radius * 1000;
+                const filteredByDistance = placesWithDistances.filter((place: any) => 
+                  (place.distance || 0) <= maxDistanceMeters
+                );
+                
+                // Remover duplicatas novamente após cálculo de distância
+                const uniqueResults = this.removeDuplicateResults(filteredByDistance);
+                
                 // Ordenar
-                this.sortPlacesWithRealDistances(placesWithDistances, params.sortBy || 'distance');
+                this.sortPlacesWithRealDistances(uniqueResults, params.sortBy || 'distance');
 
                 // Converter para formato interno
-                const locations = placesWithDistances.map(place => 
+                const locations = uniqueResults.map((place: any) => 
                   this.convertGooglePlaceToPetshop(place)
                 );
 
@@ -107,24 +160,45 @@ export class LocationService {
   private searchVeterinariesWithGoogleMaps(params: LocationSearchParams): Observable<LocationSearchResponse> {
     return this.googleMapsService.geocodeZipCode(params.zipCode).pipe(
       switchMap(geocodeResult => {
-        const radiusInMeters = params.radius * 1000; // Converter km para metros
-        return this.googleMapsService.searchNearbyVeterinaries(
+        const radiusInMeters = params.radius * 1000;
+
+        const exactSearch$ = this.searchExactAreaVeterinaries(
+          geocodeResult.latitude,
+          geocodeResult.longitude,
+          Math.min(500, radiusInMeters / 2)
+        );
+        
+        const regularSearch$ = this.googleMapsService.searchNearbyVeterinaries(
           geocodeResult.latitude, 
           geocodeResult.longitude, 
           radiusInMeters
-        ).pipe(
+        );
+        
+        return forkJoin({
+          exactResults: exactSearch$,
+          regularResults: regularSearch$
+        }).pipe(
+          map(results => {
+            // Combinar e remover duplicatas usando uma estratégia mais robusta
+            const combinedResults = this.combineAndDeduplicateResults(
+              results.exactResults, 
+              results.regularResults
+            );
+            
+            return combinedResults;
+          }),
           switchMap(googlePlaces => {
             let filteredPlaces = googlePlaces;
 
             // Aplicar filtros
             if (params.isOpenNow) {
-              filteredPlaces = filteredPlaces.filter(place => 
+              filteredPlaces = filteredPlaces.filter((place: any) => 
                 place.openingHours?.openNow === true
               );
             }
 
-            // Calcular distâncias reais para cada local
-            const distanceCalculations = filteredPlaces.map(place =>
+            // Calcular distâncias reais
+            const distanceCalculations = filteredPlaces.map((place: any) =>
               this.googleMapsService.calculateDistance(
                 { lat: geocodeResult.latitude, lng: geocodeResult.longitude },
                 { lat: place.location.lat, lng: place.location.lng }
@@ -145,12 +219,21 @@ export class LocationService {
             );
 
             return forkJoin(distanceCalculations).pipe(
-              map(placesWithDistances => {
+              map((placesWithDistances: any) => {
+                // Filtrar por distância real
+                const maxDistanceMeters = params.radius * 1000;
+                const filteredByDistance = placesWithDistances.filter((place: any) => 
+                  (place.distance || 0) <= maxDistanceMeters
+                );
+                
+                // Remover duplicatas novamente após cálculo de distância
+                const uniqueResults = this.removeDuplicateResults(filteredByDistance);
+                
                 // Ordenar
-                this.sortPlacesWithRealDistances(placesWithDistances, params.sortBy || 'distance');
+                this.sortPlacesWithRealDistances(uniqueResults, params.sortBy || 'distance');
 
                 // Converter para formato interno
-                const locations = placesWithDistances.map(place => 
+                const locations = uniqueResults.map((place: any) => 
                   this.convertGooglePlaceToVeterinary(place)
                 );
 
@@ -171,101 +254,95 @@ export class LocationService {
     );
   }
 
-  private searchLocations(params: LocationSearchParams): Observable<LocationSearchResponse> {
-    let httpParams = new HttpParams()
-      .set('zipCode', params.zipCode)
-      .set('radius', params.radius.toString())
-      .set('type', params.type);
+  /**
+   * Combina resultados e remove duplicatas usando múltiplos critérios
+   */
+  private combineAndDeduplicateResults(exactResults: PlaceResult[], regularResults: PlaceResult[]): PlaceResult[] {
+    const combinedResults: PlaceResult[] = [];
+    const processedKeys = new Set<string>();
+    
+    // Função melhorada para gerar chave única
+    const generateUniqueKey = (place: PlaceResult): string => {
+      // Primeiro critério: place_id (mais confiável)
+      if (place.placeId) {
+        return `id:${place.placeId}`;
+      }
+      
+      // Segundo critério: combinação de nome normalizado + coordenadas
+      const normalizedName = this.normalizeName(place.name);
+      const coordKey = `${place.location.lat.toFixed(6)},${place.location.lng.toFixed(6)}`;
+      
+      // Terceiro critério: nome + primeiras palavras do endereço
+      const addressStart = place.address.split(',')[0]?.trim() || '';
+      
+      return `name:${normalizedName}|coord:${coordKey}|addr:${addressStart.toLowerCase()}`;
+    };
 
-    if (params.services?.length) {
-      httpParams = httpParams.set('services', params.services.join(','));
-    }
+    // Processar resultados exatos primeiro (maior prioridade)
+    exactResults.forEach(place => {
+      const key = generateUniqueKey(place);
+      if (!processedKeys.has(key)) {
+        processedKeys.add(key);
+        combinedResults.push(place);
+      }
+    });
 
-    if (params.petTypes?.length) {
-      httpParams = httpParams.set('petTypes', params.petTypes.join(','));
-    }
+    // Processar resultados regulares
+    regularResults.forEach(place => {
+      const key = generateUniqueKey(place);
+      if (!processedKeys.has(key)) {
+        processedKeys.add(key);
+        combinedResults.push(place);
+      }
+    });
 
-    if (params.isOpenNow !== undefined) {
-      httpParams = httpParams.set('isOpenNow', params.isOpenNow.toString());
-    }
-
-    if (params.sortBy) {
-      httpParams = httpParams.set('sortBy', params.sortBy);
-    }
-
-    return this.http.get<LocationSearchResponse>(`${this.apiUrl}/locations/search`, { params: httpParams });
-  }
-
-  getLocationById(id: string): Observable<Petshop | Veterinary> {
-    return this.http.get<Petshop | Veterinary>(`${this.apiUrl}/locations/${id}`);
-  }
-
-  getLocationsByIds(ids: string[]): Observable<(Petshop | Veterinary)[]> {
-    const httpParams = new HttpParams().set('ids', ids.join(','));
-    return this.http.get<(Petshop | Veterinary)[]>(`${this.apiUrl}/locations/batch`, { params: httpParams });
-  }
-
-  // Método para validar CEP brasileiro
-  validateZipCode(zipCode: string): boolean {
-    const zipCodeRegex = /^\d{5}-?\d{3}$/;
-    return zipCodeRegex.test(zipCode);
-  }
-
-  // Método para formatar CEP
-  formatZipCode(zipCode: string): string {
-    const cleanZipCode = zipCode.replace(/\D/g, '');
-    if (cleanZipCode.length === 8) {
-      return `${cleanZipCode.substring(0, 5)}-${cleanZipCode.substring(5)}`;
-    }
-    return zipCode;
-  }
-
-  // Método para buscar coordenadas por CEP (usando API externa)
-  getCoordinatesByZipCode(zipCode: string): Observable<{ lat: number; lng: number; address: string }> {
-    const formattedZipCode = this.formatZipCode(zipCode);
-    return this.http.get<any>(`https://viacep.com.br/ws/${formattedZipCode.replace('-', '')}/json/`)
-      .pipe(
-        map(response => ({
-          lat: 0, // ViaCEP não retorna coordenadas, você pode integrar com Google Maps API
-          lng: 0,
-          address: `${response.logradouro}, ${response.bairro}, ${response.localidade} - ${response.uf}`
-        }))
-      );
-  }
-
-  // Método para calcular distância entre dois pontos (fórmula de Haversine)
-  calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
-    const R = 6371; // Raio da Terra em km
-    const dLat = this.toRadians(lat2 - lat1);
-    const dLng = this.toRadians(lng2 - lng1);
-    const a = 
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(this.toRadians(lat1)) * Math.cos(this.toRadians(lat2)) * 
-      Math.sin(dLng / 2) * Math.sin(dLng / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
-  }
-
-  private toRadians(degrees: number): number {
-    return degrees * (Math.PI / 180);
+    return combinedResults;
   }
 
   /**
-   * Ordena lugares por critério especificado
+   * Normaliza nome para comparação
    */
-  private sortPlaces(places: PlaceResult[], sortBy: string): void {
-    switch (sortBy) {
-      case 'rating':
-        places.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-        break;
-      case 'name':
-        places.sort((a, b) => a.name.localeCompare(b.name));
-        break;
-      case 'distance':
-      default:
-        // Google Maps já retorna ordenado por distância
-        break;
+  private normalizeName(name: string): string {
+    return name
+      .toLowerCase()
+      .replace(/[áàãâ]/g, 'a')
+      .replace(/[éêë]/g, 'e')
+      .replace(/[íîï]/g, 'i')
+      .replace(/[óôõö]/g, 'o')
+      .replace(/[úûü]/g, 'u')
+      .replace(/[ç]/g, 'c')
+      .replace(/[^a-z0-9\s]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  /**
+   * Remove resultados duplicados após o cálculo de distâncias
+   */
+  private removeDuplicateResults(places: any[]): any[] {
+    const uniquePlaces: any[] = [];
+    const processedKeys = new Set<string>();
+    
+    places.forEach(place => {
+      const key = this.getUniqueKey(place);
+      if (!processedKeys.has(key)) {
+        processedKeys.add(key);
+        uniquePlaces.push(place);
+      }
+    });
+    
+    return uniquePlaces;
+  }
+  
+  /**
+   * Gera uma chave única para cada estabelecimento
+   */
+  private getUniqueKey(place: any): string {
+    if (place.placeId) {
+      return place.placeId;
     }
+    
+    return `${this.normalizeName(place.name)}|${place.address}`.toLowerCase();
   }
 
   /**
@@ -309,12 +386,12 @@ export class LocationService {
       durationText: place.durationText,
       isOpen: place.openingHours?.openNow || false,
       type: 'petshop',
-      hasGrooming: this.inferServiceFromTypes(place.types, 'grooming'),
-      hasDaycare: this.inferServiceFromTypes(place.types, 'daycare'),
-      hasHotel: this.inferServiceFromTypes(place.types, 'hotel'),
-      hasVaccination: this.inferServiceFromTypes(place.types, 'vaccination'),
-      acceptedPetTypes: [PetType.DOG, PetType.CAT], // Padrão
-      services: this.inferServicesFromTypes(place.types, 'petshop'),
+      hasGrooming: this.inferServiceFromTypes(place.types || [], 'grooming'),
+      hasDaycare: this.inferServiceFromTypes(place.types || [], 'daycare'),
+      hasHotel: this.inferServiceFromTypes(place.types || [], 'hotel'),
+      hasVaccination: this.inferServiceFromTypes(place.types || [], 'vaccination'),
+      acceptedPetTypes: [PetType.DOG, PetType.CAT],
+      services: this.inferServicesFromTypes(place.types || [], 'petshop'),
       imageUrl: place.photos?.[0],
       openingHours: this.convertGoogleHoursToOpeningHours(place.openingHours)
     };
@@ -343,20 +420,19 @@ export class LocationService {
       durationText: place.durationText,
       isOpen: place.openingHours?.openNow || false,
       type: 'veterinary',
-      hasEmergency: this.inferEmergencyFromName(place.name) || this.inferServiceFromTypes(place.types, 'emergency'),
-      hasLaboratory: this.inferServiceFromTypes(place.types, 'laboratory'),
-      hasSurgery: this.inferServiceFromTypes(place.types, 'surgery'),
-      hasRadiology: this.inferServiceFromTypes(place.types, 'radiology'),
-      specialties: this.inferSpecialtiesFromTypes(place.types),
-      acceptedPetTypes: [PetType.DOG, PetType.CAT], // Padrão
-      services: this.inferServicesFromTypes(place.types, 'veterinary'),
+      hasEmergency: this.inferEmergencyFromName(place.name) || this.inferServiceFromTypes(place.types || [], 'emergency'),
+      hasLaboratory: this.inferServiceFromTypes(place.types || [], 'laboratory'),
+      hasSurgery: this.inferServiceFromTypes(place.types || [], 'surgery'),
+      hasRadiology: this.inferServiceFromTypes(place.types || [], 'radiology'),
+      specialties: this.inferSpecialtiesFromTypes(place.types || []),
+      acceptedPetTypes: [PetType.DOG, PetType.CAT],
+      services: this.inferServicesFromTypes(place.types || [], 'veterinary'),
       imageUrl: place.photos?.[0],
       openingHours: this.convertGoogleHoursToOpeningHours(place.openingHours)
     };
   }
 
   private extractNeighborhood(address: string): string {
-    // Lógica simples para extrair bairro do endereço
     const parts = address.split(',');
     return parts.length > 1 ? parts[1].trim() : '';
   }
@@ -372,9 +448,8 @@ export class LocationService {
     const match = lastPart.match(/([A-Z]{2})/);
     return match ? match[1] : '';
   }
+
   private calculateDistanceFromOrigin(lat: number, lng: number): number {
-    // Implementar lógica para calcular distância do ponto de origem
-    // Exemplo: retornar 0 ou uma distância fixa
     return 0; // Placeholder
   }
 
@@ -403,9 +478,9 @@ export class LocationService {
       if (this.inferServiceFromTypes(types, 'daycare')) services.push('daycare');
       if (this.inferServiceFromTypes(types, 'hotel')) services.push('hotel');
       if (this.inferServiceFromTypes(types, 'vaccination')) services.push('vaccination');
-      services.push('food', 'toys'); // Serviços padrão
+      services.push('food', 'toys');
     } else if (businessType === 'veterinary') {
-      services.push('general'); // Sempre tem clínica geral
+      services.push('general');
       if (this.inferServiceFromTypes(types, 'emergency')) services.push('emergency');
       if (this.inferServiceFromTypes(types, 'surgery')) services.push('surgery');
       if (this.inferServiceFromTypes(types, 'laboratory')) services.push('laboratory');
@@ -424,7 +499,6 @@ export class LocationService {
   private inferSpecialtiesFromTypes(types: string[]): VeterinarySpecialty[] {
     const specialties: VeterinarySpecialty[] = [VeterinarySpecialty.GENERAL];
     
-    // Lógica simples - em uma implementação real, isso seria mais sofisticado
     if (this.inferServiceFromTypes(types, 'cardiology')) {
       specialties.push(VeterinarySpecialty.CARDIOLOGY);
     }
@@ -453,15 +527,11 @@ export class LocationService {
     return openingHours;
   }
 
-  /**
-   * Converte horário de um dia específico do Google Maps
-   */
   private parseGoogleDaySchedule(dayText: string): { isOpen: boolean; openTime?: string; closeTime?: string } {
     if (!dayText) {
       return { isOpen: false };
     }
 
-    // Remover o nome do dia (ex: "Monday: ")
     const timeText = dayText.split(': ')[1];
     
     if (!timeText || timeText.toLowerCase().includes('closed') || timeText.toLowerCase().includes('fechado')) {
@@ -472,7 +542,6 @@ export class LocationService {
       return { isOpen: true, openTime: '00:00', closeTime: '23:59' };
     }
 
-    // Extrair horários (ex: "9:00 AM – 6:00 PM" ou "09:00 – 18:00")
     const timeMatch = timeText.match(/(\d{1,2}):?(\d{0,2})\s?(AM|PM)?\s?[–-]\s?(\d{1,2}):?(\d{0,2})\s?(AM|PM)?/i);
     
     if (timeMatch) {
@@ -486,7 +555,6 @@ export class LocationService {
       let openTime24 = openHour;
       let closeTime24 = closeHour;
 
-      // Converter para formato 24h se necessário
       if (openPeriod) {
         if (openPeriod.toLowerCase() === 'pm' && openHour !== 12) {
           openTime24 = openHour + 12;
@@ -513,7 +581,6 @@ export class LocationService {
       };
     }
 
-    // Se não conseguiu fazer parse, retorna padrão
     return { isOpen: true, openTime: '09:00', closeTime: '18:00' };
   }
 
@@ -531,9 +598,84 @@ export class LocationService {
     };
   }
 
-  // Método para verificar se está aberto agora
+  // Métodos legacy para compatibilidade
+  
+  private searchLocations(params: LocationSearchParams): Observable<LocationSearchResponse> {
+    let httpParams = new HttpParams()
+      .set('zipCode', params.zipCode)
+      .set('radius', params.radius.toString())
+      .set('type', params.type);
+
+    if (params.services?.length) {
+      httpParams = httpParams.set('services', params.services.join(','));
+    }
+
+    if (params.petTypes?.length) {
+      httpParams = httpParams.set('petTypes', params.petTypes.join(','));
+    }
+
+    if (params.isOpenNow !== undefined) {
+      httpParams = httpParams.set('isOpenNow', params.isOpenNow.toString());
+    }
+
+    if (params.sortBy) {
+      httpParams = httpParams.set('sortBy', params.sortBy);
+    }
+
+    return this.http.get<LocationSearchResponse>(`${this.apiUrl}/locations/search`, { params: httpParams });
+  }
+
+  getLocationById(id: string): Observable<Petshop | Veterinary> {
+    return this.http.get<Petshop | Veterinary>(`${this.apiUrl}/locations/${id}`);
+  }
+
+  getLocationsByIds(ids: string[]): Observable<(Petshop | Veterinary)[]> {
+    const httpParams = new HttpParams().set('ids', ids.join(','));
+    return this.http.get<(Petshop | Veterinary)[]>(`${this.apiUrl}/locations/batch`, { params: httpParams });
+  }
+
+  validateZipCode(zipCode: string): boolean {
+    const zipCodeRegex = /^\d{5}-?\d{3}$/;
+    return zipCodeRegex.test(zipCode);
+  }
+
+  formatZipCode(zipCode: string): string {
+    const cleanZipCode = zipCode.replace(/\D/g, '');
+    if (cleanZipCode.length === 8) {
+      return `${cleanZipCode.substring(0, 5)}-${cleanZipCode.substring(5)}`;
+    }
+    return zipCode;
+  }
+
+  getCoordinatesByZipCode(zipCode: string): Observable<{ lat: number; lng: number; address: string }> {
+    const formattedZipCode = this.formatZipCode(zipCode);
+    return this.http.get<any>(`https://viacep.com.br/ws/${formattedZipCode.replace('-', '')}/json/`)
+      .pipe(
+        map(response => ({
+          lat: 0,
+          lng: 0,
+          address: `${response.logradouro}, ${response.bairro}, ${response.localidade} - ${response.uf}`
+        }))
+      );
+  }
+
+  calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
+    const R = 6371;
+    const dLat = this.toRadians(lat2 - lat1);
+    const dLng = this.toRadians(lng2 - lng1);
+    const a = 
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(this.toRadians(lat1)) * Math.cos(this.toRadians(lat2)) * 
+      Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+
+  private toRadians(degrees: number): number {
+    return degrees * (Math.PI / 180);
+  }
+
   isOpenNow(location: Location): boolean {
-    // Usar informação do Google Maps se disponível
     if (location.isOpen !== undefined) {
       return location.isOpen;
     }
@@ -552,7 +694,6 @@ export class LocationService {
     const openTime = openHour * 60 + openMin;
     const closeTime = closeHour * 60 + closeMin;
 
-    // Verifica se o horário de fechamento é no dia seguinte (ex: abre 22:00, fecha 02:00)
     if (closeTime < openTime) {
       return currentTime >= openTime || currentTime <= closeTime;
     }
@@ -560,9 +701,6 @@ export class LocationService {
     return currentTime >= openTime && currentTime <= closeTime;
   }
 
-  /**
-   * Retorna o próximo horário de funcionamento
-   */
   getNextOpenTime(location: Location): string | null {
     const now = new Date();
     const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
@@ -575,7 +713,6 @@ export class LocationService {
       
       if (schedule?.isOpen && schedule.openTime) {
         if (i === 0) {
-          // Hoje - verificar se ainda não passou do horário
           const currentTime = now.getHours() * 60 + now.getMinutes();
           const [openHour, openMin] = schedule.openTime.split(':').map(Number);
           const openTime = openHour * 60 + openMin;
