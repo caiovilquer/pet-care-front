@@ -140,7 +140,7 @@ import { MatIconModule } from '@angular/material/icon';
     }
 
     .veterinary-card {
-      border-left: 4px solid #4caf50;
+      border-left: 4px solid var(--success-color);
     }
 
     .card-avatar {
@@ -154,11 +154,11 @@ import { MatIconModule } from '@angular/material/icon';
     }
 
     .petshop-avatar {
-      background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+      background: linear-gradient(135deg, var(--secondary-color) 0%, var(--secondary-dark) 100%);
     }
 
     .veterinary-avatar {
-      background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+      background: linear-gradient(135deg, var(--success-color) 0%, var(--primary-dark) 100%);
     }
 
     .card-avatar mat-icon {

@@ -182,7 +182,7 @@ import { LocationService } from '../../core/services/location.service';
     }
 
     .location-card.open {
-      border-left: 4px solid #4caf50;
+      border-left: 4px solid var(--success-color);
     }
 
     .location-card.closed {
@@ -422,9 +422,9 @@ import { LocationService } from '../../core/services/location.service';
     }
 
     .today-hours.open {
-      background: #e8f5e8;
-      border-left-color: #4caf50;
-      color: #2e7d32;
+      background: var(--success-bg);
+      border-left-color: var(--success-color);
+      color: var(--success-color);
     }
 
     .today-hours.closed {

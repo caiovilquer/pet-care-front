@@ -682,7 +682,7 @@ import { of } from 'rxjs';
     }
 
     .day-hours.open .day-time {
-      color: #2e7d32;
+      color: var(--success-color);
     }
 
     .day-hours.closed .day-time {

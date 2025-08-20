@@ -194,18 +194,18 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
   styles: [`
     .sidenav-container {
       height: 100vh;
-      background: linear-gradient(135deg, #f8faff 0%, #f0f4ff 100%);
+      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
     }
 
     .sidenav {
       width: 280px;
-      background: linear-gradient(180deg, #ffffff 0%, #f8faff 100%);
-      border-right: 1px solid rgba(76, 175, 80, 0.1);
-      box-shadow: 2px 0 20px rgba(76, 175, 80, 0.08);
+      background: linear-gradient(180deg, #ffffff 0%, var(--bg-primary) 100%);
+      border-right: 1px solid var(--border-light);
+      box-shadow: 2px 0 20px rgba(99, 102, 241, 0.08);
     }
 
     .sidenav-header {
-      background: linear-gradient(135deg, #4caf50 0%, #66bb6a 50%, #81c784 100%);
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 50%, var(--secondary-color) 100%);
       color: white;
       display: flex;
       align-items: center;
@@ -254,15 +254,15 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
       position: sticky;
       top: 0;
       z-index: 1000;
-      background: linear-gradient(90deg, #ffffff 0%, #f8faff 100%);
-      border-bottom: 1px solid rgba(76, 175, 80, 0.1);
+      background: linear-gradient(90deg, #ffffff 0%, var(--bg-primary) 100%);
+      border-bottom: 1px solid var(--border-light);
       box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     }
 
     .toolbar-title {
       font-size: 22px;
       font-weight: 600;
-      color: #2e7d32;
+      color: var(--primary-dark);
       letter-spacing: 0.3px;
     }
 
@@ -273,7 +273,7 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
     .main-content {
       padding: 32px;
       min-height: calc(100vh - 64px);
-      background: linear-gradient(135deg, #fafffe 0%, #f0fff4 100%);
+      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
       position: relative;
     }
 
@@ -285,22 +285,22 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
       right: 0;
       bottom: 0;
       background: 
-        radial-gradient(circle at 20% 20%, rgba(76, 175, 80, 0.03) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(129, 199, 132, 0.03) 0%, transparent 50%);
+        radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.03) 0%, transparent 50%);
       pointer-events: none;
     }
 
     .active {
-      background: linear-gradient(135deg, rgba(76, 175, 80, 0.15) 0%, rgba(129, 199, 132, 0.1) 100%);
-      color: #2e7d32;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.1) 100%);
+      color: var(--primary-dark);
       border-radius: 12px;
       margin: 4px 12px;
       transform: translateX(4px);
-      box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
+      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.2);
     }
 
     .active mat-icon {
-      color: #2e7d32;
+      color: var(--primary-dark);
     }
 
     mat-nav-list a {
@@ -312,12 +312,12 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
     }
 
     mat-nav-list a:hover:not(.active) {
-      background: rgba(76, 175, 80, 0.08);
+      background: rgba(99, 102, 241, 0.08);
       transform: translateX(2px);
     }
 
     mat-nav-list a mat-icon {
-      color: #4caf50;
+      color: var(--primary-color);
       transition: all 0.3s ease;
     }
 
@@ -327,7 +327,7 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
 
     .user-info {
       padding: 20px;
-      background: linear-gradient(135deg, #f8faff 0%, #e8f5e8 100%);
+      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
       border-radius: 12px;
       margin: 8px;
       display: flex;
@@ -339,12 +339,12 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
       width: 48px;
       height: 48px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
-      box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
       overflow: hidden;
     }
 
@@ -367,13 +367,13 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
     .user-name {
       font-weight: 600;
       margin: 0;
-      color: #2e7d32;
+      color: var(--primary-dark);
       font-size: 16px;
     }
 
     .user-email {
       font-size: 13px;
-      color: #66bb6a;
+      color: var(--text-secondary);
       margin: 6px 0 0 0;
       font-weight: 400;
     }
@@ -386,12 +386,12 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
     }
 
     .menu-item:hover {
-      background: rgba(76, 175, 80, 0.1);
-      color: #2e7d32;
+      background: rgba(99, 102, 241, 0.1);
+      color: var(--primary-dark);
     }
 
     .menu-item mat-icon {
-      color: #4caf50;
+      color: var(--primary-color);
       margin-right: 12px;
     }
 
@@ -411,12 +411,12 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
     }
 
     .main-toolbar button:hover {
-      background: rgba(76, 175, 80, 0.1);
+      background: rgba(99, 102, 241, 0.1);
       transform: scale(1.05);
     }
 
     .main-toolbar button mat-icon {
-      color: #4caf50;
+      color: var(--primary-color);
     }
 
     /* Estilização do menu de notificações */
@@ -425,7 +425,7 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
       display: flex;
       align-items: center;
       gap: 12px;
-      background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
       color: white;
     }
 
@@ -458,7 +458,7 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
       max-height: 420px;
       overflow-y: auto;
       min-width: 380px;
-      background: #ffffff;
+      background: var(--bg-card);
     }
 
     .notification-item {
@@ -466,7 +466,7 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
       align-items: flex-start;
       gap: 16px;
       padding: 16px 20px;
-      border-bottom: 1px solid #f0f8f0;
+      border-bottom: 1px solid var(--border-light);
       transition: all 0.3s ease;
       position: relative;
     }
@@ -478,13 +478,13 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
       top: 0;
       bottom: 0;
       width: 3px;
-      background: linear-gradient(180deg, #4caf50 0%, #66bb6a 100%);
+      background: linear-gradient(180deg, var(--primary-color) 0%, var(--primary-light) 100%);
       opacity: 0;
       transition: opacity 0.3s ease;
     }
 
     .notification-item:hover {
-      background: linear-gradient(135deg, #f8fff8 0%, #f0fff4 100%);
+      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
       transform: translateX(4px);
     }
 
@@ -527,29 +527,29 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
     }
 
     .event-icon-vaccine { 
-      background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c8 100%); 
-      color: #2e7d32; 
-      border: 2px solid rgba(46, 125, 50, 0.2);
+      background: linear-gradient(135deg, var(--success-bg) 0%, rgba(16, 185, 129, 0.2) 100%); 
+      color: var(--success-color); 
+      border: 2px solid rgba(16, 185, 129, 0.2);
     }
     .event-icon-medicine { 
-      background: linear-gradient(135deg, #fff8e1 0%, #ffe0b2 100%); 
-      color: #f57c00; 
-      border: 2px solid rgba(245, 124, 0, 0.2);
+      background: linear-gradient(135deg, var(--warning-bg) 0%, rgba(245, 158, 11, 0.2) 100%); 
+      color: var(--warning-color); 
+      border: 2px solid rgba(245, 158, 11, 0.2);
     }
     .event-icon-diary { 
-      background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%); 
-      color: #7b1fa2; 
-      border: 2px solid rgba(123, 31, 162, 0.2);
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(139, 92, 246, 0.2) 100%); 
+      color: var(--primary-light); 
+      border: 2px solid rgba(139, 92, 246, 0.2);
     }
     .event-icon-breed { 
-      background: linear-gradient(135deg, #fce4ec 0%, #f8bbd9 100%); 
-      color: #c2185b; 
-      border: 2px solid rgba(194, 24, 91, 0.2);
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.1) 0%, rgba(6, 182, 212, 0.2) 100%); 
+      color: var(--secondary-color); 
+      border: 2px solid rgba(6, 182, 212, 0.2);
     }
     .event-icon-service { 
-      background: linear-gradient(135deg, #e1f5fe 0%, #b3e5fc 100%); 
-      color: #0277bd; 
-      border: 2px solid rgba(2, 119, 189, 0.2);
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(99, 102, 241, 0.2) 100%); 
+      color: var(--primary-color); 
+      border: 2px solid rgba(99, 102, 241, 0.2);
     }
 
     .event-info {
@@ -559,7 +559,7 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
 
     .event-description {
       font-weight: 600;
-      color: #2e7d32;
+      color: var(--primary-dark);
       font-size: 15px;
       margin-bottom: 6px;
       line-height: 1.4;
@@ -567,14 +567,14 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
 
     .event-date {
       font-size: 13px;
-      color: #66bb6a;
+      color: var(--text-secondary);
       margin-bottom: 4px;
       font-weight: 500;
     }
 
     .event-pet {
       font-size: 12px;
-      color: #81c784;
+      color: var(--text-muted);
       font-style: italic;
       display: flex;
       align-items: center;
@@ -589,33 +589,33 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
     .view-all-button {
       width: 100%;
       justify-content: center;
-      color: #4caf50;
+      color: var(--primary-color);
       font-weight: 600;
       padding: 16px;
       border-radius: 0 0 12px 12px;
-      background: linear-gradient(135deg, #f8fff8 0%, #f0fff4 100%);
+      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
       transition: all 0.3s ease;
     }
 
     .view-all-button:hover {
-      background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
       color: white;
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
     }
 
     .no-notifications {
       padding: 32px 24px;
       text-align: center;
-      color: #81c784;
-      background: linear-gradient(135deg, #f8fff8 0%, #f0fff4 100%);
+      color: var(--text-muted);
+      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
     }
 
     .no-notifications-icon {
       font-size: 64px;
       width: 64px;
       height: 64px;
-      color: #c8e6c8;
+      color: var(--text-muted);
       margin-bottom: 16px;
       animation: float 3s ease-in-out infinite;
     }
@@ -629,16 +629,16 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
     .create-event-button {
       width: 100%;
       justify-content: center;
-      color: #4caf50;
+      color: var(--primary-color);
       font-weight: 600;
-      background: rgba(76, 175, 80, 0.1);
+      background: rgba(99, 102, 241, 0.1);
       border-radius: 25px;
       padding: 12px;
       transition: all 0.3s ease;
     }
 
     .create-event-button:hover {
-      background: #4caf50;
+      background: var(--primary-color);
       color: white;
       transform: scale(1.05);
     }
@@ -700,7 +700,7 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
     ::ng-deep .mat-mdc-menu-panel {
       border-radius: 16px !important;
       box-shadow: 0 8px 32px rgba(0,0,0,0.12) !important;
-      border: 1px solid rgba(76, 175, 80, 0.1) !important;
+      border: 1px solid var(--border-light) !important;
       overflow: hidden !important;
     }
 
@@ -722,7 +722,7 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
       display: flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
     }
 
     .toolbar-avatar .avatar-image {
@@ -748,7 +748,7 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
       margin: 0;
       font-size: 14px;
       font-weight: 600;
-      color: #4caf50;
+      color: var(--primary-color);
       text-transform: uppercase;
       letter-spacing: 0.5px;
       opacity: 0.8;
