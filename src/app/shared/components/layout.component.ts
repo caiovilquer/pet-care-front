@@ -202,6 +202,7 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
       background: linear-gradient(180deg, #ffffff 0%, var(--bg-primary) 100%);
       border-right: 1px solid var(--border-light);
       box-shadow: 2px 0 20px rgba(99, 102, 241, 0.08);
+      overflow: hidden;
     }
 
     .sidenav-header {
@@ -301,6 +302,12 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
 
     .active mat-icon {
       color: var(--primary-dark);
+    }
+
+    mat-nav-list {
+      overflow: hidden;
+      height: auto;
+      max-height: none;
     }
 
     mat-nav-list a {
@@ -701,6 +708,15 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
       border-radius: 16px !important;
       box-shadow: 0 8px 32px rgba(0,0,0,0.12) !important;
       border: 1px solid var(--border-light) !important;
+      overflow: hidden !important;
+    }
+
+    /* Remove barra de rolagem do sidenav */
+    ::ng-deep .mat-drawer-inner-container {
+      overflow: hidden !important;
+    }
+
+    ::ng-deep .mat-sidenav {
       overflow: hidden !important;
     }
 
