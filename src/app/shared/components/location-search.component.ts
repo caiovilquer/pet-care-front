@@ -235,7 +235,7 @@ import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
     }
 
     .search-header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
       color: white;
       padding: 1.5rem 2rem;
       text-align: center;
@@ -300,11 +300,12 @@ import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
     
     /* Estilização dos filtros ativos */
     .active-filters-container {
-      background-color: #f5f7ff;
+      background-color: var(--bg-surface);
       border-radius: 8px;
       padding: 0.75rem 1rem;
       margin-bottom: 1rem;
       animation: fadeIn 0.3s ease;
+      border: 1px solid var(--border-light);
     }
     
     .active-filters-header {
@@ -319,7 +320,7 @@ import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
       align-items: center;
       gap: 0.5rem;
       font-size: 0.9rem;
-      color: #555;
+      color: var(--text-secondary);
       font-weight: 500;
     }
     
@@ -327,7 +328,7 @@ import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
       font-size: 18px;
       width: 18px;
       height: 18px;
-      color: #667eea;
+      color: var(--primary-color);
     }
     
     .active-filters-chips {
@@ -338,12 +339,13 @@ import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
     
     .filter-chip {
       font-size: 0.85rem;
-      background-color: #e6e9ff !important;
-      color: #4151b0 !important;
+      background-color: var(--bg-hover) !important;
+      color: var(--primary-dark) !important;
+      border: 1px solid var(--border-light) !important;
     }
 
     .advanced-filters {
-      border-top: 1px solid #eee;
+      border-top: 1px solid var(--border-light);
       padding-top: 1rem;
     }
 
@@ -352,15 +354,16 @@ import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
       align-items: center;
       gap: 0.5rem;
       margin-bottom: 1rem;
-      color: #667eea;
+      color: var(--primary-color);
       font-weight: 500;
     }
 
     .filters-content {
-      background-color: #f9faff;
+      background-color: var(--bg-surface);
       border-radius: 8px;
       padding: 1rem;
       animation: fadeIn 0.3s ease-in-out;
+      border: 1px solid var(--border-light);
     }
 
     @keyframes fadeIn {
@@ -377,7 +380,7 @@ import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
       font-size: 0.9rem;
       font-weight: 500;
       margin-bottom: 0.5rem;
-      color: #444;
+      color: var(--text-primary);
     }
     
     .radius-slider {
@@ -389,7 +392,7 @@ import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
     }
     
     .open-now-checkbox {
-      color: #333;
+      color: var(--text-primary);
       font-size: 1rem;
     }
 
