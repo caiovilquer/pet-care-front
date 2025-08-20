@@ -1,6 +1,50 @@
 /* You can add global styles to this file, and also import other style files */
 @import '@angular/material/prebuilt-themes/azure-blue.css';
 
+/* Modern Color Palette */
+:root {
+  /* Primary Colors - Blue/Purple theme */
+  --primary-color: #6366f1;
+  --primary-light: #8b5cf6;
+  --primary-dark: #4f46e5;
+  
+  /* Secondary Colors */
+  --secondary-color: #06b6d4;
+  --secondary-light: #0ea5e9;
+  --secondary-dark: #0891b2;
+  
+  /* Accent Colors */
+  --accent-color: #f59e0b;
+  --accent-light: #fbbf24;
+  --accent-dark: #d97706;
+  
+  /* Neutral Colors */
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+  
+  /* Background Colors */
+  --bg-primary: #f8fafc;
+  --bg-secondary: #f1f5f9;
+  --bg-surface: #ffffff;
+  --bg-hover: #f8fafc;
+  --bg-input: #f9fafb;
+  
+  /* Border Colors */
+  --border-light: #e5e7eb;
+  --border-medium: #d1d5db;
+  
+  /* Status Colors */
+  --success-color: #10b981;
+  --warning-color: #f59e0b;
+  --error-color: #ef4444;
+  
+  /* Shadow Styles */
+  --shadow-soft: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -9,32 +53,43 @@
 
 html, body {
   height: 100%;
-  font-family: 'Roboto', 'Helvetica Neue', sans-serif;
+  font-family: 'Inter', 'Roboto', 'Helvetica Neue', sans-serif;
 }
 
 body {
-  background-color: #fafafa;
+  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+  color: var(--text-primary);
 }
 
 /* Custom Material Theme Colors */
 .mat-mdc-button.mat-primary {
-  --mdc-protected-button-container-color: #667eea;
+  --mdc-protected-button-container-color: var(--primary-color);
   --mdc-protected-button-label-text-color: white;
 }
 
 .mat-mdc-raised-button.mat-primary {
-  --mdc-protected-button-container-color: #667eea;
+  --mdc-protected-button-container-color: var(--primary-color);
   --mdc-protected-button-label-text-color: white;
+}
+
+.mat-mdc-fab.mat-primary {
+  --mdc-fab-container-color: var(--primary-color);
+  --mdc-fab-label-text-color: white;
 }
 
 /* Snackbar Styles */
 .success-snackbar {
-  --mdc-snackbar-container-color: #4caf50;
+  --mdc-snackbar-container-color: var(--success-color);
   --mdc-snackbar-supporting-text-color: white;
 }
 
 .error-snackbar {
-  --mdc-snackbar-container-color: #f44336;
+  --mdc-snackbar-container-color: var(--error-color);
+  --mdc-snackbar-supporting-text-color: white;
+}
+
+.warning-snackbar {
+  --mdc-snackbar-container-color: var(--warning-color);
   --mdc-snackbar-supporting-text-color: white;
 }
 
@@ -80,42 +135,165 @@ body {
 
 /* Enhanced Material UI Overrides */
 .mat-mdc-tab-group {
-  --mdc-tab-indicator-active-indicator-color: #667eea;
+  --mdc-tab-indicator-active-indicator-color: var(--primary-color);
 }
 
 .mat-mdc-tab .mdc-tab__text-label {
-  color: #666;
+  color: var(--text-secondary);
+  transition: color 0.3s ease;
 }
 
 .mat-mdc-tab.mdc-tab--active .mdc-tab__text-label {
-  color: #667eea;
+  color: var(--primary-color);
 }
 
 /* Badge customizations */
 .mat-badge-content {
-  background: #ff4081 !important;
+  background: var(--error-color) !important;
   color: white !important;
   font-weight: 600 !important;
+  border-radius: 12px !important;
 }
 
 /* Card hover effects */
-.mat-mdc-card:hover {
-  transform: translateY(-2px);
+.mat-mdc-card {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 16px !important;
+  box-shadow: var(--shadow-card);
+}
+
+.mat-mdc-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
+}
+
+/* Button enhancements */
+.mat-mdc-button, .mat-mdc-raised-button {
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mat-mdc-button:hover, .mat-mdc-raised-button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card);
+}
+
+/* Form field enhancements */
+.mat-mdc-form-field {
+  width: 100%;
+}
+
+.mat-mdc-form-field .mdc-text-field {
+  background-color: var(--bg-input) !important;
+  border-radius: 12px !important;
+  border: 1px solid var(--border-light) !important;
+  transition: all 0.3s ease;
+}
+
+.mat-mdc-form-field.mat-focused .mdc-text-field {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
+}
+
+.mat-mdc-form-field:not(.mat-form-field-disabled) .mdc-text-field:hover {
+  border-color: var(--primary-light) !important;
 }
 
 /* Chip customizations */
 .mat-mdc-chip {
   --mdc-chip-container-shape: 16px;
+  border-radius: 20px !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease;
+}
+
+.mat-mdc-chip:hover {
+  transform: scale(1.05);
 }
 
 .mat-mdc-chip.service-chip {
-  background-color: #e3f2fd;
-  color: #1976d2;
+  background-color: var(--bg-secondary);
+  color: var(--primary-color);
 }
 
 .mat-mdc-chip.service-chip:hover {
-  background-color: #bbdefb;
+  background-color: var(--primary-light);
+  color: white;
+}
+
+/* Modern animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Animation classes */
+.fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.6s ease-out;
+}
+
+.pulse-animation {
+  animation: pulse 2s infinite;
+}
+
+/* Status indicators */
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-success {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: var(--success-color);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.status-warning {
+  background-color: rgba(245, 158, 11, 0.1);
+  color: var(--warning-color);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.status-error {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: var(--error-color);
+  border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
 /* Loading animation */
@@ -123,20 +301,80 @@ body {
   display: inline-block;
   width: 20px;
   height: 20px;
-  border: 3px solid rgba(255,255,255,.3);
+  border: 3px solid rgba(99, 102, 241, 0.3);
   border-radius: 50%;
-  border-top-color: #fff;
+  border-top-color: var(--primary-color);
   animation: spin 1s ease-in-out infinite;
+}
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(5px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--border-light);
+  border-top: 4px solid var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
 
+/* Focus styles */
+.mat-mdc-button:focus,
+.mat-mdc-raised-button:focus,
+.mat-mdc-form-field:focus-within {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* Utility classes */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+.mb-1 { margin-bottom: 0.5rem; }
+.mb-2 { margin-bottom: 1rem; }
+.mb-3 { margin-bottom: 1.5rem; }
+.mb-4 { margin-bottom: 2rem; }
+
+.mt-1 { margin-top: 0.5rem; }
+.mt-2 { margin-top: 1rem; }
+.mt-3 { margin-top: 1.5rem; }
+.mt-4 { margin-top: 2rem; }
+
+.p-1 { padding: 0.5rem; }
+.p-2 { padding: 1rem; }
+.p-3 { padding: 1.5rem; }
+.p-4 { padding: 2rem; }
+
 /* Responsive helpers */
 @media (max-width: 768px) {
   .hide-mobile {
     display: none !important;
+  }
+  
+  .mat-mdc-card {
+    margin: 8px !important;
+    border-radius: 12px !important;
+  }
+  
+  .mat-mdc-button, .mat-mdc-raised-button {
+    border-radius: 8px !important;
   }
 }
 

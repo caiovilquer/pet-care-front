@@ -1,5 +1,7 @@
 .events-container {
   padding: 2rem;
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
 }
 
 .events-header {
@@ -7,6 +9,12 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border-light);
 }
 
 .header-actions {
@@ -19,15 +27,22 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  color: var(--primary-color);
 }
 
 .events-header h1 {
   font-size: 2rem;
-  font-weight: 500;
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 .table-container {
   overflow: auto;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border-light);
 }
 
 .events-table {
@@ -41,7 +56,7 @@
 
 .date-icon {
   margin-right: 8px;
-  color: #757575;
+  color: var(--primary-color);
 }
 
 .mat-column-actions {
@@ -56,7 +71,12 @@
   justify-content: center;
   padding: 3rem;
   text-align: center;
-  color: #757575;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border-light);
 }
 
 .no-events-icon {
@@ -64,21 +84,24 @@
   width: 4rem;
   height: 4rem;
   margin-bottom: 1rem;
+  color: var(--primary-color);
 }
 
 .no-events h2 {
   font-size: 1.5rem;
+  color: var(--text-primary);
   margin-bottom: 0.5rem;
 }
 
 /* Event Type Chip Colors */
-.event-chip-vaccine { background-color: #e3f2fd; color: #1e88e5; }
-.event-chip-medicine { background-color: #fce4ec; color: #d81b60; }
-.event-chip-diary { background-color: #fffde7; color: #fdd835; }
-.event-chip-breed { background-color: #f3e5f5; color: #8e24aa; }
-.event-chip-service { background-color: #e0f2f1; color: #00897b; }
+.event-chip-vaccine { background-color: rgba(99, 102, 241, 0.1); color: var(--primary-color); }
+.event-chip-medicine { background-color: rgba(239, 68, 68, 0.1); color: var(--error-color); }
+.event-chip-diary { background-color: rgba(245, 158, 11, 0.1); color: var(--warning-color); }
+.event-chip-breed { background-color: rgba(6, 182, 212, 0.1); color: var(--secondary-color); }
+.event-chip-service { background-color: rgba(139, 92, 246, 0.1); color: var(--primary-light); }
+.event-chip-diary { background-color: rgba(245, 158, 11, 0.1); color: var(--accent-color); }
 
 /* Status Chip Colors */
-.status-chip-done { background-color: #e8f5e9; color: #43a047; }
-.status-chip-pending { background-color: #fff3e0; color: #fb8c00; }
-.status-chip-overdue { background-color: #ffebee; color: #e53935; }
+.status-chip-done { background-color: var(--success-bg); color: var(--success-color); }
+.status-chip-pending { background-color: var(--warning-bg); color: var(--warning-color); }
+.status-chip-overdue { background-color: var(--error-bg); color: var(--error-color); }
