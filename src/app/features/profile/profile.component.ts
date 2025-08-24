@@ -353,7 +353,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
     // Se inscrever para atualizações de eventos
     this.eventUpdateSubscription = this.eventStateService.eventUpdated$.subscribe(() => {
-      console.log('Profile: Recebeu notificação de atualização de evento');
+  
       this.refreshEventData();
     });
   }
@@ -366,7 +366,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   private refreshEventData(): void {
     if (this.currentUser && this.currentUser.pets && this.currentUser.pets.length > 0) {
-      console.log('Profile: Recarregando dados dos eventos...');
+  
       this.loadEventsForAllPets(this.currentUser.pets);
     }
   }
@@ -397,24 +397,24 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   private loadEventsForAllPets(pets: any[]): void {
-    console.log('=== PERFIL: Carregando eventos dos pets ===');
-    console.log('Pets para carregar eventos:', pets.map(p => ({ id: p.id, name: p.name })));
+  
+  
 
     const petEventRequests = pets.map(pet => {
-      console.log(`PERFIL: Fazendo requisição para pet ${pet.id} (${pet.name})`);
+  
       return this.eventService.listByPet(pet.id);
     });
 
     forkJoin(petEventRequests).subscribe({
       next: (petEventsArrays) => {
-        console.log('PERFIL: Respostas dos eventos por pet:', petEventsArrays);
+  
 
         // Combinar todos os eventos de todos os pets
         const allEvents: EventSummary[] = [];
 
         petEventsArrays.forEach((petEvents, index) => {
           const pet = pets[index];
-          console.log(`PERFIL: Pet ${pet.id} (${pet.name}) - Eventos:`, petEvents);
+          
 
           if (Array.isArray(petEvents)) {
             petEvents.forEach((event: any) => {
@@ -430,17 +430,16 @@ export class ProfileComponent implements OnInit, OnDestroy {
           }
         });
 
-        console.log('PERFIL: Total de eventos coletados:', allEvents.length);
+  
 
         this.totalEvents = allEvents.length;
         const upcomingEvents = this.getUpcomingEvents(allEvents);
         this.upcomingEvents = upcomingEvents.length;
 
-        console.log('PERFIL: Total eventos:', this.totalEvents);
-        console.log('PERFIL: Eventos próximos:', this.upcomingEvents);
+  
       },
       error: (error) => {
-        console.error('PERFIL: Erro ao carregar eventos:', error);
+  
         this.totalEvents = 0;
         this.upcomingEvents = 0;
       }

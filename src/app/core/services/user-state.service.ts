@@ -14,7 +14,7 @@ export class UserStateService {
 
   // Método para notificar que o perfil do usuário foi atualizado
   notifyUserUpdated(): void {
-    console.log('UserStateService: Notificando atualização de perfil');
+  
     this.userUpdatedSource.next();
   }
 }

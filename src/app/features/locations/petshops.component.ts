@@ -440,7 +440,7 @@ export class PetshopsComponent implements OnInit {
           }
         },
         error: (error) => {
-          console.error('Erro ao buscar petshops:', error);
+          
           this.snackBar.open('Erro ao buscar petshops. Tente novamente.', 'Fechar', {
             duration: 5000
           });
@@ -489,7 +489,7 @@ export class PetshopsComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       // Pode realizar ações após fechar o modal se necessário
-      console.log('Modal de detalhes fechado', result);
+  
     });
   }
 

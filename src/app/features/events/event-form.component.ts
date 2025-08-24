@@ -72,7 +72,7 @@ export class EventFormComponent implements OnInit {
     this.loadPets();
     if (this.isEdit) {
       this.eventService.getById(this.data.eventId).subscribe(event => {
-        console.log('Evento carregado da API:', event);
+  
 
         // Tratar a data corretamente
         let dateStart = null;
@@ -106,11 +106,11 @@ export class EventFormComponent implements OnInit {
           finalDate: finalDate
         });
 
-        console.log('Formulário após patchValue:', this.eventForm.value);
+  
       });
     } else if (this.data && this.data.petId) {
       this.eventForm.patchValue({ petId: this.data.petId });
-      console.log('Novo evento - petId pré-selecionado:', this.data.petId);
+  
     }
   }
 
@@ -182,7 +182,7 @@ export class EventFormComponent implements OnInit {
 
   private handleError(error: any, message: string): void {
     this.snackBar.open(message, 'Fechar', { duration: 3000 });
-    console.error(error);
+  
   }
 
   onCancel(): void {

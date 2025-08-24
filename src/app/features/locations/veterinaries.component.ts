@@ -572,7 +572,7 @@ export class VeterinariesComponent implements OnInit {
           }
         },
         error: (error: any) => {
-          console.error('Erro ao buscar veterinários:', error);
+          
           this.snackBar.open('Erro ao buscar veterinários. Tente novamente.', 'Fechar', {
             duration: 5000
           });
@@ -638,7 +638,7 @@ export class VeterinariesComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       // Pode realizar ações após fechar o modal se necessário
-      console.log('Modal de detalhes fechado', result);
+  
     });
   }
 

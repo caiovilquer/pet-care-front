@@ -793,13 +793,13 @@ export class LayoutComponent implements OnInit, OnDestroy {
 
     // Se inscrever para atualizações de eventos
     this.eventUpdateSubscription = this.eventStateService.eventUpdated$.subscribe(() => {
-      console.log('Layout: Recebeu notificação de atualização de evento');
+  
       this.refreshNotifications();
     });
 
     // Se inscrever para atualizações do perfil do usuário
     this.userUpdateSubscription = this.userStateService.userUpdated$.subscribe(() => {
-      console.log('Layout: Recebeu notificação de atualização de perfil');
+  
       this.refreshUserProfile();
     });
   }
@@ -815,7 +815,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
 
   private refreshNotifications(): void {
     if (this.currentUser && this.currentUser.pets && this.currentUser.pets.length > 0) {
-      console.log('Layout: Recarregando notificações...');
+  
       this.loadUpcomingEventsCount(this.currentUser.pets);
     }
   }
@@ -833,14 +833,14 @@ export class LayoutComponent implements OnInit, OnDestroy {
         }
       },
       error: () => {
-        console.error('Error loading user profile');
+  
         this.upcomingEventsCount = 0;
       }
     });
   }
 
   private loadUpcomingEventsCount(pets: any[]): void {
-    console.log('=== LAYOUT: Carregando contagem de eventos próximos ===');
+  
 
     const petEventRequests = pets.map(pet =>
       this.eventService.listByPet(pet.id)
@@ -887,11 +887,10 @@ export class LayoutComponent implements OnInit, OnDestroy {
         this.upcomingEventsCount = upcomingEvents.length;
         this.upcomingEventsList = upcomingEvents.slice(0, 5); // Mostrar apenas os 5 primeiros
 
-        console.log('LAYOUT: Eventos próximos contados:', this.upcomingEventsCount);
-        console.log('LAYOUT: Lista de eventos próximos:', this.upcomingEventsList);
+  
       },
       error: (error) => {
-        console.error('LAYOUT: Erro ao carregar eventos:', error);
+  
         this.upcomingEventsCount = 0;
         this.upcomingEventsList = [];
       }
@@ -950,11 +949,11 @@ export class LayoutComponent implements OnInit, OnDestroy {
   }
 
   private refreshUserProfile(): void {
-    console.log('Layout: Recarregando perfil do usuário...');
+  
     this.tutorService.getMyProfile().subscribe({
       next: (user) => {
         this.currentUser = user;
-        console.log('Layout: Perfil atualizado:', user);
+  
         
         // Também recarregar notificações porque podem ter mudado com novos pets, etc.
         if (user.pets && user.pets.length > 0) {
@@ -964,7 +963,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
         }
       },
       error: (error) => {
-        console.error('Layout: Erro ao recarregar perfil:', error);
+  
       }
     });
   }

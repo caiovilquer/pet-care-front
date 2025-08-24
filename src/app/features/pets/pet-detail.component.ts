@@ -62,10 +62,10 @@ export class PetDetailComponent implements OnInit {
       next: (pet) => {
         this.pet = pet;
         this.isLoading = false;
-        console.log('Detalhes do pet carregados:', pet);
+  
       },
       error: (err) => {
-        console.error('Erro ao carregar detalhes do pet:', err);
+  
         this.snackBar.open('Erro ao carregar detalhes do pet.', 'Fechar', { duration: 3000 });
         this.isLoading = false;
       }
@@ -83,10 +83,10 @@ export class PetDetailComponent implements OnInit {
             ...event,
             petId: this.petId
           } as EventSummary));
-        console.log('Eventos recentes carregados:', this.recentEvents);
+  
       },
       error: (err) => {
-        console.error('Erro ao carregar eventos do pet:', err);
+  
       }
     });
   }

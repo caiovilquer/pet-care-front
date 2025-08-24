@@ -50,10 +50,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadDashboardData();
-    
     // Se inscrever para atualizações de eventos
     this.eventUpdateSubscription = this.eventStateService.eventUpdated$.subscribe(() => {
-      console.log('Dashboard: Recebeu notificação de atualização de evento');
       this.refreshEventData();
     });
   }
@@ -66,7 +64,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   private refreshEventData(): void {
     if (this.currentUser && this.currentUser.pets.length > 0) {
-      console.log('Dashboard: Recarregando dados dos eventos...');
       this.loadEventsForAllPets(this.currentUser.pets);
     }
   }
@@ -90,41 +87,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private loadEventsForAllPets(pets: any[]): void {
-    console.log('=== INÍCIO DO CARREGAMENTO DE EVENTOS ===');
-    console.log('Pets para carregar eventos:', pets.map(p => ({ id: p.id, name: p.name })));
-    
     const petEventRequests = pets.map(pet => {
-      console.log(`Fazendo requisição para pet ${pet.id} (${pet.name})`);
       return this.eventService.listByPet(pet.id);
     });
 
     forkJoin(petEventRequests).subscribe({
       next: (petEventsArrays) => {
-        console.log('=== RESPOSTAS DA API ===');
-        console.log('Número de respostas recebidas:', petEventsArrays.length);
-        console.log('Respostas completas:', petEventsArrays);
-        
         // Combinar todos os eventos de todos os pets
         const allEvents: EventSummary[] = [];
-        
         petEventsArrays.forEach((petEvents, index) => {
           const pet = pets[index];
-          console.log(`\n--- Pet ${pet.id} (${pet.name}) ---`);
-          console.log('Eventos recebidos:', petEvents);
-          console.log('Tipo da resposta:', typeof petEvents);
-          console.log('É array?', Array.isArray(petEvents));
-          
           if (Array.isArray(petEvents)) {
-            console.log(`Processando ${petEvents.length} eventos do pet ${pet.id}`);
-            petEvents.forEach((event: any, eventIndex: number) => {
-              console.log(`  Evento ${eventIndex + 1}:`, {
-                id: event.id,
-                type: event.type,
-                description: event.description,
-                dateStart: event.dateStart,
-                status: event.status
-              });
-              
+            petEvents.forEach((event: any) => {
               allEvents.push({
                 id: event.id,
                 type: event.type,
@@ -134,28 +108,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 status: event.status
               });
             });
-          } else {
-            console.log(`AVISO: Resposta para pet ${pet.id} não é um array:`, petEvents);
           }
         });
-        
-        console.log('\n=== RESULTADO FINAL ===');
-        console.log('Total de eventos coletados:', allEvents.length);
-        console.log('Eventos completos:', allEvents);
-        
         this.totalEvents = allEvents.length;
         const upcomingEvents = this.getUpcomingEvents(allEvents);
         this.upcomingEvents = upcomingEvents.length;
         this.recentEvents = upcomingEvents.slice(0, 5);
-        
-        console.log('\n=== ESTATÍSTICAS FINAIS ===');
-        console.log('Total eventos:', this.totalEvents);
-        console.log('Eventos próximos:', this.upcomingEvents);
-        console.log('Eventos recentes (amostra):', this.recentEvents);
-        console.log('=== FIM DO CARREGAMENTO ===\n');
       },
       error: (error) => {
-        console.error('Erro ao carregar eventos:', error);
         this.totalEvents = 0;
         this.upcomingEvents = 0;
         this.recentEvents = [];
@@ -166,31 +126,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private getUpcomingEvents(events: EventSummary[]): EventSummary[] {
     const now = new Date();
     const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-    
-    console.log('\n--- FILTRAGEM DE EVENTOS PRÓXIMOS ---');
-    console.log('Data atual:', now.toISOString());
-    console.log('Data limite (próxima semana):', nextWeek.toISOString());
-    console.log('Total de eventos para filtrar:', events.length);
-    
-    const filtered = events.filter((event, index) => {
+    const filtered = events.filter((event) => {
       const eventDate = new Date(event.dateStart);
       const isNotDone = !isEventDone(event.status);
       const isInFuture = eventDate >= now;
       const isWithinWeek = eventDate <= nextWeek;
-      
-      console.log(`Evento ${index + 1} (ID: ${event.id}):`);
-      console.log(`  - Descrição: ${event.description}`);
-      console.log(`  - Data: ${event.dateStart} (${eventDate.toISOString()})`);
-      console.log(`  - Não concluído: ${isNotDone} (status=${event.status})`);
-      console.log(`  - No futuro: ${isInFuture}`);
-      console.log(`  - Dentro da semana: ${isWithinWeek}`);
-      console.log(`  - INCLUÍDO: ${isNotDone && isInFuture && isWithinWeek ? 'SIM' : 'NÃO'}`);
-      
       return isNotDone && isInFuture && isWithinWeek;
     });
-    
-    console.log('Eventos próximos filtrados:', filtered.length);
-    console.log('--- FIM DA FILTRAGEM ---\n');
     return filtered;
   }
 

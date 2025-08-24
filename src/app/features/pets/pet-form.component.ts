@@ -107,7 +107,7 @@ export class PetFormComponent implements OnInit {
 
   private handleError(error: any, message: string): void {
     this.snackBar.open(message, 'Fechar', { duration: 3000 });
-    console.error(error);
+  
   }
 
   onCancel(): void {
