@@ -1,31 +1,11 @@
 {
-  "version": 2,
   "framework": "angular",
-  "buildCommand": "node scripts/vercel-build.js",
+  "buildCommand": "npm run build:prod",
   "outputDirectory": "dist/pet-care-scheduler-front/browser",
-  "installCommand": "npm install",
-  "routes": [
-    {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
-  ],
-  "headers": [
+  "rewrites": [
     {
       "source": "/(.*)",
-      "headers": [
-        {
-          "key": "X-Frame-Options",
-          "value": "DENY"
-        },
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        }
-      ]
+      "destination": "/index.html"
     }
   ]
 }
