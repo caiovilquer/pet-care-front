@@ -42,10 +42,8 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
         }
       }
 
-      console.error('API Error:', error);
-      
       // Exibir erro apenas se não for uma requisição de autenticação
-      if (!req.url.includes('/auth/login')) {
+      if (!req.url.includes('/auth/login') && !req.url.includes('/auth/signup')) {
         snackBar.open(errorMessage, 'Fechar', {
           duration: 5000,
           panelClass: ['error-snackbar']

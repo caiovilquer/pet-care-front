@@ -54,18 +54,13 @@ export class EventsComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    console.log('Events Component - ngOnInit iniciado');
     this.route.paramMap.subscribe(params => {
-      console.log('Events Component - Parâmetros da rota:', params);
       const id = params.get('petId');
-      console.log('Events Component - PetId recebido:', id);
       if (id) {
         this.petId = +id;
-        console.log('Events Component - Carregando eventos para pet:', this.petId);
         this.loadPetName();
         this.loadEventsByPet();
       } else {
-        console.log('Events Component - Carregando todos os eventos');
         this.petName = '';
         this.loadAllEvents();
       }
@@ -77,10 +72,8 @@ export class EventsComponent implements OnInit {
       this.petService.getById(this.petId).subscribe({
         next: (pet) => {
           this.petName = pet.name;
-          console.log('Nome do pet carregado:', this.petName);
         },
         error: (err) => {
-          console.error('Erro ao carregar dados do pet:', err);
           this.petName = `Pet #${this.petId}`;
         }
       });
@@ -88,23 +81,12 @@ export class EventsComponent implements OnInit {
   }
 
   loadAllEvents(): void {
-    console.log('Carregando todos os eventos');
-    
     this.eventService.getAll(this.currentPage, this.pageSize).subscribe({
       next: (page: EventsPage) => {
-        console.log('Página de eventos recebida:', page);
-        console.log('Eventos da página:', page.items);
-        
-        // Verificar se cada evento tem o campo status
-        page.items.forEach(event => {
-          console.log(`Evento ${event.id}: status = ${event.status}`);
-        });
-        
         this.events = page.items;
         this.totalItems = page.total;
       },
       error: (err) => {
-        console.error('Erro ao carregar eventos:', err);
         this.snackBar.open('Erro ao carregar eventos.', 'Fechar', { duration: 3000 });
       }
     });
@@ -112,47 +94,22 @@ export class EventsComponent implements OnInit {
 
   loadEventsByPet(): void {
     if (this.petId) {
-      console.log(`Carregando eventos para pet ${this.petId}`);
-      
       this.eventService.listByPet(this.petId).pipe(
         map((events: Event[]): EventSummary[] => {
-          console.log('Eventos recebidos da API para pet:', events);
-          
-          // Debug: verificar cada evento individualmente
-          events.forEach((event, index) => {
-            console.log(`Evento ${index + 1}:`, {
-              id: event.id,
-              description: event.description,
-              status: event.status,
-              type: typeof event.status,
-              statusDefined: event.status !== undefined
-            });
-          });
-          
           return events.map(event => {
             const eventWithPetId: EventSummary = {
               ...event,
               petId: this.petId as number
             };
-            
-            console.log(`Evento mapeado:`, {
-              id: eventWithPetId.id,
-              description: eventWithPetId.description,
-              status: eventWithPetId.status,
-              originalEvent: event
-            });
-            
             return eventWithPetId;
           });
         })
       ).subscribe({
         next: (summaries: EventSummary[]) => {
-          console.log('Eventos finais carregados:', summaries);
           this.events = summaries;
           this.totalItems = summaries.length;
         },
         error: (err) => {
-          console.error('Erro ao carregar eventos do pet:', err);
           this.snackBar.open(`Erro ao carregar eventos do pet.`, 'Fechar', { duration: 3000 });
         }
       });
@@ -185,16 +142,12 @@ export class EventsComponent implements OnInit {
   }
 
   editEvent(event: EventSummary): void {
-    console.log('=== EDITANDO EVENTO ===');
-    console.log('Dados do evento:', event);
-    console.log('PetId do evento:', event.petId);
-    
     const dialogRef = this.dialog.open(EventFormComponent, {
       width: '500px',
       data: { 
         ...event, 
         eventId: event.id,
-        petId: event.petId // Garantir que o petId está sendo passado
+        petId: event.petId
       }
     });
 
@@ -221,17 +174,12 @@ export class EventsComponent implements OnInit {
   }
 
   toggleEventStatus(event: EventSummary): void {
-    console.log('=== TOGGLE EVENT STATUS ===');
-    console.log('Evento antes do toggle:', event);
-    console.log('Estado atual (status):', event.status);
-    
     // Fazer update otimista temporário para feedback imediato
     const originalState = event.status;
     event.status = event.status === 'DONE' ? 'PENDING' : 'DONE';
     
     this.eventService.toggleDone(event.id).subscribe({
       next: (response) => {
-        console.log('Resposta da API do toggle:', response);
         this.snackBar.open(
           `Evento ${event.status === 'DONE' ? 'concluído' : 'reativado'} com sucesso!`, 
           'Fechar', 
@@ -249,12 +197,8 @@ export class EventsComponent implements OnInit {
         
         // Notificar outros componentes sobre a atualização
         this.eventStateService.notifyEventUpdated();
-        
-        console.log('Dados recarregados após toggle');
       },
       error: (err) => {
-        console.error('Erro ao fazer toggle do evento:', err);
-        
         // Reverter o estado em caso de erro
         event.status = originalState;
         

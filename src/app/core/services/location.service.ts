@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, forkJoin, of } from 'rxjs';
 import { map, switchMap, catchError } from 'rxjs/operators';
-import { API_CONFIG } from '../config/api.config';
+import { environment } from '../../../environments/environment';
 import { GoogleMapsService, PlaceResult } from './google-maps.service';
 import { 
   LocationSearchParams, 
@@ -20,7 +20,7 @@ import {
 export class LocationService {
   private readonly http = inject(HttpClient);
   private readonly googleMapsService = inject(GoogleMapsService);
-  private readonly apiUrl = API_CONFIG.baseUrl;
+  private readonly apiUrl = environment.apiUrl;
 
   searchPetshops(params: LocationSearchParams): Observable<LocationSearchResponse> {
     return this.searchPetshopsWithGoogleMaps(params);

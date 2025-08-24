@@ -54,12 +54,30 @@ export class LoginComponent {
 
     this.authService.login({ email, password }).subscribe({
       next: () => {
-        this.snackBar.open('Login realizado com sucesso!', 'Fechar', { duration: 3000 });
+        this.snackBar.open('✅ Login realizado com sucesso!', 'Fechar', { 
+          duration: 3000,
+          panelClass: ['success-snackbar']
+        });
         this.router.navigate(['/dashboard']);
       },
-      error: (err) => {
+      error: (error) => {
         this.isLoading = false;
-        this.snackBar.open('Email ou senha inválidos.', 'Fechar', { duration: 3000 });
+        let errorMessage = 'Email ou senha inválidos.';
+        
+        if (error.status === 401) {
+          errorMessage = 'Email ou senha incorretos. Verifique suas credenciais.';
+        } else if (error.status === 0) {
+          errorMessage = 'Erro de conexão. Verifique sua internet e tente novamente.';
+        } else if (error.status >= 500) {
+          errorMessage = 'Erro interno do servidor. Tente novamente em alguns minutos.';
+        } else if (error.error?.message) {
+          errorMessage = error.error.message;
+        }
+        
+        this.snackBar.open(`❌ ${errorMessage}`, 'Fechar', { 
+          duration: 4000,
+          panelClass: ['error-snackbar']
+        });
       },
       complete: () => {
         this.isLoading = false;

@@ -77,8 +77,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.totalPets = user.pets.length;
       this.recentPets = user.pets.slice(0, 5);
       
-      console.log('Perfil do usuário carregado:', user); // Debug
-      console.log('Pets do usuário:', user.pets); // Debug
       
       // Carregar eventos de todos os pets
       if (user.pets.length > 0) {
