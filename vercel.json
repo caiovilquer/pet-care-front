@@ -1,0 +1,29 @@
+{
+  "version": 2,
+  "name": "pet-care-scheduler-front",
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": ["scripts/**", "src/**"]
+      }
+    }
+  ],
+  "routes": [
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ],
+  "buildCommand": "npm run build:prod",
+  "outputDirectory": "dist/pet-care-scheduler-front/browser",
+  "framework": "angular",
+  "env": {
+    "API_URL": "@api_url",
+    "GOOGLE_MAPS_API_KEY": "@google_maps_api_key"
+  }
+}

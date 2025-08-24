@@ -41,3 +41,9 @@ testem.log
 .DS_Store
 Thumbs.db
 api-docs.json
+
+# Environment files
+src/assets/env.js
+.env
+.env.local
+.env.production

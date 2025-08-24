@@ -1,8 +1,8 @@
 export const environment = {
   production: false,
-  apiUrl: '/api/v1',
+  apiUrl: (globalThis as any)?.['ENV']?.['API_URL'] || '/api/v1',
   googleMaps: {
-    apiKey: 'AIzaSyAz4oVPaOtUG3YbZ2E_LyD7q-DmAzOjUy0', // Substitua pela sua chave da API
+    apiKey: (globalThis as any)?.['ENV']?.['GOOGLE_MAPS_API_KEY'] || '',
     language: 'pt-BR',
     region: 'BR'
   }
