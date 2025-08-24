@@ -95,7 +95,8 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
           <button mat-icon-button [matMenuTriggerFor]="notificationMenu">
             <mat-icon [matBadge]="upcomingEventsCount > 0 ? upcomingEventsCount : null" 
                       matBadgeColor="accent" 
-                      [class.has-notifications]="upcomingEventsCount > 0">
+                      [class.has-notifications]="upcomingEventsCount > 0"
+                      aria-hidden="false">
               notifications
             </mat-icon>
           </button>

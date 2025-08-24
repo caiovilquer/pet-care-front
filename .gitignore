@@ -47,3 +47,4 @@ src/assets/env.js
 .env
 .env.local
 .env.production
+public/env.js

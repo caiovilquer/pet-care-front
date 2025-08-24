@@ -40,12 +40,12 @@ function createEnvFile() {
 })(this);
 `;
 
-  const targetPath = path.resolve(__dirname, '../src/assets/env.js');
+  const targetPath = path.resolve(__dirname, '../public/env.js');
   
-  // Criar diretório assets se não existir
-  const assetsDir = path.dirname(targetPath);
-  if (!fs.existsSync(assetsDir)) {
-    fs.mkdirSync(assetsDir, { recursive: true });
+  // Criar diretório public se não existir
+  const publicDir = path.dirname(targetPath);
+  if (!fs.existsSync(publicDir)) {
+    fs.mkdirSync(publicDir, { recursive: true });
   }
 
   fs.writeFileSync(targetPath, envConfigFile);

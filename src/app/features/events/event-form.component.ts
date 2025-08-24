@@ -68,9 +68,6 @@ export class EventFormComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    console.log('=== EVENT FORM INIT ===');
-    console.log('Data recebida:', this.data);
-    console.log('É edição:', this.isEdit);
 
     this.loadPets();
     if (this.isEdit) {

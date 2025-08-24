@@ -60,7 +60,38 @@
 input:focus,
 textarea:focus,
 select:focus,
-button:focus {
+button:focus,
+.mat-mdc-input-element:focus,
+.mdc-text-field__input:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: inherit !important;
+}
+
+/* Remove ALL possible focus rings */
+*:focus,
+*:focus-visible,
+*:focus-within {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Remove Material focus indicators */
+.mat-mdc-focus-indicator:focus::before,
+.mat-focus-indicator:focus::before {
+  display: none !important;
+}
+
+/* Remove any blue webkit focus */
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="tel"]:focus,
+input[type="number"]:focus,
+textarea:focus,
+select:focus {
+  -webkit-appearance: none !important;
+  appearance: none !important;
   outline: none !important;
   box-shadow: none !important;
 }
@@ -206,10 +237,12 @@ body {
 /* Remove Material Design outlines and focus states */
 .mat-mdc-form-field .mdc-text-field:focus-within {
   outline: none !important;
+  box-shadow: none !important;
 }
 
 .mat-mdc-form-field .mdc-text-field--focused {
   outline: none !important;
+  box-shadow: none !important;
 }
 
 .mat-mdc-form-field input:focus {
@@ -222,15 +255,64 @@ body {
   box-shadow: none !important;
 }
 
+.mat-mdc-form-field select:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 /* Remove focus overlay that creates blue background */
 .mat-mdc-form-field-focus-overlay {
   background-color: transparent !important;
   opacity: 0 !important;
+  display: none !important;
 }
 
 /* Remove ripple effects on focus */
 .mat-mdc-form-field .mat-mdc-text-field-wrapper .mat-mdc-form-field-focus-overlay {
   display: none !important;
+}
+
+/* Remove ALL blue outlines from Material components */
+.mat-mdc-form-field .mdc-notched-outline {
+  border-color: var(--border-light) !important;
+}
+
+.mat-mdc-form-field .mdc-notched-outline__leading,
+.mat-mdc-form-field .mdc-notched-outline__notch,
+.mat-mdc-form-field .mdc-notched-outline__trailing {
+  border-color: var(--border-light) !important;
+}
+
+.mat-mdc-form-field.mat-focused .mdc-notched-outline {
+  border-color: var(--primary-color) !important;
+  box-shadow: none !important;
+}
+
+.mat-mdc-form-field.mat-focused .mdc-notched-outline__leading,
+.mat-mdc-form-field.mat-focused .mdc-notched-outline__notch,
+.mat-mdc-form-field.mat-focused .mdc-notched-outline__trailing {
+  border-color: var(--primary-color) !important;
+  box-shadow: none !important;
+}
+
+/* Remove all Material focus rings */
+.mdc-text-field:focus-within,
+.mdc-text-field--focused {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Remove native browser focus styles */
+.mdc-text-field__input:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Remove any remaining blue highlights */
+.mat-mdc-form-field .mdc-line-ripple::before,
+.mat-mdc-form-field .mdc-line-ripple::after {
+  border-bottom: none !important;
+  background-color: transparent !important;
 }
 
 /* Ensure no blue highlights on any Material components */
@@ -383,12 +465,12 @@ body {
   to { transform: rotate(360deg); }
 }
 
-/* Focus styles */
+/* Focus styles - REMOVE ALL OUTLINES */
 .mat-mdc-button:focus,
 .mat-mdc-raised-button:focus,
 .mat-mdc-form-field:focus-within {
-  outline: 2px solid var(--primary-color);
-  outline-offset: 2px;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 /* Utility classes */
@@ -447,4 +529,39 @@ body {
 .warning-snackbar {
   --mdc-snackbar-container-color: var(--warning-color) !important;
   --mdc-snackbar-supporting-text-color: white !important;
+}
+
+/* FINAL RULE: Remove ALL possible blue outlines and focus states */
+*:focus,
+*:focus-visible,
+*:focus-within,
+input:focus,
+textarea:focus,
+select:focus,
+button:focus,
+.mat-mdc-form-field:focus,
+.mat-mdc-form-field.mat-focused,
+.mat-mdc-input-element:focus,
+.mdc-text-field:focus,
+.mdc-text-field:focus-within,
+.mdc-text-field--focused,
+.mdc-text-field__input:focus,
+.mat-mdc-button:focus,
+.mat-mdc-raised-button:focus,
+.mat-mdc-icon-button:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+
+/* Remove any possible blue Material Design highlights */
+.mat-mdc-form-field .mdc-line-ripple,
+.mat-mdc-form-field .mdc-line-ripple::before,
+.mat-mdc-form-field .mdc-line-ripple::after,
+.mat-mdc-form-field-focus-overlay,
+.mat-mdc-text-field-wrapper .mat-mdc-form-field-focus-overlay {
+  background-color: transparent !important;
+  opacity: 0 !important;
+  display: none !important;
 }
