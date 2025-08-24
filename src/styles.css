@@ -51,6 +51,20 @@
   box-sizing: border-box;
 }
 
+/* Remove all focus outlines */
+*:focus {
+  outline: none !important;
+}
+
+/* Remove blue outline from all inputs */
+input:focus,
+textarea:focus,
+select:focus,
+button:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 html, body {
   height: 100%;
   font-family: 'Inter', 'Roboto', 'Helvetica Neue', sans-serif;
@@ -185,20 +199,55 @@ body {
   width: 100%;
 }
 
-.mat-mdc-form-field .mdc-text-field {
+.mat-mdc-text-field-wrapper {
   background-color: var(--bg-input) !important;
-  border-radius: 12px !important;
-  border: 1px solid var(--border-light) !important;
-  transition: all 0.3s ease;
 }
 
-.mat-mdc-form-field.mat-focused .mdc-text-field {
+/* Remove Material Design outlines and focus states */
+.mat-mdc-form-field .mdc-text-field:focus-within {
+  outline: none !important;
+}
+
+.mat-mdc-form-field .mdc-text-field--focused {
+  outline: none !important;
+}
+
+.mat-mdc-form-field input:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.mat-mdc-form-field textarea:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Remove focus overlay that creates blue background */
+.mat-mdc-form-field-focus-overlay {
+  background-color: transparent !important;
+  opacity: 0 !important;
+}
+
+/* Remove ripple effects on focus */
+.mat-mdc-form-field .mat-mdc-text-field-wrapper .mat-mdc-form-field-focus-overlay {
+  display: none !important;
+}
+
+/* Ensure no blue highlights on any Material components */
+.mat-mdc-form-field .mdc-text-field:not(.mdc-text-field--disabled):hover .mdc-notched-outline {
+  border-color: var(--border-medium) !important;
+}
+
+.mat-mdc-form-field.mat-focused .mdc-notched-outline {
   border-color: var(--primary-color) !important;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
 }
 
-.mat-mdc-form-field:not(.mat-form-field-disabled) .mdc-text-field:hover {
-  border-color: var(--primary-light) !important;
+/* Remove focus states from buttons */
+.mat-mdc-button:focus,
+.mat-mdc-raised-button:focus,
+.mat-mdc-icon-button:focus {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 /* Chip customizations */
@@ -382,4 +431,20 @@ body {
   .hide-desktop {
     display: none !important;
   }
+}
+
+/* Snackbar personalizados */
+.success-snackbar {
+  --mdc-snackbar-container-color: var(--success-color) !important;
+  --mdc-snackbar-supporting-text-color: white !important;
+}
+
+.error-snackbar {
+  --mdc-snackbar-container-color: var(--error-color) !important;
+  --mdc-snackbar-supporting-text-color: white !important;
+}
+
+.warning-snackbar {
+  --mdc-snackbar-container-color: var(--warning-color) !important;
+  --mdc-snackbar-supporting-text-color: white !important;
 }

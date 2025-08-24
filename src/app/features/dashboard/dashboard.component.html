@@ -1,7 +1,9 @@
 <div class="dashboard-container">
   <div class="dashboard-header">
     <h1>Dashboard</h1>
-    <p *ngIf="currentUser">Bem-vindo, {{currentUser.firstName}}!</p>
+    @if (currentUser) {
+      <p>Bem-vindo, {{currentUser.firstName}}!</p>
+    }
   </div>
 
   <div class="stats-grid">

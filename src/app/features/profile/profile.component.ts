@@ -307,6 +307,21 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
         gap: 0;
       }
     }
+
+    /* Remove all focus outlines */
+    ::ng-deep .mat-mdc-form-field .mdc-text-field:focus-within {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+    ::ng-deep .mat-mdc-form-field input:focus {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+    ::ng-deep .mat-mdc-form-field.mat-focused .mdc-text-field {
+      box-shadow: none !important;
+    }
   `]
 })
 export class ProfileComponent implements OnInit, OnDestroy {
