@@ -1,0 +1,9 @@
+# Vercel ignore
+node_modules
+.git
+.angular
+src/**/*.spec.ts
+*.md
+scripts/build-prod.sh
+.env
+.env.example

@@ -1,11 +1,33 @@
 {
   "name": "pet-care-scheduler-front",
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "Sistema moderno de agendamento e gerenciamento de cuidados para pets",
+  "author": "Caio Vilquer <caiovilquer@gmail.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/caiovilquer/pet-care-front#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/caiovilquer/pet-care-front.git"
+  },
+  "bugs": {
+    "url": "https://github.com/caiovilquer/pet-care-front/issues"
+  },
+  "keywords": [
+    "angular",
+    "typescript",
+    "material-design",
+    "pet-care",
+    "scheduler",
+    "veterinary",
+    "google-maps"
+  ],
   "scripts": {
     "ng": "ng",
     "start": "npm run set-env && ng serve",
     "start:dev": "npm run set-env && ng serve",
-    "build": "ng build",
+    "start:https": "npm run set-env && ng serve --proxy-config proxy.conf.https.json",
+    "start:no-proxy": "npm run set-env && ng serve --proxy-config false",
+    "build": "ng build --configuration=production",
     "build:prod": "node scripts/set-env.js && ng build --configuration=production",
     "build:vercel": "./scripts/build-prod.sh",
     "set-env": "node scripts/set-env.js",
