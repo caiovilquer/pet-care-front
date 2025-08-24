@@ -59,6 +59,18 @@
   color: var(--primary-color);
 }
 
+.pet-name {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-primary);
+}
+
+.pet-icon {
+  font-size: 1.2rem;
+  color: var(--primary-color);
+}
+
 .mat-column-actions {
   width: 180px;
   text-align: right;

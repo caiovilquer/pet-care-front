@@ -42,6 +42,7 @@ export class EventsComponent implements OnInit {
   displayedColumns: string[] = ['type', 'description', 'dateStart', 'status', 'actions'];
   petId: number | null = null;
   petName: string = '';
+  petNamesMap: { [key: number]: string } = {};
 
   constructor(
     private eventService: EventService,
@@ -58,10 +59,13 @@ export class EventsComponent implements OnInit {
       const id = params.get('petId');
       if (id) {
         this.petId = +id;
+        this.displayedColumns = ['type', 'description', 'dateStart', 'status', 'actions'];
         this.loadPetName();
         this.loadEventsByPet();
       } else {
         this.petName = '';
+        this.displayedColumns = ['type', 'pet', 'description', 'dateStart', 'status', 'actions'];
+        this.loadPetsMap();
         this.loadAllEvents();
       }
     });
@@ -78,6 +82,20 @@ export class EventsComponent implements OnInit {
         }
       });
     }
+  }
+
+  private loadPetsMap(): void {
+    this.petService.getPets().subscribe({
+      next: (pets) => {
+        this.petNamesMap = {};
+        pets.forEach(pet => {
+          this.petNamesMap[pet.id] = pet.name;
+        });
+      },
+      error: (err) => {
+        // Em caso de erro, o mapa ficará vazio e mostrará o ID
+      }
+    });
   }
 
   loadAllEvents(): void {
@@ -275,5 +293,9 @@ export class EventsComponent implements OnInit {
 
   getToggleTooltip(status: string): string {
     return status === 'DONE' ? 'Marcar como pendente' : 'Marcar como concluído';
+  }
+
+  getPetName(petId: number): string {
+    return this.petNamesMap[petId] || `Pet #${petId}`;
   }
 }
