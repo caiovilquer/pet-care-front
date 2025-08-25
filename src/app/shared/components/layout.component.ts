@@ -735,7 +735,7 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
       width: 40px;
       height: 40px;
       border-radius: 50%;
-      overflow: hidden;
+      overflow: visible;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -751,9 +751,10 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
 
     .toolbar-avatar mat-icon {
       color: white;
-      font-size: 24px;
-      width: 24px;
-      height: 24px;
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
+      line-height: 1;
     }
 
     .avatar-button {
@@ -761,7 +762,9 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
       width: 48px !important;
       height: 48px !important;
       border-radius: 50% !important;
-      overflow: hidden !important;
+      overflow: visible !important;
+      min-width: 48px !important;
+      min-height: 48px !important;
     }
 
     .avatar-button:hover {
