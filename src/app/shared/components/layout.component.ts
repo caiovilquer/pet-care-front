@@ -351,6 +351,7 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
       display: flex;
       align-items: center;
       gap: 16px;
+      min-width: 0; /* Prevents flex items from shrinking below content size */
     }
 
     .user-avatar {
@@ -364,6 +365,13 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
       color: white;
       box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
       overflow: hidden;
+      flex-shrink: 0;
+      position: relative;
+      aspect-ratio: 1 / 1; /* Force 1:1 aspect ratio */
+      min-width: 48px; /* Prevent shrinking */
+      max-width: 48px; /* Prevent growing */
+      min-height: 48px; /* Prevent shrinking */
+      max-height: 48px; /* Prevent growing */
     }
 
     .user-avatar .avatar-image {
@@ -371,15 +379,26 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
       height: 48px;
       object-fit: cover;
       border-radius: 50%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: block;
     }
 
     .user-avatar mat-icon {
       color: white;
       font-size: 24px;
+      width: 24px;
+      height: 24px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .user-details {
       flex: 1;
+      min-width: 0; /* Allow text to truncate */
     }
 
     .user-name {
@@ -394,6 +413,27 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
       color: var(--text-secondary);
       margin: 6px 0 0 0;
       font-weight: 400;
+    }
+
+    /* User Menu Specific Styles */
+    .user-menu {
+      min-width: 280px;
+      max-width: 320px;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      border: 1px solid var(--border-light);
+      overflow: hidden;
+    }
+
+    .user-menu .mat-mdc-menu-content {
+      padding: 0;
+    }
+
+    .user-menu .user-info {
+      border-bottom: 1px solid var(--border-light);
+      margin: 0;
+      border-radius: 0;
+      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
     }
 
     .menu-item {
@@ -867,6 +907,19 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
 
       .user-menu {
         max-width: 90vw;
+      }
+
+      .user-avatar {
+        width: 48px !important;
+        height: 48px !important;
+        flex-shrink: 0 !important;
+        min-width: 48px !important;
+        min-height: 48px !important;
+      }
+
+      .user-avatar .avatar-image {
+        width: 48px !important;
+        height: 48px !important;
       }
 
       .notification-menu {

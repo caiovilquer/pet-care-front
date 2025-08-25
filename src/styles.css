@@ -674,3 +674,41 @@ button:focus,
     min-height: 48px !important;
   }
 }
+
+/* Avatar circle fix for Material UI */
+.user-avatar,
+.toolbar-avatar,
+[class*="avatar"] {
+  border-radius: 50% !important;
+  overflow: hidden !important;
+  aspect-ratio: 1 / 1 !important;
+}
+
+.user-avatar img,
+.toolbar-avatar img,
+[class*="avatar"] img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 50% !important;
+  display: block !important;
+}
+
+/* Material UI Menu fixes */
+.mat-mdc-menu-panel {
+  border-radius: 12px !important;
+  overflow: hidden !important;
+}
+
+.mat-mdc-menu-content {
+  padding: 0 !important;
+}
+
+/* Prevent flex containers from deforming avatars */
+.user-info {
+  align-items: center !important;
+}
+
+.user-info .user-avatar {
+  flex-shrink: 0 !important;
+}
