@@ -565,3 +565,112 @@ button:focus,
   opacity: 0 !important;
   display: none !important;
 }
+
+/* Mobile Responsive Global Styles */
+@media (max-width: 768px) {
+  /* Typography responsive adjustments */
+  h1 { font-size: 1.8rem !important; }
+  h2 { font-size: 1.5rem !important; }
+  h3 { font-size: 1.3rem !important; }
+  h4 { font-size: 1.1rem !important; }
+  
+  /* Ensure proper sizing for mobile */
+  .mat-mdc-card {
+    margin: 8px !important;
+    padding: 16px !important;
+  }
+  
+  .mat-mdc-card-header {
+    padding: 16px 16px 8px !important;
+  }
+  
+  .mat-mdc-card-content {
+    padding: 8px 16px 16px !important;
+  }
+  
+  /* Table responsive */
+  .mat-mdc-table {
+    font-size: 14px !important;
+  }
+  
+  .mat-mdc-header-cell,
+  .mat-mdc-cell {
+    padding: 8px 4px !important;
+  }
+  
+  /* Form fields responsive */
+  .mat-mdc-form-field {
+    width: 100% !important;
+    margin-bottom: 16px !important;
+  }
+  
+  /* Button responsive */
+  .mat-mdc-button,
+  .mat-mdc-raised-button,
+  .mat-mdc-outlined-button {
+    padding: 8px 16px !important;
+    min-width: auto !important;
+  }
+  
+  .mat-mdc-fab,
+  .mat-mdc-mini-fab {
+    width: 48px !important;
+    height: 48px !important;
+  }
+  
+  /* Dialog responsive */
+  .mat-mdc-dialog-container {
+    max-width: 95vw !important;
+    max-height: 90vh !important;
+    margin: 16px !important;
+  }
+  
+  .mat-mdc-dialog-content {
+    max-height: 60vh !important;
+  }
+  
+  /* Snackbar responsive */
+  .mat-mdc-snack-bar-container {
+    max-width: 95vw !important;
+    margin: 8px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Extra small screens */
+  .mat-mdc-card {
+    margin: 4px !important;
+    padding: 12px !important;
+  }
+  
+  .mat-mdc-button,
+  .mat-mdc-raised-button,
+  .mat-mdc-outlined-button {
+    padding: 6px 12px !important;
+    font-size: 14px !important;
+  }
+  
+  .mat-mdc-form-field {
+    margin-bottom: 12px !important;
+  }
+  
+  /* Hide less important columns in tables */
+  .hide-mobile {
+    display: none !important;
+  }
+}
+
+/* Touch-friendly styles */
+@media (pointer: coarse) {
+  .mat-mdc-button,
+  .mat-mdc-raised-button,
+  .mat-mdc-outlined-button,
+  .mat-mdc-icon-button {
+    min-height: 48px !important;
+    min-width: 48px !important;
+  }
+  
+  .mat-mdc-list-item {
+    min-height: 48px !important;
+  }
+}

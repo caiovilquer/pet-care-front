@@ -1,7 +1,7 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLink, Router } from '@angular/router';
-import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatSidenavModule, MatSidenav } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -9,6 +9,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatDividerModule } from '@angular/material/divider';
+import { BreakpointObserver, Breakpoints, LayoutModule } from '@angular/cdk/layout';
 import { forkJoin, Subscription } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { TutorService } from '../../core/services/tutor.service';
@@ -32,29 +33,38 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
     MatListModule,
     MatMenuModule,
     MatBadgeModule,
-    MatDividerModule
+    MatDividerModule,
+    LayoutModule
   ],
   template: `
     <mat-sidenav-container class="sidenav-container">
-      <mat-sidenav #drawer class="sidenav" fixedInViewport mode="side" opened>
+      <mat-sidenav #drawer class="sidenav" [mode]="mobileQuery.matches ? 'over' : 'side'" 
+                   [fixedInViewport]="mobileQuery.matches" 
+                   [opened]="!mobileQuery.matches"
+                   (closed)="onSidenavClosed()">
         <mat-toolbar class="sidenav-header">
           <mat-icon class="logo-icon">pets</mat-icon>
           <span class="logo-text">Pet Care</span>
           <div class="paw-decoration">🐾</div>
+          <button mat-icon-button class="close-button" 
+                  (click)="drawer.close()" 
+                  *ngIf="mobileQuery.matches">
+            <mat-icon>close</mat-icon>
+          </button>
         </mat-toolbar>
         
         <mat-nav-list>
-          <a mat-list-item routerLink="/dashboard" routerLinkActive="active">
+          <a mat-list-item routerLink="/dashboard" routerLinkActive="active" (click)="closeSidenavOnMobile()">
             <mat-icon matListItemIcon>dashboard</mat-icon>
             <span matListItemTitle>Dashboard</span>
           </a>
           
-          <a mat-list-item routerLink="/pets" routerLinkActive="active">
+          <a mat-list-item routerLink="/pets" routerLinkActive="active" (click)="closeSidenavOnMobile()">
             <mat-icon matListItemIcon>pets</mat-icon>
             <span matListItemTitle>Meus Pets</span>
           </a>
           
-          <a mat-list-item routerLink="/events" routerLinkActive="active">
+          <a mat-list-item routerLink="/events" routerLinkActive="active" (click)="closeSidenavOnMobile()">
             <mat-icon matListItemIcon>event</mat-icon>
             <span matListItemTitle>Eventos</span>
           </a>
@@ -63,19 +73,19 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
           
           <h3 class="nav-section-title">Localidades</h3>
           
-          <a mat-list-item routerLink="/petshops" routerLinkActive="active">
+          <a mat-list-item routerLink="/petshops" routerLinkActive="active" (click)="closeSidenavOnMobile()">
             <mat-icon matListItemIcon>store</mat-icon>
             <span matListItemTitle>Petshops</span>
           </a>
           
-          <a mat-list-item routerLink="/veterinaries" routerLinkActive="active">
+          <a mat-list-item routerLink="/veterinaries" routerLinkActive="active" (click)="closeSidenavOnMobile()">
             <mat-icon matListItemIcon>local_hospital</mat-icon>
             <span matListItemTitle>Veterinários</span>
           </a>
           
           <mat-divider></mat-divider>
           
-          <a mat-list-item routerLink="/profile" routerLinkActive="active">
+          <a mat-list-item routerLink="/profile" routerLinkActive="active" (click)="closeSidenavOnMobile()">
             <mat-icon matListItemIcon>person</mat-icon>
             <span matListItemTitle>Perfil</span>
           </a>
@@ -781,12 +791,121 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
       letter-spacing: 0.5px;
       opacity: 0.8;
     }
+
+    .close-button {
+      margin-left: auto;
+      color: white;
+    }
+
+    /* Mobile Responsive Styles */
+    @media (max-width: 768px) {
+      .sidenav {
+        width: 85vw;
+        max-width: 320px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+      }
+
+      .sidenav-header {
+        padding: 16px 20px;
+        min-height: 64px;
+      }
+
+      .logo-text {
+        font-size: 18px;
+      }
+
+      .toolbar-title {
+        font-size: 18px;
+        display: none;
+      }
+
+      .main-toolbar {
+        padding: 0 8px;
+        min-height: 56px;
+      }
+
+      .main-content {
+        padding: 8px;
+      }
+
+      .nav-section-title {
+        padding: 12px 20px 6px 20px;
+        font-size: 13px;
+      }
+
+      mat-nav-list a {
+        margin: 2px 8px;
+        padding: 12px 16px;
+      }
+
+      mat-nav-list a mat-icon {
+        font-size: 20px;
+        margin-right: 12px;
+      }
+
+      .toolbar-avatar {
+        width: 36px;
+        height: 36px;
+      }
+
+      .toolbar-avatar .avatar-image {
+        width: 36px;
+        height: 36px;
+      }
+
+      .toolbar-avatar mat-icon {
+        font-size: 24px;
+        width: 24px;
+        height: 24px;
+      }
+
+      .avatar-button {
+        width: 44px !important;
+        height: 44px !important;
+        padding: 4px !important;
+      }
+
+      .user-menu {
+        max-width: 90vw;
+      }
+
+      .notification-menu {
+        max-width: 90vw;
+        max-height: 70vh;
+      }
+
+      .notification-content {
+        max-height: 300px;
+        overflow-y: auto;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .sidenav {
+        width: 90vw;
+      }
+
+      .main-content {
+        padding: 4px;
+      }
+
+      .toolbar-title {
+        display: none !important;
+      }
+
+      .spacer {
+        flex: 0.5 1 auto;
+      }
+    }
   `]
 })
 export class LayoutComponent implements OnInit, OnDestroy {
+  @ViewChild('drawer') drawer!: MatSidenav;
+  
   currentUser: TutorDetailResult | null = null;
   upcomingEventsCount = 0;
   upcomingEventsList: any[] = [];
+  mobileQuery: MediaQueryList;
   private eventUpdateSubscription?: Subscription;
   private userUpdateSubscription?: Subscription;
 
@@ -796,8 +915,14 @@ export class LayoutComponent implements OnInit, OnDestroy {
     private eventService: EventService,
     private eventStateService: EventStateService,
     private userStateService: UserStateService,
-    private router: Router
-  ) { }
+    private router: Router,
+    private breakpointObserver: BreakpointObserver
+  ) { 
+    this.mobileQuery = this.breakpointObserver.observe([
+      '(max-width: 768px)'
+    ]).subscribe().unsubscribe() as any;
+    this.mobileQuery = window.matchMedia('(max-width: 768px)');
+  }
 
   ngOnInit(): void {
     this.loadUserProfile();
@@ -957,6 +1082,16 @@ export class LayoutComponent implements OnInit, OnDestroy {
   onAvatarError(event: any): void {
     // Esconder a imagem com erro e mostrar o ícone padrão
     event.target.style.display = 'none';
+  }
+
+  onSidenavClosed(): void {
+    // Método executado quando o sidenav é fechado em mobile
+  }
+
+  closeSidenavOnMobile(): void {
+    if (this.mobileQuery.matches && this.drawer) {
+      this.drawer.close();
+    }
   }
 
   private refreshUserProfile(): void {

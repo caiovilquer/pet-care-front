@@ -84,3 +84,82 @@
 ::ng-deep .mat-mdc-form-field.mat-focused .mdc-text-field {
   box-shadow: none !important;
 }
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .login-container {
+    padding: 16px;
+    min-height: 100vh;
+  }
+
+  .login-card {
+    max-width: 100%;
+    padding: 1.5rem;
+    margin: 0;
+    min-height: auto;
+  }
+
+  .header-image {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 1rem;
+  }
+
+  .header-image mat-icon {
+    font-size: 28px;
+  }
+
+  ::ng-deep .mat-mdc-card-title {
+    font-size: 1.5rem !important;
+  }
+
+  ::ng-deep .mat-mdc-card-subtitle {
+    font-size: 0.9rem !important;
+  }
+
+  .full-width {
+    margin-bottom: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-container {
+    padding: 8px;
+  }
+
+  .login-card {
+    padding: 1rem;
+    border-radius: 12px;
+  }
+
+  .header-image {
+    width: 45px;
+    height: 45px;
+  }
+
+  .header-image mat-icon {
+    font-size: 24px;
+  }
+
+  ::ng-deep .mat-mdc-card-title {
+    font-size: 1.3rem !important;
+  }
+}
+
+/* Landscape mode for mobile */
+@media (max-height: 600px) and (orientation: landscape) {
+  .login-container {
+    padding: 8px;
+    min-height: auto;
+  }
+
+  .login-card {
+    padding: 1rem;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .header-image {
+    margin-bottom: 0.5rem;
+  }
+}
