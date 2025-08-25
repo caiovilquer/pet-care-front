@@ -102,27 +102,29 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
           
           <span class="spacer"></span>
           
-          <button mat-icon-button [matMenuTriggerFor]="notificationMenu">
-            <mat-icon [matBadge]="upcomingEventsCount > 0 ? upcomingEventsCount : null" 
-                      matBadgeColor="accent" 
-                      [class.has-notifications]="upcomingEventsCount > 0"
-                      aria-hidden="false">
-              notifications
-            </mat-icon>
-          </button>
-          
-          <button mat-icon-button [matMenuTriggerFor]="userMenu" class="avatar-button">
-            <div class="toolbar-avatar">
-              <img *ngIf="currentUser?.avatar; else defaultAvatar" 
-                   [src]="currentUser!.avatar" 
-                   [alt]="(currentUser!.firstName || '') + ' ' + (currentUser!.lastName || '')"
-                   class="avatar-image"
-                   (error)="onAvatarError($event)">
-              <ng-template #defaultAvatar>
-                <mat-icon>account_circle</mat-icon>
-              </ng-template>
-            </div>
-          </button>
+          <div class="toolbar-actions">
+            <button mat-icon-button [matMenuTriggerFor]="notificationMenu">
+              <mat-icon [matBadge]="upcomingEventsCount > 0 ? upcomingEventsCount : null" 
+                        matBadgeColor="accent" 
+                        [class.has-notifications]="upcomingEventsCount > 0"
+                        aria-hidden="false">
+                notifications
+              </mat-icon>
+            </button>
+            
+            <button mat-icon-button [matMenuTriggerFor]="userMenu" class="avatar-button">
+              <div class="toolbar-avatar">
+                <img *ngIf="currentUser?.avatar; else defaultAvatar" 
+                     [src]="currentUser!.avatar" 
+                     [alt]="(currentUser!.firstName || '') + ' ' + (currentUser!.lastName || '')"
+                     class="avatar-image"
+                     (error)="onAvatarError($event)">
+                <ng-template #defaultAvatar>
+                  <mat-icon>account_circle</mat-icon>
+                </ng-template>
+              </div>
+            </button>
+          </div>
         </mat-toolbar>
 
         <main class="main-content">
@@ -280,6 +282,12 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
 
     .spacer {
       flex: 1 1 auto;
+    }
+
+    .toolbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .main-content {
@@ -862,6 +870,21 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
       .main-toolbar {
         padding: 0 8px;
         min-height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .toolbar-actions {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        flex-shrink: 0;
+      }
+
+      .spacer {
+        flex: 1 1 auto;
+        min-width: 0;
       }
 
       .main-content {
@@ -947,7 +970,20 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
       }
 
       .spacer {
-        flex: 0.5 1 auto;
+        flex: 1 1 auto;
+        min-width: 0;
+      }
+
+      .toolbar-actions {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        flex-shrink: 0;
+      }
+
+      .main-toolbar {
+        padding: 0 4px;
+        justify-content: space-between;
       }
     }
   `]
