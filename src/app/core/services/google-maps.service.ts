@@ -4,6 +4,7 @@ import { Observable, from, of, forkJoin, BehaviorSubject, timer } from 'rxjs';
 import { map, catchError, switchMap, debounceTime, distinctUntilChanged, shareReplay } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { CacheService } from './cache.service';
+import { SearchOptimizerService } from './search-optimizer.service';
 
 export interface GoogleMapsConfig {
   apiKey: string;
@@ -67,13 +68,44 @@ export class GoogleMapsService {
 
   constructor(
     private http: HttpClient,
-    private cacheService: CacheService
+    private cacheService: CacheService,
+    private searchOptimizer: SearchOptimizerService
   ) {
     // Debounce para pesquisas
     this.searchSubject.pipe(
       debounceTime(300),
       distinctUntilChanged()
     ).subscribe();
+  }
+
+  /**
+   * Retorna campos otimizados baseado no tipo de busca e ambiente
+   */
+  private getOptimizedFields(type: 'basic' | 'details' | 'search'): string[] {
+    const config = this.searchOptimizer.getCurrentConfig();
+    const isUltraEconomic = config.enableAggression && config.maxResults <= 15;
+    
+    const basicFields = [
+      'place_id', 'name', 'formatted_address', 'geometry',
+      'rating', 'user_ratings_total', 'business_status'
+    ];
+
+    const searchFields = [
+      ...basicFields,
+      'types', 'opening_hours'
+    ];
+
+    // MODO ULTRA ECONÔMICO: apenas campos essenciais
+    const detailFields = isUltraEconomic ? 
+      [...basicFields, 'formatted_phone_number'] : 
+      [...searchFields, 'formatted_phone_number', 'website'];
+
+    switch (type) {
+      case 'basic': return basicFields;
+      case 'search': return searchFields;
+      case 'details': return detailFields;
+      default: return basicFields;
+    }
   }
 
   /**
@@ -248,7 +280,7 @@ export class GoogleMapsService {
       }),
       switchMap(places => {
         // Buscar detalhes apenas para os primeiros resultados mais relevantes
-        const limitedPlaces = places.slice(0, 20); // Reduzir de 60 para 20
+        const limitedPlaces = places.slice(0, 8); // MODO ULTRA ECONÔMICO: apenas 8 resultados
         
         // Buscar detalhes com cache
         const detailRequests = limitedPlaces.map(place => 
@@ -395,7 +427,7 @@ export class GoogleMapsService {
       }),
       switchMap(places => {
         // Buscar detalhes apenas para os primeiros resultados mais relevantes
-        const limitedPlaces = places.slice(0, 20); // Reduzir de 60 para 20
+        const limitedPlaces = places.slice(0, 8); // MODO ULTRA ECONÔMICO: apenas 8 resultados
         
         const detailRequests = limitedPlaces.map(place => 
           this.getPlaceDetailsById(place.place_id || '', latitude, longitude)
@@ -434,11 +466,7 @@ export class GoogleMapsService {
         
         const request: google.maps.places.PlaceDetailsRequest = {
           placeId: placeId,
-          fields: [
-            'place_id', 'name', 'formatted_address', 'geometry',
-            'rating', 'user_ratings_total', 'business_status',
-            'opening_hours', 'formatted_phone_number', 'types' // Reduzir campos para economizar
-          ]
+          fields: this.getOptimizedFields('details')
         };
 
         return from(new Promise<google.maps.places.PlaceResult>((resolve, reject) => {
@@ -466,7 +494,7 @@ export class GoogleMapsService {
           openingHours: undefined,
           phoneNumber: '',
           website: '',
-          photos: [],
+          photos: [], // REMOVIDO: fotos aumentam muito o custo - só carregar quando necessário
           types: [],
           priceLevel: 0
         } as PlaceResult);
@@ -597,27 +625,19 @@ export class GoogleMapsService {
 
         const request = {
           placeId: placeId,
-          fields: [
-            'place_id', 'name', 'formatted_address', 'geometry',
-            'rating', 'user_ratings_total', 'business_status',
-            'opening_hours', 'formatted_phone_number', 'website',
-            'photos', 'types', 'price_level', 'reviews',
-            'vicinity', 'url', 'editorial_summary'
-          ]
+          fields: this.getOptimizedFields('details') // CAMPO DRASTICAMENTE REDUZIDO
         };
 
         return new Promise((resolve, reject) => {
           service.getDetails(request, (place, status) => {
             if (status === google.maps.places.PlacesServiceStatus.OK && place) {
               const details = {
-                description: (place as any).editorial_summary?.overview || '',
-                priceLevel: place.price_level,
-                accessibility: this.extractAccessibilityFeatures(place),
-                paymentMethods: this.extractPaymentMethods(place),
-                googleMapsUrl: (place as any).url,
-                photos: place.photos?.map(photo => 
-                  photo.getUrl({ maxWidth: 800, maxHeight: 600 })
-                ) || []
+                description: '', // REMOVIDO: editorial_summary é caro
+                priceLevel: place.price_level || 0,
+                accessibility: [], // REMOVIDO: muito caro de processar
+                paymentMethods: [], // REMOVIDO: muito caro de processar
+                googleMapsUrl: '', // REMOVIDO: url é campo caro
+                photos: [] // REMOVIDO: fotos são o que mais gasta na API
               };
               resolve(details);
             } else {

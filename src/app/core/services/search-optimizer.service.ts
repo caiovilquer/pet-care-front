@@ -22,10 +22,10 @@ export interface SearchMetrics {
 })
 export class SearchOptimizerService {
   private readonly DEFAULT_CONFIG: SearchOptimizationConfig = {
-    debounceTime: 500,
-    maxResults: 20,
-    cacheTimeout: 120, // 2 horas
-    enableAggression: true
+    debounceTime: 500, // AUMENTADO para reduzir chamadas
+    maxResults: 10, // DRASTICAMENTE REDUZIDO de 20 para 10
+    cacheTimeout: 4 * 60, // 4 horas
+    enableAggression: true // ATIVO por padrão - modo ultra econômico
   };
 
   private config = new BehaviorSubject<SearchOptimizationConfig>(this.DEFAULT_CONFIG);
@@ -68,6 +68,10 @@ export class SearchOptimizerService {
    */
   getConfig(): Observable<SearchOptimizationConfig> {
     return this.config.asObservable();
+  }
+
+  getCurrentConfig(): SearchOptimizationConfig {
+    return this.config.value;
   }
 
   /**
