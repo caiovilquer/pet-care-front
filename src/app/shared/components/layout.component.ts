@@ -752,12 +752,20 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
     .toolbar-avatar mat-icon {
       color: white;
       font-size: 24px;
+      width: 24px;
+      height: 24px;
     }
 
     .avatar-button {
       padding: 4px !important;
       width: 48px !important;
       height: 48px !important;
+      border-radius: 50% !important;
+      overflow: hidden !important;
+    }
+
+    .avatar-button:hover {
+      background-color: rgba(255, 255, 255, 0.1) !important;
     }
 
     .nav-section-title {
