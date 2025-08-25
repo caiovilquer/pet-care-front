@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, from, of, forkJoin } from 'rxjs';
-import { map, catchError, switchMap } from 'rxjs/operators';
+import { Observable, from, of, forkJoin, BehaviorSubject, timer } from 'rxjs';
+import { map, catchError, switchMap, debounceTime, distinctUntilChanged, shareReplay } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+import { CacheService } from './cache.service';
 
 export interface GoogleMapsConfig {
   apiKey: string;
@@ -53,8 +54,27 @@ export class GoogleMapsService {
   };
 
   private isGoogleMapsLoaded = false;
+  private searchSubject = new BehaviorSubject<any>(null);
+  private ongoingRequests = new Map<string, Observable<any>>();
 
-  constructor(private http: HttpClient) {}
+  // Configurações de cache otimizadas
+  private readonly CACHE_CONFIG = {
+    GEOCODE: { ttl: 24 * 60, maxSize: 50 }, // 24 horas para geocoding
+    PLACES_SEARCH: { ttl: 2 * 60, maxSize: 100 }, // 2 horas para pesquisas de lugares
+    PLACE_DETAILS: { ttl: 6 * 60, maxSize: 200 }, // 6 horas para detalhes de lugares
+    DISTANCE: { ttl: 4 * 60, maxSize: 100 } // 4 horas para cálculos de distância
+  };
+
+  constructor(
+    private http: HttpClient,
+    private cacheService: CacheService
+  ) {
+    // Debounce para pesquisas
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged()
+    ).subscribe();
+  }
 
   /**
    * Carrega a API do Google Maps dinamicamente
@@ -84,10 +104,20 @@ export class GoogleMapsService {
   }
 
   /**
-   * Converte CEP em coordenadas usando Google Geocoding API
+   * Converte CEP em coordenadas usando Google Geocoding API com cache
    */
   geocodeZipCode(zipCode: string): Observable<GeocodeResult> {
     const formattedZipCode = this.formatZipCode(zipCode);
+    const cacheKey = this.cacheService.generateKey('geocode', { zipCode: formattedZipCode });
+    
+    return this.cacheService.getOrSet(
+      cacheKey,
+      () => this.performGeocode(formattedZipCode),
+      this.CACHE_CONFIG.GEOCODE
+    );
+  }
+
+  private performGeocode(formattedZipCode: string): Observable<GeocodeResult> {
     
     return from(this.loadGoogleMaps()).pipe(
       switchMap(() => {
@@ -135,9 +165,39 @@ export class GoogleMapsService {
   }
 
   /**
-   * Busca petshops próximos usando Google Places API
+   * Busca petshops próximos usando Google Places API com cache otimizado
    */
   searchNearbyPetshops(latitude: number, longitude: number, radius: number = 5000): Observable<PlaceResult[]> {
+    const cacheKey = this.cacheService.generateKey('petshops', { 
+      lat: Math.round(latitude * 1000) / 1000, // Arredondar para reduzir variações de cache
+      lng: Math.round(longitude * 1000) / 1000,
+      radius: Math.round(radius / 1000) * 1000 // Arredondar raio para múltiplos de 1000
+    });
+
+    // Verificar se já existe uma requisição em andamento
+    if (this.ongoingRequests.has(cacheKey)) {
+      return this.ongoingRequests.get(cacheKey)!;
+    }
+
+    const request$ = this.cacheService.getOrSet(
+      cacheKey,
+      () => this.performPetshopsSearch(latitude, longitude, radius),
+      this.CACHE_CONFIG.PLACES_SEARCH
+    ).pipe(
+      shareReplay(1)
+    );
+
+    this.ongoingRequests.set(cacheKey, request$);
+    
+    // Remover da lista de requisições em andamento após completar
+    setTimeout(() => {
+      this.ongoingRequests.delete(cacheKey);
+    }, 5000);
+
+    return request$;
+  }
+
+  private performPetshopsSearch(latitude: number, longitude: number, radius: number): Observable<PlaceResult[]> {
     return from(this.loadGoogleMaps()).pipe(
       switchMap(() => {
         const map = new google.maps.Map(document.createElement('div'));
@@ -151,28 +211,28 @@ export class GoogleMapsService {
           location: new google.maps.LatLng(latitude, longitude),
           radius: searchRadius,
           type: 'pet_store',
-          keyword: 'petshop pet shop animais',
-          rankBy: google.maps.places.RankBy.PROMINENCE // Para poder usar radius e obter mais resultados
+          keyword: 'petshop pet shop',
+          rankBy: google.maps.places.RankBy.PROMINENCE
         };
 
-        // Função para paginar os resultados e obter mais de 20
-        const getAllResults = (accumulator: google.maps.places.PlaceResult[] = []): Promise<google.maps.places.PlaceResult[]> => {
+        // Função otimizada para obter apenas os resultados necessários
+        const getAllResults = (accumulator: google.maps.places.PlaceResult[] = [], maxResults: number = 30): Promise<google.maps.places.PlaceResult[]> => {
           return new Promise((resolve, reject) => {
             service.nearbySearch(request, (results, status, pagination) => {
               if (status === google.maps.places.PlacesServiceStatus.OK && results) {
                 const newAccumulator = [...accumulator, ...results];
                 
-                // Se temos outra página e não atingimos limite de 60 resultados, continua buscando
-                if (pagination && pagination.hasNextPage && newAccumulator.length < 60) {
+                // Limitar resultados para reduzir chamadas de detalhes
+                if (pagination && pagination.hasNextPage && newAccumulator.length < maxResults) {
                   // Aguarda um tempo antes de fazer a próxima chamada (exigência da API)
                   setTimeout(() => {
                     pagination.nextPage();
-                    getAllResults(newAccumulator)
+                    getAllResults(newAccumulator, maxResults)
                       .then(resolve)
                       .catch(reject);
                   }, 2000);
                 } else {
-                  resolve(newAccumulator);
+                  resolve(newAccumulator.slice(0, maxResults)); // Limitar ao máximo
                 }
               } else if (accumulator.length > 0) {
                 // Se já temos resultados, retorna mesmo com erro
@@ -187,8 +247,11 @@ export class GoogleMapsService {
         return from(getAllResults());
       }),
       switchMap(places => {
-        // Buscar detalhes completos para cada local (incluindo horários)
-        const detailRequests = places.map(place => 
+        // Buscar detalhes apenas para os primeiros resultados mais relevantes
+        const limitedPlaces = places.slice(0, 20); // Reduzir de 60 para 20
+        
+        // Buscar detalhes com cache
+        const detailRequests = limitedPlaces.map(place => 
           this.getPlaceDetailsById(place.place_id || '', latitude, longitude)
         );
         return forkJoin(detailRequests);
@@ -250,9 +313,38 @@ export class GoogleMapsService {
   }
 
   /**
-   * Busca veterinários próximos usando Google Places API
+   * Busca veterinários próximos usando Google Places API com cache otimizado
    */
   searchNearbyVeterinaries(latitude: number, longitude: number, radius: number = 5000): Observable<PlaceResult[]> {
+    const cacheKey = this.cacheService.generateKey('veterinaries', { 
+      lat: Math.round(latitude * 1000) / 1000,
+      lng: Math.round(longitude * 1000) / 1000,
+      radius: Math.round(radius / 1000) * 1000
+    });
+
+    // Verificar se já existe uma requisição em andamento
+    if (this.ongoingRequests.has(cacheKey)) {
+      return this.ongoingRequests.get(cacheKey)!;
+    }
+
+    const request$ = this.cacheService.getOrSet(
+      cacheKey,
+      () => this.performVeterinariesSearch(latitude, longitude, radius),
+      this.CACHE_CONFIG.PLACES_SEARCH
+    ).pipe(
+      shareReplay(1)
+    );
+
+    this.ongoingRequests.set(cacheKey, request$);
+    
+    setTimeout(() => {
+      this.ongoingRequests.delete(cacheKey);
+    }, 5000);
+
+    return request$;
+  }
+
+  private performVeterinariesSearch(latitude: number, longitude: number, radius: number): Observable<PlaceResult[]> {
     return from(this.loadGoogleMaps()).pipe(
       switchMap(() => {
         const map = new google.maps.Map(document.createElement('div'));
@@ -266,28 +358,28 @@ export class GoogleMapsService {
           location: new google.maps.LatLng(latitude, longitude),
           radius: searchRadius,
           type: 'veterinary_care',
-          keyword: 'veterinario clinica veterinaria hospital veterinario',
-          rankBy: google.maps.places.RankBy.PROMINENCE // Para poder usar radius e obter mais resultados
+          keyword: 'veterinario clinica veterinaria',
+          rankBy: google.maps.places.RankBy.PROMINENCE
         };
 
-        // Função para paginar os resultados e obter mais de 20
-        const getAllResults = (accumulator: google.maps.places.PlaceResult[] = []): Promise<google.maps.places.PlaceResult[]> => {
+        // Função otimizada para obter apenas os resultados necessários
+        const getAllResults = (accumulator: google.maps.places.PlaceResult[] = [], maxResults: number = 30): Promise<google.maps.places.PlaceResult[]> => {
           return new Promise((resolve, reject) => {
             service.nearbySearch(request, (results, status, pagination) => {
               if (status === google.maps.places.PlacesServiceStatus.OK && results) {
                 const newAccumulator = [...accumulator, ...results];
                 
-                // Se temos outra página e não atingimos limite de 60 resultados, continua buscando
-                if (pagination && pagination.hasNextPage && newAccumulator.length < 60) {
+                // Limitar resultados para reduzir chamadas de detalhes
+                if (pagination && pagination.hasNextPage && newAccumulator.length < maxResults) {
                   // Aguarda um tempo antes de fazer a próxima chamada (exigência da API)
                   setTimeout(() => {
                     pagination.nextPage();
-                    getAllResults(newAccumulator)
+                    getAllResults(newAccumulator, maxResults)
                       .then(resolve)
                       .catch(reject);
                   }, 2000);
                 } else {
-                  resolve(newAccumulator);
+                  resolve(newAccumulator.slice(0, maxResults));
                 }
               } else if (accumulator.length > 0) {
                 // Se já temos resultados, retorna mesmo com erro
@@ -302,8 +394,10 @@ export class GoogleMapsService {
         return from(getAllResults());
       }),
       switchMap(places => {
-        // Buscar detalhes completos para cada local (incluindo horários)
-        const detailRequests = places.map(place => 
+        // Buscar detalhes apenas para os primeiros resultados mais relevantes
+        const limitedPlaces = places.slice(0, 20); // Reduzir de 60 para 20
+        
+        const detailRequests = limitedPlaces.map(place => 
           this.getPlaceDetailsById(place.place_id || '', latitude, longitude)
         );
         return forkJoin(detailRequests);
@@ -316,9 +410,23 @@ export class GoogleMapsService {
   }
 
   /**
-   * Busca detalhes de um local específico com coordenadas de origem
+   * Busca detalhes de um local específico com coordenadas de origem - versão otimizada com cache
    */
   getPlaceDetailsById(placeId: string, originLat: number, originLng: number): Observable<PlaceResult> {
+    const cacheKey = this.cacheService.generateKey('place_details', { 
+      placeId,
+      originLat: Math.round(originLat * 1000) / 1000,
+      originLng: Math.round(originLng * 1000) / 1000
+    });
+
+    return this.cacheService.getOrSet(
+      cacheKey,
+      () => this.performPlaceDetailsSearch(placeId, originLat, originLng),
+      this.CACHE_CONFIG.PLACE_DETAILS
+    );
+  }
+
+  private performPlaceDetailsSearch(placeId: string, originLat: number, originLng: number): Observable<PlaceResult> {
     return from(this.loadGoogleMaps()).pipe(
       switchMap(() => {
         const map = new google.maps.Map(document.createElement('div'));
@@ -329,8 +437,7 @@ export class GoogleMapsService {
           fields: [
             'place_id', 'name', 'formatted_address', 'geometry',
             'rating', 'user_ratings_total', 'business_status',
-            'opening_hours', 'formatted_phone_number', 'website',
-            'photos', 'types', 'price_level', 'vicinity'
+            'opening_hours', 'formatted_phone_number', 'types' // Reduzir campos para economizar
           ]
         };
 
@@ -368,9 +475,27 @@ export class GoogleMapsService {
   }
 
   /**
-   * Calcula a distância entre dois pontos usando Google Maps
+   * Calcula a distância entre dois pontos usando Google Maps com cache
    */
   calculateDistance(
+    origin: { lat: number; lng: number },
+    destination: { lat: number; lng: number }
+  ): Observable<{ distance: string; duration: string; distanceValue: number }> {
+    const cacheKey = this.cacheService.generateKey('distance', {
+      originLat: Math.round(origin.lat * 1000) / 1000,
+      originLng: Math.round(origin.lng * 1000) / 1000,
+      destLat: Math.round(destination.lat * 1000) / 1000,
+      destLng: Math.round(destination.lng * 1000) / 1000
+    });
+
+    return this.cacheService.getOrSet(
+      cacheKey,
+      () => this.performDistanceCalculation(origin, destination),
+      this.CACHE_CONFIG.DISTANCE
+    );
+  }
+
+  private performDistanceCalculation(
     origin: { lat: number; lng: number },
     destination: { lat: number; lng: number }
   ): Observable<{ distance: string; duration: string; distanceValue: number }> {
@@ -586,6 +711,85 @@ export class GoogleMapsService {
     methods.push('pix');
     
     return methods;
+  }
+
+  /**
+   * Limpa o cache de pesquisas antigas
+   */
+  clearSearchCache(): void {
+    this.cacheService.clear();
+    this.ongoingRequests.clear();
+  }
+
+  /**
+   * Obtém estatísticas do cache
+   */
+  getCacheStats() {
+    return this.cacheService.getStats();
+  }
+
+  /**
+   * Método otimizado para pesquisas por keyword com cache
+   */
+  searchByKeywordOptimized(latitude: number, longitude: number, radius: number, keywords: string[]): Observable<PlaceResult[]> {
+    const cacheKey = this.cacheService.generateKey('keyword_search', {
+      lat: Math.round(latitude * 1000) / 1000,
+      lng: Math.round(longitude * 1000) / 1000,
+      radius: Math.round(radius / 1000) * 1000,
+      keywords: keywords.sort().join('_')
+    });
+
+    return this.cacheService.getOrSet(
+      cacheKey,
+      () => this.searchByKeyword(latitude, longitude, radius, keywords),
+      { ttl: 120, maxSize: 50 } // Cache por 2 horas
+    );
+  }
+
+  /**
+   * Versão simplificada para obter apenas informações básicas (economiza API calls)
+   */
+  getBasicPlaceInfo(placeId: string): Observable<{ name: string; address: string; rating?: number }> {
+    const cacheKey = this.cacheService.generateKey('basic_place', { placeId });
+
+    return this.cacheService.getOrSet(
+      cacheKey,
+      () => this.performBasicPlaceSearch(placeId),
+      { ttl: 480, maxSize: 100 } // Cache por 8 horas
+    );
+  }
+
+  private performBasicPlaceSearch(placeId: string): Observable<{ name: string; address: string; rating?: number }> {
+    return from(this.loadGoogleMaps()).pipe(
+      switchMap(() => {
+        const map = new google.maps.Map(document.createElement('div'));
+        const service = new google.maps.places.PlacesService(map);
+        
+        const request: google.maps.places.PlaceDetailsRequest = {
+          placeId: placeId,
+          fields: ['name', 'formatted_address', 'rating'] // Apenas campos essenciais
+        };
+
+        return from(new Promise<google.maps.places.PlaceResult>((resolve, reject) => {
+          service.getDetails(request, (place, status) => {
+            if (status === google.maps.places.PlacesServiceStatus.OK && place) {
+              resolve(place);
+            } else {
+              reject(new Error('Erro ao buscar informações básicas: ' + status));
+            }
+          });
+        }));
+      }),
+      map(place => ({
+        name: place.name || '',
+        address: place.formatted_address || '',
+        rating: place.rating
+      })),
+      catchError(error => {
+        console.error('Erro ao buscar informações básicas:', error);
+        return of({ name: 'Local não encontrado', address: '', rating: undefined });
+      })
+    );
   }
 }
 

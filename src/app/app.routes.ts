@@ -52,6 +52,10 @@ export const routes: Routes = [
       {
         path: 'profile',
         loadComponent: () => import('./features/profile/profile.component').then(m => m.ProfileComponent)
+      },
+      {
+        path: 'search-monitor',
+        loadComponent: () => import('./shared/components/search-monitor.component').then(m => m.SearchMonitorComponent)
       }
     ]
   },

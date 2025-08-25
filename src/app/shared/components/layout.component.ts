@@ -11,6 +11,7 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { MatDividerModule } from '@angular/material/divider';
 import { BreakpointObserver, Breakpoints, LayoutModule } from '@angular/cdk/layout';
 import { forkJoin, Subscription } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import { AuthService } from '../../core/services/auth.service';
 import { TutorService } from '../../core/services/tutor.service';
 import { EventService } from '../../core/services/event.service';
@@ -89,6 +90,16 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
             <mat-icon matListItemIcon>person</mat-icon>
             <span matListItemTitle>Perfil</span>
           </a>
+
+          <!-- Seção de Debug (apenas em desenvolvimento) -->
+          <div *ngIf="!isProduction">
+            <mat-divider></mat-divider>
+            <h3 class="nav-section-title">Debug</h3>
+            <a mat-list-item routerLink="/search-monitor" routerLinkActive="active" (click)="closeSidenavOnMobile()">
+              <mat-icon matListItemIcon>analytics</mat-icon>
+              <span matListItemTitle>Monitor de Busca</span>
+            </a>
+          </div>
         </mat-nav-list>
       </mat-sidenav>
 
@@ -995,6 +1006,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
   upcomingEventsCount = 0;
   upcomingEventsList: any[] = [];
   mobileQuery: MediaQueryList;
+  isProduction = environment.production;
   private eventUpdateSubscription?: Subscription;
   private userUpdateSubscription?: Subscription;
 

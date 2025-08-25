@@ -1,9 +1,10 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, forkJoin, of } from 'rxjs';
-import { map, switchMap, catchError } from 'rxjs/operators';
+import { Observable, forkJoin, of, BehaviorSubject } from 'rxjs';
+import { map, switchMap, catchError, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { GoogleMapsService, PlaceResult } from './google-maps.service';
+import { CacheService } from './cache.service';
 import { 
   LocationSearchParams, 
   LocationSearchResponse, 
@@ -20,57 +21,119 @@ import {
 export class LocationService {
   private readonly http = inject(HttpClient);
   private readonly googleMapsService = inject(GoogleMapsService);
+  private readonly cacheService = inject(CacheService);
   private readonly apiUrl = environment.apiUrl;
 
+  // Subject para debounce de pesquisas
+  private searchSubject = new BehaviorSubject<LocationSearchParams | null>(null);
+  
+  // Cache de última localização pesquisada
+  private lastGeocodedLocation: { zipCode: string; latitude: number; longitude: number } | null = null;
+
+  constructor() {
+    // Setup debounce para pesquisas
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged((prev, curr) => 
+        JSON.stringify(prev) === JSON.stringify(curr)
+      )
+    ).subscribe();
+  }
+
   searchPetshops(params: LocationSearchParams): Observable<LocationSearchResponse> {
-    return this.searchPetshopsWithGoogleMaps(params);
+    const cacheKey = this.cacheService.generateKey('petshops_search', params);
+    
+    return this.cacheService.getOrSet(
+      cacheKey,
+      () => this.searchPetshopsWithGoogleMaps(params),
+      { ttl: 120, maxSize: 20 } // 2 horas de cache para pesquisas
+    );
   }
 
   searchVeterinaries(params: LocationSearchParams): Observable<LocationSearchResponse> {
-    return this.searchVeterinariesWithGoogleMaps(params);
+    const cacheKey = this.cacheService.generateKey('veterinaries_search', params);
+    
+    return this.cacheService.getOrSet(
+      cacheKey,
+      () => this.searchVeterinariesWithGoogleMaps(params),
+      { ttl: 120, maxSize: 20 } // 2 horas de cache para pesquisas
+    );
   }
   
   /**
-   * Busca estabelecimentos muito próximos ou exatamente no CEP
+   * Busca estabelecimentos muito próximos ou exatamente no CEP - versão otimizada
    */
   private searchExactAreaPetshops(latitude: number, longitude: number, radius: number): Observable<PlaceResult[]> {
-    return this.googleMapsService.searchByKeyword(
+    return this.googleMapsService.searchByKeywordOptimized(
       latitude,
       longitude,
       radius,
-      ['pet_store', 'veterinary_care', 'pet grooming', 'pet shop']
+      ['pet_store', 'pet grooming', 'pet shop'] // Reduzir keywords
     );
   }
   
   /**
-   * Busca veterinários muito próximos ou exatamente no CEP
+   * Busca veterinários muito próximos ou exatamente no CEP - versão otimizada
    */
   private searchExactAreaVeterinaries(latitude: number, longitude: number, radius: number): Observable<PlaceResult[]> {
-    return this.googleMapsService.searchByKeyword(
+    return this.googleMapsService.searchByKeywordOptimized(
       latitude,
       longitude,
       radius,
-      ['veterinary_care', 'veterinario', 'clinica veterinaria', 'hospital veterinario']
+      ['veterinary_care', 'clinica veterinaria'] // Reduzir keywords
     );
   }
 
   /**
-   * Busca petshops usando Google Maps API
+   * Busca petshops usando Google Maps API com otimizações
    */
   private searchPetshopsWithGoogleMaps(params: LocationSearchParams): Observable<LocationSearchResponse> {
-    return this.googleMapsService.geocodeZipCode(params.zipCode).pipe(
-      switchMap(geocodeResult => {
+    // Reutilizar coordenadas se for o mesmo CEP
+    const getCoordinates = () => {
+      if (this.lastGeocodedLocation && this.lastGeocodedLocation.zipCode === params.zipCode) {
+        return of({
+          latitude: this.lastGeocodedLocation.latitude,
+          longitude: this.lastGeocodedLocation.longitude
+        });
+      }
+      
+      return this.googleMapsService.geocodeZipCode(params.zipCode).pipe(
+        map(result => {
+          this.lastGeocodedLocation = {
+            zipCode: params.zipCode,
+            latitude: result.latitude,
+            longitude: result.longitude
+          };
+          return { latitude: result.latitude, longitude: result.longitude };
+        })
+      );
+    };
+
+    return getCoordinates().pipe(
+      switchMap(coordinates => {
         const radiusInMeters = params.radius * 1000;
 
+        // Buscar apenas na região mais próxima se raio for pequeno
+        if (params.radius <= 2) {
+          return this.googleMapsService.searchNearbyPetshops(
+            coordinates.latitude, 
+            coordinates.longitude, 
+            radiusInMeters
+          ).pipe(
+            map(places => this.processPlacesSimple(places, params))
+          );
+        }
+
+        // Para raios maiores, fazer busca dupla
         const exactSearch$ = this.searchExactAreaPetshops(
-          geocodeResult.latitude,
-          geocodeResult.longitude,
+          coordinates.latitude,
+          coordinates.longitude,
           Math.min(500, radiusInMeters / 2)
         );
         
         const regularSearch$ = this.googleMapsService.searchNearbyPetshops(
-          geocodeResult.latitude, 
-          geocodeResult.longitude, 
+          coordinates.latitude, 
+          coordinates.longitude, 
           radiusInMeters
         );
         
@@ -79,7 +142,6 @@ export class LocationService {
           regularResults: regularSearch$
         }).pipe(
           map(results => {
-            // Combinar e remover duplicatas usando uma estratégia mais robusta
             const combinedResults = this.combineAndDeduplicateResults(
               results.exactResults, 
               results.regularResults
@@ -100,7 +162,7 @@ export class LocationService {
             // Calcular distâncias reais
             const distanceCalculations = filteredPlaces.map((place: any) =>
               this.googleMapsService.calculateDistance(
-                { lat: geocodeResult.latitude, lng: geocodeResult.longitude },
+                { lat: coordinates.latitude, lng: coordinates.longitude },
                 { lat: place.location.lat, lng: place.location.lng }
               ).pipe(
                 map(distanceInfo => ({
@@ -158,22 +220,43 @@ export class LocationService {
   }
 
   /**
-   * Busca veterinários usando Google Maps API
+   * Busca veterinários usando Google Maps API com otimizações
    */
   private searchVeterinariesWithGoogleMaps(params: LocationSearchParams): Observable<LocationSearchResponse> {
-    return this.googleMapsService.geocodeZipCode(params.zipCode).pipe(
-      switchMap(geocodeResult => {
+    // Reutilizar coordenadas se for o mesmo CEP
+    const getCoordinates = () => {
+      if (this.lastGeocodedLocation && this.lastGeocodedLocation.zipCode === params.zipCode) {
+        return of({
+          latitude: this.lastGeocodedLocation.latitude,
+          longitude: this.lastGeocodedLocation.longitude
+        });
+      }
+      
+      return this.googleMapsService.geocodeZipCode(params.zipCode).pipe(
+        map(result => {
+          this.lastGeocodedLocation = {
+            zipCode: params.zipCode,
+            latitude: result.latitude,
+            longitude: result.longitude
+          };
+          return { latitude: result.latitude, longitude: result.longitude };
+        })
+      );
+    };
+
+    return getCoordinates().pipe(
+      switchMap(coordinates => {
         const radiusInMeters = params.radius * 1000;
 
         const exactSearch$ = this.searchExactAreaVeterinaries(
-          geocodeResult.latitude,
-          geocodeResult.longitude,
+          coordinates.latitude,
+          coordinates.longitude,
           Math.min(500, radiusInMeters / 2)
         );
         
         const regularSearch$ = this.googleMapsService.searchNearbyVeterinaries(
-          geocodeResult.latitude, 
-          geocodeResult.longitude, 
+          coordinates.latitude, 
+          coordinates.longitude, 
           radiusInMeters
         );
         
@@ -203,7 +286,7 @@ export class LocationService {
             // Calcular distâncias reais
             const distanceCalculations = filteredPlaces.map((place: any) =>
               this.googleMapsService.calculateDistance(
-                { lat: geocodeResult.latitude, lng: geocodeResult.longitude },
+                { lat: coordinates.latitude, lng: coordinates.longitude },
                 { lat: place.location.lat, lng: place.location.lng }
               ).pipe(
                 map(distanceInfo => ({
@@ -679,6 +762,50 @@ export class LocationService {
 
   private toRadians(degrees: number): number {
     return degrees * (Math.PI / 180);
+  }
+
+  /**
+   * Processamento simplificado de lugares sem cálculo de distância
+   */
+  private processPlacesSimple(places: PlaceResult[], params: LocationSearchParams): LocationSearchResponse {
+    let filteredPlaces = places;
+
+    // Aplicar filtros básicos
+    if (params.isOpenNow) {
+      filteredPlaces = filteredPlaces.filter((place: any) => 
+        place.openingHours?.openNow === true
+      );
+    }
+
+    // Converter para formato interno (limitado a 20 resultados)
+    const locations = filteredPlaces.slice(0, 20).map((place: any) => 
+      this.convertGooglePlaceToPetshop(place)
+    );
+
+    return {
+      locations,
+      total: locations.length,
+      searchParams: params
+    } as LocationSearchResponse;
+  }
+
+  /**
+   * Limpar cache de pesquisas
+   */
+  clearSearchCache(): void {
+    this.cacheService.clear();
+    this.lastGeocodedLocation = null;
+    this.googleMapsService.clearSearchCache();
+  }
+
+  /**
+   * Obter estatísticas de cache
+   */
+  getCacheStats() {
+    return {
+      location: this.cacheService.getStats(),
+      googleMaps: this.googleMapsService.getCacheStats()
+    };
   }
 
   isOpenNow(location: Location): boolean {
