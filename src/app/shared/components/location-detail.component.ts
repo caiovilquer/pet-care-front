@@ -39,18 +39,10 @@ import { of } from 'rxjs';
         <div class="header-content">
           <div class="location-image-large">
             <div class="image-container">
-              <img 
-                *ngIf="location.imageUrl; else placeholderImage"
-                [src]="location.imageUrl" 
-                [alt]="location.name"
-                (error)="onImageError($event)"
-                class="location-img">
-              <ng-template #placeholderImage>
-                <div class="placeholder-image">
-                  <mat-icon>{{ getTypeIcon() }}</mat-icon>
-                  <span class="placeholder-text">{{ getTypeLabel() }}</span>
-                </div>
-              </ng-template>
+              <div class="placeholder-image">
+                <mat-icon>{{ getTypeIcon() }}</mat-icon>
+                <span class="placeholder-text">{{ getTypeLabel() }}</span>
+              </div>
             </div>
             <div class="image-overlay">
               <div class="status-badge" [class.open]="isOpen" [class.closed]="!isOpen">
@@ -94,11 +86,6 @@ import { of } from 'rxjs';
                 Como chegar
               </button>
               
-              <button mat-raised-button (click)="onWebsite()" *ngIf="location.website">
-                <mat-icon>language</mat-icon>
-                Visitar site
-              </button>
-
               <button mat-raised-button (click)="onShare()">
                 <mat-icon>share</mat-icon>
                 Compartilhar
@@ -139,22 +126,6 @@ import { of } from 'rxjs';
                     <div>
                       <strong>Telefone</strong>
                       <p><a [href]="'tel:' + location.phone">{{ location.phone }}</a></p>
-                    </div>
-                  </div>
-
-                  <div class="contact-item" *ngIf="location.email">
-                    <mat-icon>email</mat-icon>
-                    <div>
-                      <strong>Email</strong>
-                      <p><a [href]="'mailto:' + location.email">{{ location.email }}</a></p>
-                    </div>
-                  </div>
-
-                  <div class="contact-item" *ngIf="location.website">
-                    <mat-icon>language</mat-icon>
-                    <div>
-                      <strong>Website</strong>
-                      <p><a [href]="location.website" target="_blank">{{ location.website }}</a></p>
                     </div>
                   </div>
                 </div>
@@ -1059,13 +1030,6 @@ export class LocationDetailComponent implements OnInit, OnDestroy {
     return this.location.type === 'petshop' ? 'Petshop' : 'Clínica Veterinária';
   }
 
-  onImageError(event: any) {
-    // Esconder a imagem com erro para mostrar o placeholder
-    event.target.style.display = 'none';
-    // Marcar que houve erro na imagem para mostrar placeholder
-    this.location.imageUrl = undefined;
-  }
-
   getServiceIcon(service: string): string {
     const icons: { [key: string]: string } = {
       grooming: 'spa',
@@ -1183,12 +1147,6 @@ export class LocationDetailComponent implements OnInit, OnDestroy {
   onDirections() {
     const url = `https://www.google.com/maps/dir/?api=1&destination=${this.location.latitude},${this.location.longitude}&destination_place_id=${this.location.name}`;
     window.open(url, '_blank');
-  }
-
-  onWebsite() {
-    if (this.location.website) {
-      window.open(this.location.website, '_blank');
-    }
   }
 
   onShare() {

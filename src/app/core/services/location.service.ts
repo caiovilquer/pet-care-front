@@ -467,7 +467,6 @@ export class LocationService {
       latitude: place.location.lat,
       longitude: place.location.lng,
       phone: place.phoneNumber,
-      website: place.website,
       rating: place.rating || 0,
       reviewCount: place.userRatingsTotal || 0,
       distance: place.distance || this.calculateDistanceFromOrigin(place.location.lat, place.location.lng),
@@ -475,13 +474,12 @@ export class LocationService {
       durationText: place.durationText,
       isOpen: place.openingHours?.openNow || false,
       type: 'petshop',
-      hasGrooming: this.inferServiceFromTypes(place.types || [], 'grooming'),
-      hasDaycare: this.inferServiceFromTypes(place.types || [], 'daycare'),
-      hasHotel: this.inferServiceFromTypes(place.types || [], 'hotel'),
-      hasVaccination: this.inferServiceFromTypes(place.types || [], 'vaccination'),
+      hasGrooming: false,
+      hasDaycare: false,
+      hasHotel: false,
+      hasVaccination: false,
       acceptedPetTypes: [PetType.DOG, PetType.CAT],
-      services: this.inferServicesFromTypes(place.types || [], 'petshop'),
-      imageUrl: place.photos?.[0] || null,
+      services: ['petshop'],
       openingHours: this.convertGoogleHoursToOpeningHours(place.openingHours)
     };
   }
@@ -490,6 +488,9 @@ export class LocationService {
    * Converte PlaceResult do Google Maps para Veterinary
    */
   private convertGooglePlaceToVeterinary(place: any): Veterinary {
+    // Verificar se é emergência apenas pelo nome para reduzir API calls
+    const hasEmergency = this.inferEmergencyFromName(place.name);
+    
     return {
       id: place.placeId,
       name: place.name,
@@ -501,7 +502,6 @@ export class LocationService {
       latitude: place.location.lat,
       longitude: place.location.lng,
       phone: place.phoneNumber,
-      website: place.website,
       rating: place.rating || 0,
       reviewCount: place.userRatingsTotal || 0,
       distance: place.distance || this.calculateDistanceFromOrigin(place.location.lat, place.location.lng),
@@ -509,14 +509,13 @@ export class LocationService {
       durationText: place.durationText,
       isOpen: place.openingHours?.openNow || false,
       type: 'veterinary',
-      hasEmergency: this.inferEmergencyFromName(place.name) || this.inferServiceFromTypes(place.types || [], 'emergency'),
-      hasLaboratory: this.inferServiceFromTypes(place.types || [], 'laboratory'),
-      hasSurgery: this.inferServiceFromTypes(place.types || [], 'surgery'),
-      hasRadiology: this.inferServiceFromTypes(place.types || [], 'radiology'),
-      specialties: this.inferSpecialtiesFromTypes(place.types || []),
+      hasEmergency: hasEmergency,
+      hasLaboratory: false,
+      hasSurgery: false,
+      hasRadiology: false,
+      specialties: [],
       acceptedPetTypes: [PetType.DOG, PetType.CAT],
-      services: this.inferServicesFromTypes(place.types || [], 'veterinary'),
-      imageUrl: place.photos?.[0] || null,
+      services: hasEmergency ? ['veterinary', 'emergency'] : ['veterinary'],
       openingHours: this.convertGoogleHoursToOpeningHours(place.openingHours)
     };
   }
@@ -542,60 +541,10 @@ export class LocationService {
     return 0; // Placeholder
   }
 
-  private inferServiceFromTypes(types: string[], service: string): boolean {
-    const typeString = types.join(' ').toLowerCase();
-    const serviceMap: { [key: string]: string[] } = {
-      grooming: ['grooming', 'spa', 'banho', 'tosa'],
-      daycare: ['daycare', 'creche', 'cuidado'],
-      hotel: ['hotel', 'hospedagem', 'pensao'],
-      vaccination: ['vaccination', 'vacina', 'imunizacao'],
-      emergency: ['emergency', 'emergencia', '24h', 'urgencia'],
-      laboratory: ['laboratory', 'laboratorio', 'exame'],
-      surgery: ['surgery', 'cirurgia', 'operacao'],
-      radiology: ['radiology', 'radiologia', 'raio-x']
-    };
-
-    const keywords = serviceMap[service] || [];
-    return keywords.some(keyword => typeString.includes(keyword));
-  }
-
-  private inferServicesFromTypes(types: string[], businessType: string): string[] {
-    const services: string[] = [];
-    
-    if (businessType === 'petshop') {
-      if (this.inferServiceFromTypes(types, 'grooming')) services.push('grooming');
-      if (this.inferServiceFromTypes(types, 'daycare')) services.push('daycare');
-      if (this.inferServiceFromTypes(types, 'hotel')) services.push('hotel');
-      if (this.inferServiceFromTypes(types, 'vaccination')) services.push('vaccination');
-      services.push('food', 'toys');
-    } else if (businessType === 'veterinary') {
-      services.push('general');
-      if (this.inferServiceFromTypes(types, 'emergency')) services.push('emergency');
-      if (this.inferServiceFromTypes(types, 'surgery')) services.push('surgery');
-      if (this.inferServiceFromTypes(types, 'laboratory')) services.push('laboratory');
-      if (this.inferServiceFromTypes(types, 'radiology')) services.push('radiology');
-    }
-
-    return services;
-  }
-
   private inferEmergencyFromName(name: string): boolean {
     const emergencyKeywords = ['24h', '24 horas', 'emergencia', 'urgencia', 'hospital'];
     const nameLower = name.toLowerCase();
     return emergencyKeywords.some(keyword => nameLower.includes(keyword));
-  }
-
-  private inferSpecialtiesFromTypes(types: string[]): VeterinarySpecialty[] {
-    const specialties: VeterinarySpecialty[] = [VeterinarySpecialty.GENERAL];
-    
-    if (this.inferServiceFromTypes(types, 'cardiology')) {
-      specialties.push(VeterinarySpecialty.CARDIOLOGY);
-    }
-    if (this.inferServiceFromTypes(types, 'dermatology')) {
-      specialties.push(VeterinarySpecialty.DERMATOLOGY);
-    }
-
-    return specialties;
   }
 
   private convertGoogleHoursToOpeningHours(googleHours?: { openNow: boolean; weekdayText: string[] }) {
@@ -777,8 +726,8 @@ export class LocationService {
       );
     }
 
-    // Converter para formato interno (limitado a 20 resultados)
-    const locations = filteredPlaces.slice(0, 20).map((place: any) => 
+    // Converter para formato interno (limitado a 5 resultados)
+    const locations = filteredPlaces.slice(0, 5).map((place: any) => 
       this.convertGooglePlaceToPetshop(place)
     );
 

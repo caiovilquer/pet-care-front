@@ -24,18 +24,10 @@ import { LocationService } from '../../core/services/location.service';
       <div class="card-header">
         <div class="location-image">
           <div class="image-container">
-            <img 
-              *ngIf="location.imageUrl; else placeholderImage"
-              [src]="location.imageUrl" 
-              [alt]="location.name"
-              (error)="onImageError($event)"
-              class="location-img">
-            <ng-template #placeholderImage>
-              <div class="placeholder-image">
-                <mat-icon>{{ getTypeIcon() }}</mat-icon>
-                <span class="placeholder-text">{{ getTypeLabel() }}</span>
-              </div>
-            </ng-template>
+            <div class="placeholder-image">
+              <mat-icon>{{ getTypeIcon() }}</mat-icon>
+              <span class="placeholder-text">{{ getTypeLabel() }}</span>
+            </div>
           </div>
           <div class="status-badge" [class.open]="isOpen" [class.closed]="!isOpen">
             <mat-icon>{{ isOpen ? 'schedule' : 'schedule_off' }}</mat-icon>
@@ -71,14 +63,10 @@ import { LocationService } from '../../core/services/location.service';
           <span>{{ location.address }}, {{ location.neighborhood }}</span>
         </div>
 
-        <div class="contact-info" *ngIf="location.phone || location.email">
+        <div class="contact-info" *ngIf="location.phone">
           <div class="phone" *ngIf="location.phone">
             <mat-icon>phone</mat-icon>
             <a [href]="'tel:' + location.phone">{{ location.phone }}</a>
-          </div>
-          <div class="email" *ngIf="location.email">
-            <mat-icon>email</mat-icon>
-            <a [href]="'mailto:' + location.email">{{ location.email }}</a>
           </div>
         </div>
 
@@ -154,11 +142,6 @@ import { LocationService } from '../../core/services/location.service';
         <button mat-button (click)="onDirections()">
           <mat-icon>directions</mat-icon>
           Como chegar
-        </button>
-        
-        <button mat-button (click)="onWebsite()" *ngIf="location.website">
-          <mat-icon>language</mat-icon>
-          Site
         </button>
         
         <button mat-raised-button color="primary" (click)="onViewDetails()">
@@ -513,7 +496,6 @@ export class LocationCardComponent {
   @Input() location!: Petshop | Veterinary;
   @Output() callLocation = new EventEmitter<Location>();
   @Output() getDirections = new EventEmitter<Location>();
-  @Output() viewWebsite = new EventEmitter<Location>();
   @Output() viewDetails = new EventEmitter<Location>();
 
   constructor(private locationService: LocationService) {}
@@ -536,13 +518,6 @@ export class LocationCardComponent {
 
   getTypeLabel(): string {
     return this.location.type === 'petshop' ? 'Petshop' : 'Veterinário';
-  }
-
-  onImageError(event: any) {
-    // Esconder a imagem com erro para mostrar o placeholder
-    event.target.style.display = 'none';
-    // Marcar que houve erro na imagem para mostrar placeholder
-    this.location.imageUrl = undefined;
   }
 
   getServiceLabel(service: string): string {
@@ -630,12 +605,6 @@ export class LocationCardComponent {
 
   onDirections() {
     this.getDirections.emit(this.location);
-  }
-
-  onWebsite() {
-    if (this.location.website) {
-      this.viewWebsite.emit(this.location);
-    }
   }
 
   onViewDetails() {

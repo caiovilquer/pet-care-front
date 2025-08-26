@@ -9,8 +9,6 @@ export interface Location {
   latitude: number;
   longitude: number;
   phone?: string;
-  email?: string;
-  website?: string;
   rating: number;
   reviewCount: number;
   distance: number; // distância em km
@@ -19,7 +17,6 @@ export interface Location {
   isOpen: boolean;
   openingHours: OpeningHours;
   services: string[];
-  imageUrl?: string;
   type: 'petshop' | 'veterinary';
 }
 

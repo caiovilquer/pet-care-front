@@ -247,8 +247,8 @@ export class GoogleMapsService {
           rankBy: google.maps.places.RankBy.PROMINENCE
         };
 
-        // Função otimizada para obter apenas os resultados necessários
-        const getAllResults = (accumulator: google.maps.places.PlaceResult[] = [], maxResults: number = 30): Promise<google.maps.places.PlaceResult[]> => {
+        // Função otimizada para obter apenas os 5 resultados mais próximos
+        const getAllResults = (accumulator: google.maps.places.PlaceResult[] = [], maxResults: number = 5): Promise<google.maps.places.PlaceResult[]> => {
           return new Promise((resolve, reject) => {
             service.nearbySearch(request, (results, status, pagination) => {
               if (status === google.maps.places.PlacesServiceStatus.OK && results) {
@@ -328,11 +328,11 @@ export class GoogleMapsService {
           return of([]);
         }
         
-        // Buscar detalhes completos para cada local (incluindo horários)
-        const detailRequests = places.map(place => 
-          this.getPlaceDetailsById(place.place_id || '', latitude, longitude)
-        );
-        return forkJoin(detailRequests);
+        // Limitar a 5 resultados para reduzir custos da API
+        const limitedPlaces = places.slice(0, 5);
+        
+        // Retornar dados básicos sem chamadas extras de API para os primeiros 5
+        return of(limitedPlaces.map(place => this.mapPlaceToResult(place, latitude, longitude)));
       }),
       catchError(error => {
         console.error('Erro na busca por texto:', error);
@@ -391,8 +391,8 @@ export class GoogleMapsService {
           rankBy: google.maps.places.RankBy.PROMINENCE
         };
 
-        // Função otimizada para obter apenas os resultados necessários
-        const getAllResults = (accumulator: google.maps.places.PlaceResult[] = [], maxResults: number = 30): Promise<google.maps.places.PlaceResult[]> => {
+        // Função otimizada para obter apenas os 5 resultados mais próximos
+        const getAllResults = (accumulator: google.maps.places.PlaceResult[] = [], maxResults: number = 5): Promise<google.maps.places.PlaceResult[]> => {
           return new Promise((resolve, reject) => {
             service.nearbySearch(request, (results, status, pagination) => {
               if (status === google.maps.places.PlacesServiceStatus.OK && results) {
@@ -586,6 +586,7 @@ export class GoogleMapsService {
     const latValue: number = typeof location?.lat === 'function' ? location.lat() : Number(location?.lat ?? 0);
     const lngValue: number = typeof location?.lng === 'function' ? location.lng() : Number(location?.lng ?? 0);
 
+    // ECONOMIA MÁXIMA: Retornar apenas dados básicos essenciais
     return {
       placeId: place.place_id || '',
       name: place.name || '',
@@ -599,12 +600,11 @@ export class GoogleMapsService {
         weekdayText: place.opening_hours.weekday_text || []
       } : undefined,
       phoneNumber: place.formatted_phone_number,
-      website: place.website,
-      photos: place.photos?.map(photo => 
-        photo.getUrl({ maxWidth: 400, maxHeight: 300 })
-      ) || [],
-      types: place.types || [],
-      priceLevel: place.price_level
+      // REMOVIDOS: website, photos, types, priceLevel para economizar dados
+      website: undefined,
+      photos: [],
+      types: [],
+      priceLevel: undefined
     };
   }
 

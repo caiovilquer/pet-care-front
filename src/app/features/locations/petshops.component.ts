@@ -105,7 +105,6 @@ import {
                 [location]="petshop"
                 (callLocation)="onCallPetshop($event)"
                 (getDirections)="onGetDirections($event)"
-                (viewWebsite)="onViewWebsite($event)"
                 (viewDetails)="onViewDetails($event)">
               </app-location-card>
             </div>
@@ -467,12 +466,6 @@ export class PetshopsComponent implements OnInit {
   onGetDirections(location: Location) {
     const url = `https://www.google.com/maps/dir/?api=1&destination=${location.latitude},${location.longitude}&destination_place_id=${location.name}`;
     window.open(url, '_blank');
-  }
-
-  onViewWebsite(location: Location) {
-    if (location.website) {
-      window.open(location.website, '_blank');
-    }
   }
 
   onViewDetails(location: Location) {
