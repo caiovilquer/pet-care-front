@@ -11,6 +11,7 @@ import { CommonModule } from '@angular/common';
 import { EventService } from '../../core/services/event.service';
 import { PetService } from '../../core/services/pet.service';
 import { EventStateService } from '../../core/services/event-state.service';
+import { DateTimeService } from '../../core/services/datetime.service';
 import { EventCreateRequest, EventUpdateRequest, RecurrenceFrequency } from '../../core/models/event.model';
 import { PetSummary } from '../../core/models/pet.model';
 
@@ -48,6 +49,7 @@ export class EventFormComponent implements OnInit {
     private eventService: EventService,
     private petService: PetService,
     private eventStateService: EventStateService,
+    private dateTimeService: DateTimeService,
     private snackBar: MatSnackBar,
     public dialogRef: MatDialogRef<EventFormComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any
@@ -79,19 +81,17 @@ export class EventFormComponent implements OnInit {
         let timeStart = '';
 
         if (event.dateStart) {
-          const eventDate = new Date(event.dateStart);
-          dateStart = eventDate;
-          timeStart = eventDate.toTimeString().substring(0, 5);
+          const eventDate = this.dateTimeService.parseAPIDate(event.dateStart); // FIX: usar parsing seguro
+          if (eventDate) {
+            dateStart = eventDate;
+            timeStart = this.dateTimeService.extractTime(event.dateStart); // FIX: extrair hora corretamente
+          }
         }
 
         // Tratar a data final se existir (apenas data, sem horário)
         let finalDate = null;
         if (event.recurrence?.finalDate) {
-          const finalDateStr = event.recurrence.finalDate.split('T')[0]; // Pegar apenas a parte da data
-          const dateParts = finalDateStr.split('-');
-          if (dateParts.length === 3) {
-            finalDate = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
-          }
+          finalDate = this.dateTimeService.parseAPIDate(event.recurrence.finalDate); // FIX: usar parsing seguro
         }
 
         this.eventForm.patchValue({
@@ -147,11 +147,11 @@ export class EventFormComponent implements OnInit {
       petId: formValue.petId,
       type: formValue.type,
       description: formValue.description,
-      dateStart: dateStart.toISOString(),
+      dateStart: this.dateTimeService.formatDateTimeForAPI(dateStart), // FIX: usar timezone local
       frequency: formValue.frequency || undefined,
       intervalCount: formValue.intervalCount,
       repetitions: formValue.repetitions || undefined,
-      finalDate: formValue.finalDate ? this.formatDateOnlyForAPI(formValue.finalDate) : undefined
+      finalDate: formValue.finalDate ? this.dateTimeService.formatDateOnlyForAPI(formValue.finalDate) : undefined
     };
 
     if (this.isEdit) {
@@ -187,23 +187,5 @@ export class EventFormComponent implements OnInit {
 
   onCancel(): void {
     this.dialogRef.close();
-  }
-
-  private formatDateOnlyForAPI(date: Date | string): string {
-    if (!date) return '';
-
-    let dateObj: Date;
-    if (date instanceof Date) {
-      dateObj = date;
-    } else {
-      dateObj = new Date(date);
-    }
-
-    // Usar getFullYear, getMonth, getDate para evitar problemas de timezone
-    const year = dateObj.getFullYear();
-    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-    const day = String(dateObj.getDate()).padStart(2, '0');
-
-    return `${year}-${month}-${day}T00:00:00.000Z`;
   }
 }

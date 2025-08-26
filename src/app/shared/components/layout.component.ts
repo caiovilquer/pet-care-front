@@ -16,6 +16,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { TutorService } from '../../core/services/tutor.service';
 import { EventService } from '../../core/services/event.service';
 import { EventStateService } from '../../core/services/event-state.service';
+import { DateTimeService } from '../../core/services/datetime.service';
 import { UserStateService } from '../../core/services/user-state.service';
 import { TutorDetailResult } from '../../shared/models/tutor.model';
 import { EventSummary, isEventDone } from '../../core/models/event.model';
@@ -1015,6 +1016,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
     private tutorService: TutorService,
     private eventService: EventService,
     private eventStateService: EventStateService,
+    private dateTimeService: DateTimeService,
     private userStateService: UserStateService,
     private router: Router,
     private breakpointObserver: BreakpointObserver
@@ -1153,7 +1155,9 @@ export class LayoutComponent implements OnInit, OnDestroy {
   formatEventDate(dateString: string): string {
     if (!dateString) return 'Data inválida';
 
-    const eventDate = new Date(dateString);
+    const eventDate = this.dateTimeService.parseAPIDate(dateString); // FIX: usar parsing seguro
+    if (!eventDate) return 'Data inválida';
+    
     const now = new Date();
     const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
     const dayAfterTomorrow = new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000);

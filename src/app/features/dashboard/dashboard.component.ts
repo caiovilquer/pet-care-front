@@ -11,6 +11,7 @@ import { forkJoin, Subscription } from 'rxjs';
 import { TutorService } from '../../core/services/tutor.service';
 import { EventService } from '../../core/services/event.service';
 import { EventStateService } from '../../core/services/event-state.service';
+import { DateTimeService } from '../../core/services/datetime.service';
 import { PetService } from '../../core/services/pet.service';
 import { Tutor } from '../../core/models/tutor.model';
 import { EventSummary, EventType, isEventDone } from '../../core/models/event.model';
@@ -45,6 +46,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private tutorService: TutorService,
     private eventService: EventService,
     private eventStateService: EventStateService,
+    private dateTimeService: DateTimeService,
     private petService: PetService
   ) { }
 
@@ -160,10 +162,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   formatDate(dateString: string): string {
     if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
-    });
+    return this.dateTimeService.formatDateTimeForDisplay(dateString); // FIX: usar serviço centralizado
   }
 }

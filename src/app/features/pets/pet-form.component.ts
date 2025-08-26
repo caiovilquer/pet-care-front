@@ -9,6 +9,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CommonModule } from '@angular/common';
 import { PetService } from '../../core/services/pet.service';
+import { DateTimeService } from '../../core/services/datetime.service';
 import { PetCreateRequest, PetUpdateRequest } from '../../core/models/pet.model';
 
 @Component({
@@ -35,6 +36,7 @@ export class PetFormComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private petService: PetService,
+    private dateTimeService: DateTimeService,
     private snackBar: MatSnackBar,
     public dialogRef: MatDialogRef<PetFormComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any
@@ -54,11 +56,7 @@ export class PetFormComponent implements OnInit {
         // Converter a string de data para objeto Date evitando problemas de timezone
         let birthdate = null;
         if (pet.birthdate) {
-          // Criar data local sem considerar timezone para evitar mudança de dia
-          const dateParts = pet.birthdate.split('-');
-          if (dateParts.length === 3) {
-            birthdate = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
-          }
+          birthdate = this.dateTimeService.parseAPIDate(pet.birthdate); // FIX: usar parsing seguro
         }
 
         const petData = {
@@ -82,7 +80,7 @@ export class PetFormComponent implements OnInit {
       name: formValue.name,
       specie: formValue.specie,
       race: formValue.race,
-      birthdate: formValue.birthdate ? this.formatDateForAPI(formValue.birthdate) : ''
+      birthdate: formValue.birthdate ? this.dateTimeService.formatDateOnlyForAPI(formValue.birthdate) : ''
     };
 
     if (this.isEdit) {
@@ -112,23 +110,5 @@ export class PetFormComponent implements OnInit {
 
   onCancel(): void {
     this.dialogRef.close();
-  }
-
-  private formatDateForAPI(date: Date | string): string {
-    if (!date) return '';
-
-    let dateObj: Date;
-    if (date instanceof Date) {
-      dateObj = date;
-    } else {
-      dateObj = new Date(date);
-    }
-
-    // Usar getFullYear, getMonth, getDate para evitar problemas de timezone
-    const year = dateObj.getFullYear();
-    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-    const day = String(dateObj.getDate()).padStart(2, '0');
-
-    return `${year}-${month}-${day}`;
   }
 }

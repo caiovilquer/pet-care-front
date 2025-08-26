@@ -10,6 +10,7 @@ import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { PetService } from '../../core/services/pet.service';
 import { EventService } from '../../core/services/event.service';
+import { DateTimeService } from '../../core/services/datetime.service';
 import { Pet } from '../../core/models/pet.model';
 import { EventSummary } from '../../core/models/event.model';
 import { PetFormComponent } from './pet-form.component';
@@ -40,6 +41,7 @@ export class PetDetailComponent implements OnInit {
     private router: Router,
     private petService: PetService,
     private eventService: EventService,
+    private dateTimeService: DateTimeService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar
   ) { }
@@ -124,11 +126,7 @@ export class PetDetailComponent implements OnInit {
 
   formatDate(dateString: string): string {
     if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
+    return this.dateTimeService.formatForDisplay(dateString); // FIX: usar serviço centralizado
   }
 
   getGenderDisplay(gender: string): string {
@@ -175,13 +173,7 @@ export class PetDetailComponent implements OnInit {
 
   formatEventDate(dateString: string): string {
     if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    return this.dateTimeService.formatDateTimeForDisplay(dateString); // FIX: usar serviço centralizado
   }
 
   getEventStatus(dateStart: string, status: string): string {
@@ -189,7 +181,8 @@ export class PetDetailComponent implements OnInit {
       return 'Concluído';
     }
     const now = new Date();
-    const eventDate = new Date(dateStart);
+    const eventDate = this.dateTimeService.parseAPIDate(dateStart); // FIX: usar parsing seguro
+    if (!eventDate) return 'Desconhecido';
     if (eventDate < now) {
       return 'Atrasado';
     }
@@ -201,8 +194,8 @@ export class PetDetailComponent implements OnInit {
       return 'status-done';
     }
     const now = new Date();
-    const eventDate = new Date(dateStart);
-    if (eventDate < now) {
+    const eventDate = this.dateTimeService.parseAPIDate(dateStart); // FIX: usar parsing seguro
+    if (!eventDate || eventDate < now) {
       return 'status-overdue';
     }
     return 'status-pending';

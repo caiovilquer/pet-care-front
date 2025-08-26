@@ -13,6 +13,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { map } from 'rxjs/operators';
 import { EventService } from '../../core/services/event.service';
 import { EventStateService } from '../../core/services/event-state.service';
+import { DateTimeService } from '../../core/services/datetime.service';
 import { PetService } from '../../core/services/pet.service';
 import { Event, EventSummary, EventsPage, EventType, isEventDone } from '../../core/models/event.model';
 import { EventFormComponent } from './event-form.component';
@@ -47,6 +48,7 @@ export class EventsComponent implements OnInit {
   constructor(
     private eventService: EventService,
     private eventStateService: EventStateService,
+    private dateTimeService: DateTimeService,
     private petService: PetService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar,
@@ -258,13 +260,7 @@ export class EventsComponent implements OnInit {
 
   formatDate(dateString: string): string {
     if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    return this.dateTimeService.formatDateTimeForDisplay(dateString); // FIX: usar serviço centralizado
   }
 
   getEventStatus(dateStart: string, status: string): string {
