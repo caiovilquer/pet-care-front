@@ -23,7 +23,7 @@ export interface SearchMetrics {
 export class SearchOptimizerService {
   private readonly DEFAULT_CONFIG: SearchOptimizationConfig = {
     debounceTime: 500, // AUMENTADO para reduzir chamadas
-    maxResults: 10, // DRASTICAMENTE REDUZIDO de 20 para 10
+    maxResults: 5, // ULTRA ECONÔMICO: apenas 5 resultados
     cacheTimeout: 4 * 60, // 4 horas
     enableAggression: true // ATIVO por padrão - modo ultra econômico
   };

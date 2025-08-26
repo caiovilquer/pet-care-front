@@ -162,50 +162,70 @@ import { of } from 'rxjs';
             </mat-card>
 
             <!-- Detalhes específicos -->
-            <mat-card class="details-card" *ngIf="detailedInfo">
-              <mat-card-header>
-                <mat-icon mat-card-avatar>business</mat-icon>
-                <mat-card-title>Detalhes do Estabelecimento</mat-card-title>
-              </mat-card-header>
-              <mat-card-content>
-                <div class="details-grid" *ngIf="!loadingDetails; else loadingSpinner">
-                  <div class="detail-item" *ngIf="detailedInfo.description">
-                    <strong>Descrição</strong>
-                    <p>{{ detailedInfo.description }}</p>
-                  </div>
-
-                  <div class="detail-item" *ngIf="detailedInfo.priceLevel">
-                    <strong>Nível de preços</strong>
-                    <p>{{ getPriceLevelText(detailedInfo.priceLevel) }}</p>
-                  </div>
-
-                  <div class="detail-item" *ngIf="detailedInfo.accessibility?.length > 0">
-                    <strong>Acessibilidade</strong>
-                    <mat-chip-set>
-                      <mat-chip *ngFor="let feature of detailedInfo.accessibility">
-                        {{ getAccessibilityLabel(feature) }}
-                      </mat-chip>
-                    </mat-chip-set>
-                  </div>
-
-                  <div class="detail-item" *ngIf="detailedInfo.paymentMethods?.length > 0">
-                    <strong>Formas de pagamento</strong>
-                    <mat-chip-set>
-                      <mat-chip *ngFor="let method of detailedInfo.paymentMethods">
-                        {{ getPaymentMethodLabel(method) }}
-                      </mat-chip>
-                    </mat-chip-set>
-                  </div>
-                </div>
-
-                <ng-template #loadingSpinner>
+            @if (loadingDetails) {
+              <mat-card class="details-card">
+                <mat-card-content>
                   <div class="loading-container">
-                    <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+                    <mat-spinner diameter="30"></mat-spinner>
                     <p>Carregando detalhes...</p>
                   </div>
-                </ng-template>
-              </mat-card-content>
-            </mat-card>
+                </mat-card-content>
+              </mat-card>
+            } @else if (detailedInfo) {
+              <mat-card class="details-card">
+                <mat-card-header>
+                  <mat-icon mat-card-avatar>business</mat-icon>
+                  <mat-card-title>Detalhes do Estabelecimento</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <div class="details-grid">
+                    <div class="detail-item" *ngIf="detailedInfo.description">
+                      <strong>Descrição</strong>
+                      <p>{{ detailedInfo.description }}</p>
+                    </div>
+
+                    <div class="detail-item" *ngIf="detailedInfo.priceLevel">
+                      <strong>Nível de preços</strong>
+                      <p>{{ getPriceLevelText(detailedInfo.priceLevel) }}</p>
+                    </div>
+
+                    <div class="detail-item" *ngIf="detailedInfo.accessibility?.length > 0">
+                      <strong>Acessibilidade</strong>
+                      <mat-chip-set>
+                        <mat-chip *ngFor="let feature of detailedInfo.accessibility">
+                          {{ getAccessibilityLabel(feature) }}
+                        </mat-chip>
+                      </mat-chip-set>
+                    </div>
+
+                    <div class="detail-item" *ngIf="detailedInfo.paymentMethods?.length > 0">
+                      <strong>Formas de pagamento</strong>
+                      <mat-chip-set>
+                        <mat-chip *ngFor="let method of detailedInfo.paymentMethods">
+                          {{ getPaymentMethodLabel(method) }}
+                        </mat-chip>
+                      </mat-chip-set>
+                    </div>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            } @else {
+              <mat-card class="details-card">
+                <mat-card-header>
+                  <mat-icon mat-card-avatar>business</mat-icon>
+                  <mat-card-title>Detalhes do Estabelecimento</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <div class="load-details">
+                    <button mat-raised-button color="primary" (click)="loadDetailedInfo()">
+                      <mat-icon>info</mat-icon>
+                      Carregar Detalhes
+                    </button>
+                    <p class="load-info">Clique para buscar informações detalhadas do Google</p>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            }
           </div>
         </mat-tab>
 
@@ -376,31 +396,44 @@ import { of } from 'rxjs';
 
                 <mat-divider></mat-divider>
 
-                <div class="reviews-list" *ngIf="reviews && reviews.length > 0; else noReviews">
-                  <div class="review-item" *ngFor="let review of reviews">
-                    <div class="review-header">
-                      <div class="reviewer-info">
-                        <strong>{{ review.authorName }}</strong>
-                        <div class="review-stars">
-                          <mat-icon 
-                            *ngFor="let star of [1,2,3,4,5]" 
-                            [class.filled]="star <= review.rating">
-                            star
-                          </mat-icon>
-                        </div>
-                      </div>
-                      <span class="review-date">{{ review.relativeTime }}</span>
-                    </div>
-                    <p class="review-text">{{ review.text }}</p>
+                @if (loadingReviews) {
+                  <div class="loading-container">
+                    <mat-spinner diameter="30"></mat-spinner>
+                    <p>Carregando avaliações...</p>
                   </div>
-                </div>
-
-                <ng-template #noReviews>
+                } @else if (reviewsLoaded && reviews && reviews.length > 0) {
+                  <div class="reviews-list">
+                    <div class="review-item" *ngFor="let review of reviews">
+                      <div class="review-header">
+                        <div class="reviewer-info">
+                          <strong>{{ review.authorName }}</strong>
+                          <div class="review-stars">
+                            <mat-icon 
+                              *ngFor="let star of [1,2,3,4,5]" 
+                              [class.filled]="star <= review.rating">
+                              star
+                            </mat-icon>
+                          </div>
+                        </div>
+                        <span class="review-date">{{ review.relativeTime }}</span>
+                      </div>
+                      <p class="review-text">{{ review.text }}</p>
+                    </div>
+                  </div>
+                } @else if (reviewsLoaded) {
                   <div class="no-reviews">
                     <mat-icon>rate_review</mat-icon>
                     <p>Nenhuma avaliação disponível ainda</p>
                   </div>
-                </ng-template>
+                } @else {
+                  <div class="load-reviews">
+                    <button mat-raised-button color="primary" (click)="loadReviews()">
+                      <mat-icon>star</mat-icon>
+                      Carregar Avaliações
+                    </button>
+                    <p class="load-info">Clique para buscar avaliações detalhadas do Google</p>
+                  </div>
+                }
 
                 <div class="google-reviews-link" *ngIf="detailedInfo?.googleMapsUrl">
                   <button mat-stroked-button (click)="openGoogleReviews()">
@@ -933,6 +966,8 @@ export class LocationDetailComponent implements OnInit, OnDestroy {
   detailedInfo: any = null;
   reviews: any[] = [];
   loadingDetails = true;
+  loadingReviews = false;
+  reviewsLoaded = false;
   
   private destroy$ = new Subject<void>();
 
@@ -958,7 +993,7 @@ export class LocationDetailComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.checkIfOpen();
-    this.loadDetailedInfo();
+    // Detalhes agora são carregados sob demanda
   }
 
   ngOnDestroy() {
@@ -970,28 +1005,46 @@ export class LocationDetailComponent implements OnInit, OnDestroy {
     this.isOpen = this.locationService.isOpenNow(this.location);
   }
 
-  private loadDetailedInfo() {
+  loadDetailedInfo() {
     this.loadingDetails = true;
     
-    // Simular carregamento de informações detalhadas
-    forkJoin({
-      details: this.googleMapsService.getPlaceDetails(this.location.id).pipe(
-        catchError(() => of(null))
-      ),
-      reviews: this.googleMapsService.getPlaceReviews(this.location.id).pipe(
-        catchError(() => of([]))
-      )
-    }).pipe(
+    // ULTRA ECONÔMICO: Carregar apenas detalhes essenciais, sem reviews
+    this.googleMapsService.getPlaceDetails(this.location.id).pipe(
+      catchError(() => of(null)),
       takeUntil(this.destroy$),
       finalize(() => this.loadingDetails = false)
     ).subscribe({
-      next: ({ details, reviews }) => {
+      next: (details) => {
         this.detailedInfo = details;
-        this.reviews = reviews || [];
+        this.reviews = []; // Não carregar reviews automaticamente para economizar API
       },
       error: (error) => {
         console.error('Erro ao carregar detalhes:', error);
         this.snackBar.open('Erro ao carregar detalhes do estabelecimento', 'Fechar', {
+          duration: 3000
+        });
+      }
+    });
+  }
+
+  loadReviews() {
+    if (this.reviewsLoaded) return; // Já carregou ou está carregando
+    
+    this.loadingReviews = true;
+    this.googleMapsService.getPlaceReviews(this.location.id).pipe(
+      catchError(() => of([])),
+      takeUntil(this.destroy$),
+      finalize(() => {
+        this.loadingReviews = false;
+        this.reviewsLoaded = true;
+      })
+    ).subscribe({
+      next: (reviews) => {
+        this.reviews = reviews || [];
+      },
+      error: (error) => {
+        console.error('Erro ao carregar reviews:', error);
+        this.snackBar.open('Erro ao carregar avaliações', 'Fechar', {
           duration: 3000
         });
       }

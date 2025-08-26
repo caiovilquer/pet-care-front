@@ -278,15 +278,12 @@ export class GoogleMapsService {
 
         return from(getAllResults());
       }),
-      switchMap(places => {
-        // Buscar detalhes apenas para os primeiros resultados mais relevantes
-        const limitedPlaces = places.slice(0, 8); // MODO ULTRA ECONÔMICO: apenas 8 resultados
+      map(places => {
+        // ULTRA ECONÔMICO: Apenas 5 resultados SEM buscar detalhes automaticamente
+        const limitedPlaces = places.slice(0, 5);
         
-        // Buscar detalhes com cache
-        const detailRequests = limitedPlaces.map(place => 
-          this.getPlaceDetailsById(place.place_id || '', latitude, longitude)
-        );
-        return forkJoin(detailRequests);
+        // Retornar dados básicos sem chamadas extras de API
+        return limitedPlaces.map(place => this.mapPlaceToResult(place, latitude, longitude));
       }),
       catchError(error => {
         console.error('Erro ao buscar detalhes dos petshops:', error);
@@ -425,14 +422,12 @@ export class GoogleMapsService {
 
         return from(getAllResults());
       }),
-      switchMap(places => {
-        // Buscar detalhes apenas para os primeiros resultados mais relevantes
-        const limitedPlaces = places.slice(0, 8); // MODO ULTRA ECONÔMICO: apenas 8 resultados
+      map(places => {
+        // ULTRA ECONÔMICO: Apenas 5 resultados SEM buscar detalhes automaticamente
+        const limitedPlaces = places.slice(0, 5);
         
-        const detailRequests = limitedPlaces.map(place => 
-          this.getPlaceDetailsById(place.place_id || '', latitude, longitude)
-        );
-        return forkJoin(detailRequests);
+        // Retornar dados básicos sem chamadas extras de API
+        return limitedPlaces.map(place => this.mapPlaceToResult(place, latitude, longitude));
       }),
       catchError(error => {
         console.error('Erro ao buscar detalhes dos veterinários:', error);
