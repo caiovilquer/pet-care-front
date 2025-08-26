@@ -41,14 +41,15 @@ export const routes: Routes = [
         path: 'events',
         loadComponent: () => import('./features/events/events.component').then(m => m.EventsComponent)
       },
-      {
-        path: 'petshops',
-        loadComponent: () => import('./features/locations/petshops.component').then(m => m.PetshopsComponent)
-      },
-      {
-        path: 'veterinaries',
-        loadComponent: () => import('./features/locations/veterinaries.component').then(m => m.VeterinariesComponent)
-      },
+      // LOCALIDADES EM STANDBY - REMOVER COMENTÁRIOS PARA REATIVAR
+      // {
+      //   path: 'petshops',
+      //   loadComponent: () => import('./features/locations/petshops.component').then(m => m.PetshopsComponent)
+      // },
+      // {
+      //   path: 'veterinaries',
+      //   loadComponent: () => import('./features/locations/veterinaries.component').then(m => m.VeterinariesComponent)
+      // },
       {
         path: 'profile',
         loadComponent: () => import('./features/profile/profile.component').then(m => m.ProfileComponent)

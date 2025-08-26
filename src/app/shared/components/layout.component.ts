@@ -71,6 +71,7 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
             <span matListItemTitle>Eventos</span>
           </a>
           
+          <!-- SEÇÃO LOCALIDADES EM STANDBY - REMOVER COMENTÁRIOS PARA REATIVAR
           <mat-divider></mat-divider>
           
           <h3 class="nav-section-title">Localidades</h3>
@@ -84,6 +85,7 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
             <mat-icon matListItemIcon>local_hospital</mat-icon>
             <span matListItemTitle>Veterinários</span>
           </a>
+          -->
           
           <mat-divider></mat-divider>
           
