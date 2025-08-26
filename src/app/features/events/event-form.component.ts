@@ -192,24 +192,30 @@ export class EventFormComponent implements OnInit {
 
     console.log('Data final criada:', dateStart);
 
-    const request: EventCreateRequest | EventUpdateRequest = {
+    // Criar request sem campos undefined para o backend
+    const request: any = {
       petId: formValue.petId,
       type: formValue.type,
       description: formValue.description,
-      dateStart: this.dateTimeService.formatDateTimeForAPI(dateStart), // FIX: usar timezone local
-      frequency: formValue.frequency || undefined,
-      intervalCount: formValue.frequency ? (formValue.intervalCount || 1) : 1, // Sempre 1 se não há recorrência
-      repetitions: formValue.repetitions || undefined,
-      finalDate: formValue.finalDate ? this.dateTimeService.formatDateOnlyForAPI(formValue.finalDate) : undefined
+      dateStart: this.dateTimeService.formatDateTimeForAPIWithoutTimezone(dateStart),
+      intervalCount: formValue.frequency ? (formValue.intervalCount || 1) : 1
     };
 
+    // Adicionar campos opcionais apenas se tiverem valor
+    if (formValue.frequency) {
+      request.frequency = formValue.frequency;
+    }
+    
+    if (formValue.repetitions && formValue.repetitions > 0) {
+      request.repetitions = formValue.repetitions;
+    }
+    
+    if (formValue.finalDate) {
+      request.finalDate = this.dateTimeService.formatDateAsLocalDateTime(formValue.finalDate);
+    }
+
     // Debug: log do request que será enviado
-    console.log('Event Form - Request sendo enviado:', {
-      ...request,
-      dateStartOriginal: dateStart,
-      timeStart: formValue.timeStart,
-      dateValue: formValue.dateStart
-    });
+    console.log('Event Form - Request sendo enviado:', request);
 
     if (this.isEdit) {
       this.eventService.update(this.data.eventId, request as EventUpdateRequest).subscribe({

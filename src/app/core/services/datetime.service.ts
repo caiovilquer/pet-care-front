@@ -10,12 +10,7 @@ export class DateTimeService {
    * Resolve problema de diferença de 3 horas
    */
   formatDateTimeForAPI(date: Date): string {
-    if (!date) {
-      console.warn('DateTimeService.formatDateTimeForAPI - Date is null/undefined');
-      return '';
-    }
-
-    console.log('DateTimeService.formatDateTimeForAPI - Input date:', date);
+    if (!date) return '';
 
     // Usar timezone local em vez de UTC
     const year = date.getFullYear();
@@ -33,7 +28,25 @@ export class DateTimeService {
     const offsetString = `${offsetSign}${String(offsetHours).padStart(2, '0')}:${String(offsetMinutes).padStart(2, '0')}`;
 
     const result = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}${offsetString}`;
-    console.log('DateTimeService.formatDateTimeForAPI - Output:', result);
+    return result;
+  }
+
+  /**
+   * Formata uma data para envio à API SEM timezone (LocalDateTime)
+   * Para o backend que espera LocalDateTime sem timezone
+   */
+  formatDateTimeForAPIWithoutTimezone(date: Date): string {
+    if (!date) return '';
+
+    // Usar timezone local em vez de UTC
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+
+    const result = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
     return result;
   }
 
@@ -57,6 +70,28 @@ export class DateTimeService {
     const day = String(dateObj.getDate()).padStart(2, '0');
 
     return `${year}-${month}-${day}`;
+  }
+
+  /**
+   * Formata data como LocalDateTime com hora 00:00:00 (para finalDate da recorrência)
+   * Backend espera LocalDateTime mas semanticamente é apenas a data final
+   */
+  formatDateAsLocalDateTime(date: Date | string): string {
+    if (!date) return '';
+
+    let dateObj: Date;
+    if (date instanceof Date) {
+      dateObj = date;
+    } else {
+      dateObj = new Date(date);
+    }
+
+    // Usar timezone local para evitar mudança de dia
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const day = String(dateObj.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}T00:00:00`;
   }
 
   /**

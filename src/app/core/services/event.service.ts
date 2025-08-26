@@ -28,12 +28,10 @@ export class EventService {
   }
 
   create(event: EventCreateRequest): Observable<any> {
-    console.log('EventService.create - Enviando para API:', event);
     return this.http.post<any>(this.apiUrl, event);
   }
 
   update(id: number, event: EventUpdateRequest): Observable<any> {
-    console.log('EventService.update - Enviando para API:', { id, event });
     return this.http.put<any>(`${this.apiUrl}/${id}`, event);
   }
 
