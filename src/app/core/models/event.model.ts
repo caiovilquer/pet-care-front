@@ -42,7 +42,7 @@ export interface EventsPage {
 
 export interface EventCreateRequest {
   petId: number;
-  type: string;
+  type: EventType;
   description: string;
   dateStart: string; // format: date-time
   frequency?: RecurrenceFrequency;
@@ -52,7 +52,7 @@ export interface EventCreateRequest {
 }
 
 export interface EventUpdateRequest {
-    type?: string;
+    type?: EventType;
     description?: string;
     dateStart?: string; // format: date-time
     frequency?: RecurrenceFrequency;

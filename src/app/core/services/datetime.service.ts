@@ -10,7 +10,12 @@ export class DateTimeService {
    * Resolve problema de diferença de 3 horas
    */
   formatDateTimeForAPI(date: Date): string {
-    if (!date) return '';
+    if (!date) {
+      console.warn('DateTimeService.formatDateTimeForAPI - Date is null/undefined');
+      return '';
+    }
+
+    console.log('DateTimeService.formatDateTimeForAPI - Input date:', date);
 
     // Usar timezone local em vez de UTC
     const year = date.getFullYear();
@@ -27,7 +32,9 @@ export class DateTimeService {
     const offsetSign = timezoneOffset <= 0 ? '+' : '-';
     const offsetString = `${offsetSign}${String(offsetHours).padStart(2, '0')}:${String(offsetMinutes).padStart(2, '0')}`;
 
-    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}${offsetString}`;
+    const result = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}${offsetString}`;
+    console.log('DateTimeService.formatDateTimeForAPI - Output:', result);
+    return result;
   }
 
   /**
