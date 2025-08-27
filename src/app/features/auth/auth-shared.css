@@ -1,0 +1,230 @@
+/* Auth Shared Styles */
+.auth-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.auth-wrapper {
+  width: 100%;
+  max-width: 400px;
+}
+
+.auth-card {
+  padding: 2rem;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border-light);
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.auth-icon {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  height: 60px;
+  width: 60px;
+  border-radius: 50%;
+  margin: 0 auto 1rem auto;
+}
+
+.auth-header h1 {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+}
+
+.auth-subtitle {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.auth-subtitle.error {
+  color: var(--error-color);
+  font-weight: 500;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.auth-button {
+  height: 48px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 8px;
+  text-transform: none;
+  margin-bottom: 1rem;
+}
+
+.auth-links {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 0.5rem;
+}
+
+.auth-links a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+.auth-links a:hover {
+  background-color: rgba(var(--primary-color-rgb), 0.1);
+  color: var(--primary-dark);
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 2rem 1rem;
+  color: var(--text-secondary);
+}
+
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+.error-icon {
+  font-size: 48px;
+  height: 48px;
+  width: 48px;
+  color: var(--error-color);
+}
+
+.error-container p {
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Material Angular Override - matching login styles */
+::ng-deep .mat-mdc-form-field .mdc-text-field {
+  background-color: var(--bg-input) !important;
+  border-radius: 8px !important;
+}
+
+::ng-deep .mat-mdc-form-field-focus-overlay {
+  background-color: var(--primary-light) !important;
+}
+
+::ng-deep .mat-mdc-form-field.mat-focused .mdc-notched-outline {
+  border-color: var(--primary-color) !important;
+}
+
+::ng-deep .mat-mdc-form-field:not(.mat-form-field-disabled) .mdc-text-field:hover .mdc-notched-outline {
+  border-color: var(--primary-light) !important;
+}
+
+/* Remove all focus outlines */
+::ng-deep .mat-mdc-form-field .mdc-text-field:focus-within {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+::ng-deep .mat-mdc-form-field input:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+::ng-deep .mat-mdc-form-field.mat-focused .mdc-text-field {
+  box-shadow: none !important;
+}
+
+/* Snackbar styling */
+::ng-deep .mat-mdc-snack-bar-container.success-snackbar {
+  --mdc-snackbar-container-color: var(--success-color);
+}
+
+::ng-deep .mat-mdc-snack-bar-container.error-snackbar {
+  --mdc-snackbar-container-color: var(--error-color);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .auth-container {
+    padding: 16px;
+  }
+  
+  .auth-card {
+    padding: 1.5rem;
+    max-width: 100%;
+  }
+  
+  .auth-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 28px;
+  }
+  
+  .auth-header h1 {
+    font-size: 20px;
+  }
+  
+  .auth-subtitle {
+    font-size: 13px;
+  }
+
+  .full-width {
+    margin-bottom: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-container {
+    padding: 8px;
+  }
+
+  .auth-card {
+    padding: 1rem;
+    border-radius: 12px;
+  }
+
+  .auth-icon {
+    width: 45px;
+    height: 45px;
+    font-size: 24px;
+  }
+
+  .auth-header h1 {
+    font-size: 18px;
+  }
+}

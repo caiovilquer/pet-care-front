@@ -37,6 +37,12 @@
                 [disabled]="loginForm.invalid || isLoading" class="full-width">
           {{isLoading ? 'Entrando...' : 'Entrar'}}
         </button>
+
+        <div class="forgot-password-link">
+          <a routerLink="/auth/forgot-password" class="forgot-link">
+            Esqueci minha senha
+          </a>
+        </div>
       </form>
     </mat-card-content>
 
