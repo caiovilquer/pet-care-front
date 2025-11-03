@@ -843,8 +843,8 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
 
     .notification-badge {
       position: absolute;
-      top: 8px;
-      right: 8px;
+      top: 4px;
+      right: 4px;
       min-width: 18px;
       height: 18px;
       padding: 0 5px;
@@ -856,10 +856,11 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
       font-size: 11px;
       font-weight: 700;
       border-radius: 9px;
-      border: 2px solid var(--primary-color);
+      border: 2px solid white;
       box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4);
       z-index: 10;
       animation: badgePulse 2s ease-in-out infinite;
+      pointer-events: none;
     }
 
     @keyframes badgePulse {
@@ -1071,8 +1072,8 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
       }
 
       .notification-badge {
-        top: 6px;
-        right: 6px;
+        top: 2px;
+        right: 2px;
         min-width: 16px;
         height: 16px;
         font-size: 10px;
@@ -1131,8 +1132,8 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
       }
 
       .notification-badge {
-        top: 4px;
-        right: 4px;
+        top: 0px;
+        right: 0px;
         min-width: 14px;
         height: 14px;
         padding: 0 3px;
