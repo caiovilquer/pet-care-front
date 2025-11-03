@@ -107,7 +107,7 @@ export class EventsComponent implements OnInit {
     this.isLoading = true;
     this.eventService.getAll(this.currentPage, this.pageSize).subscribe({
       next: (page: EventsPage) => {
-        this.events = page.items;
+        this.events = this.sortEventsByDate(page.items);
         this.totalItems = page.total;
         this.isLoading = false;
       },
@@ -140,7 +140,7 @@ export class EventsComponent implements OnInit {
         })
       ).subscribe({
         next: (summaries: EventSummary[]) => {
-          this.events = summaries;
+          this.events = this.sortEventsByDate(summaries);
           this.totalItems = summaries.length;
           this.isLoading = false;
         },
@@ -328,5 +328,25 @@ export class EventsComponent implements OnInit {
 
   getPetName(petId: number): string {
     return this.petNamesMap[petId] || `Pet #${petId}`;
+  }
+
+  // Ordenar eventos por data (mais próximos primeiro)
+  private sortEventsByDate(events: EventSummary[]): EventSummary[] {
+    return events.sort((a, b) => {
+      const dateA = new Date(a.dateStart).getTime();
+      const dateB = new Date(b.dateStart).getTime();
+      return dateA - dateB; // Ordem crescente (mais próximos primeiro)
+    });
+  }
+
+  // Verificar se evento está próximo (7 dias)
+  isUpcomingEvent(dateStart: string, status: string): boolean {
+    if (status === 'DONE') return false;
+    
+    const now = new Date();
+    const eventDate = new Date(dateStart);
+    const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    
+    return eventDate >= now && eventDate <= nextWeek;
   }
 }

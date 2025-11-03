@@ -26,6 +26,14 @@
 
     <mat-card>
       <mat-card-content>
+        <!-- Legenda para eventos próximos -->
+        <div class="legend-container" *ngIf="events.length > 0">
+          <div class="legend-item">
+            <span class="legend-icon">⚡</span>
+            <span class="legend-text">Eventos próximos (7 dias) estão destacados</span>
+          </div>
+        </div>
+
         <div class="table-container" *ngIf="events.length > 0; else noEvents">
         <table mat-table [dataSource]="events" class="events-table">
           <ng-container matColumnDef="type">
@@ -94,7 +102,8 @@
           </ng-container>
 
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;" 
+              [class.upcoming-event]="isUpcomingEvent(row.dateStart, row.status)"></tr>
         </table>
 
         <mat-paginator 
