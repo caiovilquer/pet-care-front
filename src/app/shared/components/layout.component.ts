@@ -413,6 +413,10 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
     .user-details {
       flex: 1;
       min-width: 0; /* Allow text to truncate */
+      overflow: hidden; /* Ensure container handles overflow */
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
     .user-name {
@@ -420,6 +424,11 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
       margin: 0;
       color: var(--primary-dark);
       font-size: 16px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+      line-height: 1.2;
     }
 
     .user-email {
@@ -427,6 +436,11 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
       color: var(--text-secondary);
       margin: 6px 0 0 0;
       font-weight: 400;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+      word-break: break-all;
     }
 
     /* User Menu Specific Styles */
@@ -448,6 +462,9 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
       margin: 0;
       border-radius: 0;
       background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+      width: 100%;
+      max-width: 320px;
+      box-sizing: border-box;
     }
 
     .menu-item {
@@ -717,7 +734,7 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
 
     /* Animação e estilização do sino de notificação */
     .has-notifications {
-      color: #ff6f00;
+      color: var(--primary-color);
       position: relative;
     }
 
@@ -728,9 +745,11 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
       right: -2px;
       width: 8px;
       height: 8px;
-      background: #ff6f00;
+      background: #dc2626;
       border-radius: 50%;
       animation: pulse-dot 2s infinite;
+      border: 1px solid white;
+      box-shadow: 0 1px 4px rgba(220, 38, 38, 0.3);
     }
 
     @keyframes pulse-dot {
@@ -786,13 +805,15 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
     }
 
     ::ng-deep .mat-badge-content {
-      background: linear-gradient(135deg, #ff6f00 0%, #ff8f00 100%) !important;
+      background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
       color: white !important;
-      font-weight: 600 !important;
-      font-size: 11px !important;
+      font-weight: 700 !important;
+      font-size: 10px !important;
       min-width: 18px !important;
       height: 18px !important;
       line-height: 18px !important;
+      border: 2px solid white !important;
+      box-shadow: 0 2px 8px rgba(220, 38, 38, 0.4) !important;
     }
 
     .toolbar-avatar {
@@ -936,6 +957,22 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
 
       .user-menu {
         max-width: 90vw;
+        min-width: 280px;
+      }
+
+      .user-menu .user-info {
+        padding: 16px;
+        gap: 12px;
+      }
+
+      .user-menu .user-details {
+        min-width: 0;
+        flex: 1;
+      }
+
+      .user-menu .user-email {
+        font-size: 12px;
+        max-width: 180px;
       }
 
       .user-avatar {
@@ -990,6 +1027,26 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
       .main-toolbar {
         padding: 0 4px;
         justify-content: space-between;
+      }
+
+      .user-menu {
+        max-width: 95vw;
+        min-width: 260px;
+      }
+
+      .user-menu .user-info {
+        padding: 12px;
+        gap: 10px;
+      }
+
+      .user-menu .user-email {
+        font-size: 11px;
+        max-width: 160px;
+      }
+
+      .user-menu .user-name {
+        font-size: 14px;
+        max-width: 160px;
       }
     }
   `]
