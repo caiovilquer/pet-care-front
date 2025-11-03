@@ -6,6 +6,7 @@ export interface Pet {
     specie: string;
     race: string;
     birthdate: string; // format: date
+    photoUrl?: string; // URL da foto do pet
     events: EventInfo[];
 }
 
@@ -19,6 +20,7 @@ export interface PetSummary {
     id: number;
     name: string;
     specie: string;
+    photoUrl?: string; // URL da foto do pet
 }
 
 export interface PetsPage {
@@ -33,6 +35,7 @@ export interface PetCreateRequest {
     specie: string;
     race?: string;
     birthdate: string; // format: date
+    photoUrl?: string; // URL da foto do pet
 }
 
 export interface PetUpdateRequest {
@@ -40,4 +43,5 @@ export interface PetUpdateRequest {
     specie?: string;
     race?: string;
     birthdate?: string; // format: date
+    photoUrl?: string; // URL da foto do pet
 }

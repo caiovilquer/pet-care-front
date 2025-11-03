@@ -6,6 +6,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CommonModule } from '@angular/common';
 import { PetService } from '../../core/services/pet.service';
@@ -23,7 +25,9 @@ import { PetCreateRequest, PetUpdateRequest } from '../../core/models/pet.model'
     MatInputModule,
     MatButtonModule,
     MatSelectModule,
-    MatDatepickerModule
+    MatDatepickerModule,
+    MatIconModule,
+    MatTooltipModule
   ],
   templateUrl: './pet-form.component.html',
   styleUrls: ['./pet-form.component.css']
@@ -32,6 +36,7 @@ export class PetFormComponent implements OnInit {
   petForm: FormGroup;
   isEdit = false;
   isLoading = false;
+  photoPreviewUrl: string | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -46,11 +51,17 @@ export class PetFormComponent implements OnInit {
       name: ['', Validators.required],
       specie: ['', Validators.required],
       race: [''],
-      birthdate: ['']
+      birthdate: [''],
+      photoUrl: ['']
     });
   }
 
   ngOnInit(): void {
+    // Observar mudanças no campo photoUrl para preview
+    this.petForm.get('photoUrl')?.valueChanges.subscribe(url => {
+      this.updatePhotoPreview(url);
+    });
+
     if (this.isEdit) {
       this.petService.getById(this.data.id).subscribe(pet => {
         // Converter a string de data para objeto Date evitando problemas de timezone
@@ -64,6 +75,11 @@ export class PetFormComponent implements OnInit {
           birthdate: birthdate
         };
         this.petForm.patchValue(petData);
+        
+        // Configurar preview da foto se existir
+        if (pet.photoUrl) {
+          this.updatePhotoPreview(pet.photoUrl);
+        }
       });
     }
   }
@@ -80,7 +96,8 @@ export class PetFormComponent implements OnInit {
       name: formValue.name,
       specie: formValue.specie,
       race: formValue.race,
-      birthdate: formValue.birthdate ? this.dateTimeService.formatDateOnlyForAPI(formValue.birthdate) : ''
+      birthdate: formValue.birthdate ? this.dateTimeService.formatDateOnlyForAPI(formValue.birthdate) : '',
+      photoUrl: formValue.photoUrl || ''
     };
 
     if (this.isEdit) {
@@ -110,5 +127,37 @@ export class PetFormComponent implements OnInit {
 
   onCancel(): void {
     this.dialogRef.close();
+  }
+
+  updatePhotoPreview(url: string): void {
+    if (url && this.isValidImageUrl(url)) {
+      this.photoPreviewUrl = url;
+    } else {
+      this.photoPreviewUrl = null;
+    }
+  }
+
+  private isValidImageUrl(url: string): boolean {
+    try {
+      new URL(url);
+      return /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(url) || 
+             url.includes('drive.google.com') ||
+             url.includes('imgur.com') ||
+             url.includes('cloudinary.com');
+    } catch {
+      return false;
+    }
+  }
+
+  onPhotoError(): void {
+    this.photoPreviewUrl = null;
+    this.snackBar.open('Não foi possível carregar a imagem. Verifique a URL.', 'Fechar', { 
+      duration: 3000 
+    });
+  }
+
+  removePhoto(): void {
+    this.petForm.patchValue({ photoUrl: '' });
+    this.photoPreviewUrl = null;
   }
 }

@@ -180,6 +180,86 @@ mat-dialog-actions {
 .pet-type-option.bird mat-icon { color: var(--bird-color); }
 .pet-type-option.other mat-icon { color: var(--other-color); }
 
+/* Photo Section Styles */
+.photo-section {
+  margin-bottom: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--bg-hover);
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--primary-color);
+}
+
+.photo-preview {
+  margin-top: var(--spacing-md);
+  text-align: center;
+}
+
+.preview-container {
+  position: relative;
+  display: inline-block;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+
+.preview-image {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  transition: all 0.3s ease;
+}
+
+.preview-image:hover {
+  transform: scale(1.05);
+}
+
+.remove-photo-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(239, 68, 68, 0.9) !important;
+  color: white !important;
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  border-radius: 50% !important;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease !important;
+}
+
+.remove-photo-btn:hover {
+  background: rgba(239, 68, 68, 1) !important;
+  transform: scale(1.1) !important;
+}
+
+.remove-photo-btn mat-icon {
+  font-size: 16px !important;
+  width: 16px !important;
+  height: 16px !important;
+}
+
+.preview-label {
+  margin-top: var(--spacing-xs);
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* Photo URL field styling */
+::ng-deep .photo-section .mat-mdc-form-field .mat-mdc-text-field-wrapper {
+  background: var(--bg-surface) !important;
+}
+
+::ng-deep .photo-section .mat-mdc-form-field-hint {
+  color: var(--text-muted) !important;
+  font-size: 0.8rem !important;
+}
+
+::ng-deep .photo-section .mat-mdc-form-field .mat-mdc-form-field-icon-suffix {
+  color: var(--primary-color) !important;
+}
+
 /* Mobile responsive */
 @media (max-width: 768px) {
   .form-row {
@@ -196,5 +276,14 @@ mat-dialog-actions {
   
   mat-dialog-actions {
     padding: var(--spacing-sm) !important;
+  }
+  
+  .preview-image {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .photo-section {
+    padding: var(--spacing-sm);
   }
 }

@@ -22,19 +22,40 @@
     <mat-card-content>
       <div class="table-container" *ngIf="pets.length > 0; else noPets">
         <table mat-table [dataSource]="pets" class="pets-table">
+          <ng-container matColumnDef="photo">
+            <th mat-header-cell *matHeaderCellDef>Foto</th>
+            <td mat-cell *matCellDef="let pet">
+              <div class="pet-avatar">
+                @if (pet.photoUrl) {
+                  <img 
+                    [src]="pet.photoUrl" 
+                    [alt]="pet.name"
+                    [attr.data-specie]="pet.specie"
+                    class="pet-photo"
+                    (error)="onImageError($event)">
+                } @else {
+                  <div class="pet-placeholder">
+                    <span class="pet-emoji">{{ getDefaultPetImage(pet.specie) }}</span>
+                  </div>
+                }
+              </div>
+            </td>
+          </ng-container>
+
           <ng-container matColumnDef="name">
             <th mat-header-cell *matHeaderCellDef>Nome</th>
             <td mat-cell *matCellDef="let pet">
-              <div class="pet-name">
-                <mat-icon class="pet-icon">pets</mat-icon>
-                {{pet.name}}
+              <div class="pet-info">
+                <strong>{{pet.name}}</strong>
               </div>
             </td>
           </ng-container>
 
           <ng-container matColumnDef="specie">
             <th mat-header-cell *matHeaderCellDef>Espécie</th>
-            <td mat-cell *matCellDef="let pet">{{pet.specie}}</td>
+            <td mat-cell *matCellDef="let pet">
+              <span class="pet-specie">{{pet.specie}}</span>
+            </td>
           </ng-container>
 
           <ng-container matColumnDef="actions">

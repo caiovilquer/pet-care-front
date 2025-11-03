@@ -37,6 +37,37 @@
       <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
       <mat-datepicker #picker></mat-datepicker>
     </mat-form-field>
+
+    <div class="photo-section">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>URL da Foto</mat-label>
+        <input matInput 
+               formControlName="photoUrl" 
+               placeholder="https://exemplo.com/foto-do-pet.jpg"
+               type="url">
+        <mat-icon matSuffix>photo_camera</mat-icon>
+        <mat-hint>Cole a URL de uma foto do seu pet</mat-hint>
+      </mat-form-field>
+
+      @if (photoPreviewUrl) {
+        <div class="photo-preview">
+          <div class="preview-container">
+            <img [src]="photoPreviewUrl" 
+                 (error)="onPhotoError()"
+                 class="preview-image"
+                 alt="Preview da foto do pet">
+            <button mat-icon-button 
+                    type="button"
+                    class="remove-photo-btn"
+                    (click)="removePhoto()"
+                    matTooltip="Remover foto">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+          <p class="preview-label">Preview da foto</p>
+        </div>
+      }
+    </div>
   </form>
 </mat-dialog-content>
 

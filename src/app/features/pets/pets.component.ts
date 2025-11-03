@@ -35,7 +35,7 @@ export class PetsComponent implements OnInit {
   totalItems = 0;
   currentPage = 0;
   pageSize = 10;
-  displayedColumns: string[] = ['name', 'specie', 'actions'];
+  displayedColumns: string[] = ['photo', 'name', 'specie', 'actions'];
   isLoading = true;
 
   constructor(
@@ -119,5 +119,38 @@ export class PetsComponent implements OnInit {
         }
       });
     }
+  }
+
+  getDefaultPetImage(specie: string): string {
+    // Retorna uma imagem padrão baseada na espécie
+    const defaultImages: { [key: string]: string } = {
+      'Cão': '🐕',
+      'Gato': '🐱',
+      'Pássaro': '🐦',
+      'Hamster': '🐹',
+      'Coelho': '🐰',
+      'Peixe': '🐠'
+    };
+    return defaultImages[specie] || '🐾';
+  }
+
+  onImageError(event: Event): void {
+    const imgElement = event.target as HTMLImageElement;
+    const petSpecie = imgElement.getAttribute('data-specie') || 'Pet';
+    // Criar um avatar com emoji como fallback
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = 40;
+    canvas.height = 40;
+    
+    if (ctx) {
+      ctx.fillStyle = '#f5f5f5';
+      ctx.fillRect(0, 0, 40, 40);
+      ctx.font = '20px serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(this.getDefaultPetImage(petSpecie), 20, 25);
+    }
+    
+    imgElement.src = canvas.toDataURL();
   }
 }
