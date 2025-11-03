@@ -19,8 +19,17 @@
   <!-- Informações Principais -->
   <mat-card class="pet-info-card">
     <mat-card-header>
-      <div mat-card-avatar class="pet-avatar">
-        <mat-icon class="pet-icon">pets</mat-icon>
+      <div mat-card-avatar class="pet-avatar-large">
+        @if (pet.photoUrl) {
+          <img [src]="pet.photoUrl" 
+               (error)="onImageError($event)"
+               class="pet-photo-large"
+               [alt]="'Foto de ' + pet.name">
+        } @else {
+          <div class="pet-placeholder-large">
+            <span class="pet-emoji-large">{{getDefaultPetImage(pet.specie)}}</span>
+          </div>
+        }
       </div>
       <mat-card-title>{{pet.name}}</mat-card-title>
       <mat-card-subtitle>{{pet.specie}} • {{pet.race || 'Raça não informada'}}</mat-card-subtitle>

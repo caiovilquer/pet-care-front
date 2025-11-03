@@ -103,6 +103,89 @@
   position: relative;
 }
 
+/* Large pet avatar for detail page */
+.pet-avatar-large {
+  position: relative;
+  width: 120px !important;
+  height: 120px !important;
+  border-radius: var(--radius-full) !important;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--bg-surface), var(--bg-hover));
+  border: 4px solid transparent;
+  background-clip: padding-box;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+.pet-avatar-large::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  right: -6px;
+  bottom: -6px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(45deg, 
+    var(--primary-color), 
+    var(--secondary-color), 
+    var(--accent-color)
+  );
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.pet-avatar-large:hover {
+  transform: scale(1.05);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.pet-avatar-large:hover::before {
+  opacity: 1;
+}
+
+.pet-photo-large {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: all 0.3s ease;
+  border-radius: var(--radius-full);
+}
+
+.pet-photo-large:hover {
+  transform: scale(1.1);
+}
+
+.pet-photo-large.fallback-image {
+  border-radius: var(--radius-full);
+}
+
+.pet-placeholder-large {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  transition: all 0.3s ease;
+}
+
+.pet-emoji-large {
+  font-size: 48px;
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  transition: all 0.3s ease;
+}
+
+.pet-avatar-large:hover .pet-emoji-large {
+  transform: scale(1.1);
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
+}
+
 .pet-avatar::before {
   content: '';
   position: absolute;
@@ -392,5 +475,14 @@
   
   .event-status {
     align-self: flex-end;
+  }
+  
+  .pet-avatar-large {
+    width: 100px !important;
+    height: 100px !important;
+  }
+  
+  .pet-emoji-large {
+    font-size: 40px;
   }
 }
