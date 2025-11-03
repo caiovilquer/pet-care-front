@@ -1,21 +1,32 @@
 <div class="events-container">
-  <div class="events-header">
-    <h1>{{ petId ? 'Eventos de ' + (petName || 'Carregando...') : 'Todos os Eventos' }}</h1>
-    <div class="header-actions">
-      <button *ngIf="petId" mat-button (click)="goBackToAllEvents()" class="back-button">
-        <mat-icon>arrow_back</mat-icon>
-        Voltar para todos os eventos
-      </button>
-      <button mat-raised-button color="primary" (click)="openEventForm()">
-        <mat-icon>add</mat-icon>
-        Novo Evento
-      </button>
+  <!-- Loading State -->
+  @if (isLoading) {
+    <div class="loading-container">
+      <div class="loading-card">
+        <mat-spinner diameter="60"></mat-spinner>
+        <h2>Carregando eventos...</h2>
+        <p>Buscando informações dos eventos {{ petId ? 'do pet' : 'cadastrados' }}</p>
+      </div>
     </div>
-  </div>
+  } @else {
+    <!-- Main Content -->
+    <div class="events-header">
+      <h1>{{ petId ? 'Eventos de ' + (petName || 'Pet') : 'Todos os Eventos' }}</h1>
+      <div class="header-actions">
+        <button *ngIf="petId" mat-button (click)="goBackToAllEvents()" class="back-button">
+          <mat-icon>arrow_back</mat-icon>
+          Voltar para todos os eventos
+        </button>
+        <button mat-raised-button color="primary" (click)="openEventForm()">
+          <mat-icon>add</mat-icon>
+          Novo Evento
+        </button>
+      </div>
+    </div>
 
-  <mat-card>
-    <mat-card-content>
-      <div class="table-container" *ngIf="events.length > 0; else noEvents">
+    <mat-card>
+      <mat-card-content>
+        <div class="table-container" *ngIf="events.length > 0; else noEvents">
         <table mat-table [dataSource]="events" class="events-table">
           <ng-container matColumnDef="type">
             <th mat-header-cell *matHeaderCellDef>Tipo</th>
@@ -97,17 +108,18 @@
         </mat-paginator>
       </div>
 
-      <ng-template #noEvents>
-        <div class="no-events">
-          <mat-icon class="no-events-icon">event_busy</mat-icon>
-          <h2>Nenhum evento encontrado</h2>
-          <p>Crie um novo evento para começar.</p>
-          <button mat-raised-button color="primary" (click)="openEventForm()">
-            <mat-icon>add</mat-icon>
-            Novo Evento
-          </button>
-        </div>
-      </ng-template>
-    </mat-card-content>
-  </mat-card>
+        <ng-template #noEvents>
+          <div class="no-events">
+            <mat-icon class="no-events-icon">event_busy</mat-icon>
+            <h2>Nenhum evento encontrado</h2>
+            <p>Crie um novo evento para começar.</p>
+            <button mat-raised-button color="primary" (click)="openEventForm()">
+              <mat-icon>add</mat-icon>
+              Novo Evento
+            </button>
+          </div>
+        </ng-template>
+      </mat-card-content>
+    </mat-card>
+  } <!-- Fim do @else -->
 </div>
