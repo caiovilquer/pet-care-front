@@ -97,7 +97,7 @@ export class GoogleMapsService {
 
     // Campos completos com todos os dados de contato e detalhes
     const detailFields = isUltraEconomic ? 
-      [...basicFields, 'formatted_phone_number', 'website'] : 
+      [...basicFields, 'formatted_phone_number', 'website', 'opening_hours'] : 
       [
         ...searchFields, 
         'formatted_phone_number',  // Telefone formatado
@@ -107,7 +107,7 @@ export class GoogleMapsService {
         'photos',                   // Fotos do local
         'price_level',              // Nível de preços
         'editorial_summary',        // Resumo editorial do Google
-        'current_opening_hours',    // Horários atuais
+        'opening_hours',            // Horários de funcionamento (inclui weekday_text)
         'reviews',                  // Avaliações
         'types',                    // Tipos de estabelecimento
         'vicinity',                 // Endereço simplificado
@@ -600,6 +600,25 @@ export class GoogleMapsService {
     const latValue: number = typeof location?.lat === 'function' ? location.lat() : Number(location?.lat ?? 0);
     const lngValue: number = typeof location?.lng === 'function' ? location.lng() : Number(location?.lng ?? 0);
 
+    // Debug: Ver o que está vindo do Google
+    console.log('Full place data from Google:', {
+      name: place.name,
+      opening_hours: place.opening_hours,
+      has_weekday_text: place.opening_hours?.weekday_text?.length || 0,
+      has_periods: (place.opening_hours as any)?.periods?.length || 0
+    });
+
+    if (place.opening_hours) {
+      console.log('Opening hours details:', {
+        name: place.name,
+        openNow: place.opening_hours.open_now,
+        weekdayText: place.opening_hours.weekday_text,
+        periods: (place.opening_hours as any).periods
+      });
+    } else {
+      console.warn('No opening hours data for:', place.name);
+    }
+
     // Processar fotos se disponíveis (com cache automático)
     const photos = this.extractPhotoUrls(place.photos);
 
@@ -717,7 +736,7 @@ export class GoogleMapsService {
   }
 
   /**
-   * Busca avaliações de um lugar com cache
+   * Busca reviews de um lugar específico com cache
    */
   getPlaceReviews(placeId: string): Observable<any[]> {
     const cacheKey = this.cacheService.generateKey('place_reviews', { placeId });
@@ -726,6 +745,53 @@ export class GoogleMapsService {
       cacheKey,
       () => this.performReviewsSearch(placeId),
       { ttl: 6 * 60, maxSize: 50 } // 6 horas de cache para reviews
+    );
+  }
+
+  /**
+   * Busca APENAS os horários de funcionamento de um lugar
+   */
+  getPlaceOpeningHours(placeId: string): Observable<{ openNow: boolean; weekdayText: string[] } | null> {
+    const cacheKey = this.cacheService.generateKey('place_hours', { placeId });
+    
+    return this.cacheService.getOrSet(
+      cacheKey,
+      () => this.performOpeningHoursSearch(placeId),
+      { ttl: 12 * 60, maxSize: 200 } // 12 horas de cache para horários
+    );
+  }
+
+  private performOpeningHoursSearch(placeId: string): Observable<{ openNow: boolean; weekdayText: string[] } | null> {
+    return from(this.loadGoogleMaps()).pipe(
+      switchMap(() => {
+        const service = new google.maps.places.PlacesService(
+          document.createElement('div')
+        );
+
+        const request = {
+          placeId: placeId,
+          fields: ['opening_hours'] // Solicitar APENAS horários
+        };
+
+        return new Promise<{ openNow: boolean; weekdayText: string[] } | null>((resolve, reject) => {
+          service.getDetails(request, (place, status) => {
+            if (status === google.maps.places.PlacesServiceStatus.OK && place?.opening_hours) {
+              console.log('Horários obtidos do Google para place:', placeId, place.opening_hours);
+              resolve({
+                openNow: place.opening_hours.open_now || false,
+                weekdayText: place.opening_hours.weekday_text || []
+              });
+            } else {
+              console.warn('Sem horários disponíveis no Google para place:', placeId);
+              resolve(null);
+            }
+          });
+        });
+      }),
+      catchError(error => {
+        console.error('Erro ao buscar horários:', error);
+        return of(null);
+      })
     );
   }
 

@@ -242,6 +242,27 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
       width: 100%;
     }
 
+    /* Placeholder styling - fonte menor */
+    ::ng-deep .mat-mdc-form-field input::placeholder {
+      font-size: 0.75rem !important;
+      color: rgba(0, 0, 0, 0.5) !important;
+    }
+
+    ::ng-deep .mat-mdc-form-field input::-webkit-input-placeholder {
+      font-size: 0.75rem !important;
+      color: rgba(0, 0, 0, 0.5) !important;
+    }
+
+    ::ng-deep .mat-mdc-form-field input::-moz-placeholder {
+      font-size: 0.75rem !important;
+      color: rgba(0, 0, 0, 0.5) !important;
+    }
+
+    ::ng-deep .mat-mdc-form-field input:-ms-input-placeholder {
+      font-size: 0.75rem !important;
+      color: rgba(0, 0, 0, 0.5) !important;
+    }
+
 
 
     ::ng-deep .mat-mdc-form-field.mat-focused .mdc-text-field {

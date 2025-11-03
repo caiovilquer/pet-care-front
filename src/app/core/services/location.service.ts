@@ -181,7 +181,7 @@ export class LocationService {
             );
 
             return forkJoin(distanceCalculations).pipe(
-              map((placesWithDistances: any) => {
+              switchMap((placesWithDistances: any) => {
                 // Filtrar por distância real
                 // params.radius está em quilômetros, distance do Google Maps também está em quilômetros
                 const maxDistanceKm = params.radius;
@@ -202,11 +202,14 @@ export class LocationService {
                   this.convertGooglePlaceToPetshop(place)
                 );
 
-                return {
-                  locations,
-                  total: locations.length,
-                  searchParams: params
-                } as LocationSearchResponse;
+                // Buscar horários reais do Google para cada local (em paralelo)
+                return this.enrichLocationsWithRealHours(locations).pipe(
+                  map(enrichedLocations => ({
+                    locations: enrichedLocations,
+                    total: enrichedLocations.length,
+                    searchParams: params
+                  } as LocationSearchResponse))
+                );
               })
             );
           })
@@ -305,7 +308,7 @@ export class LocationService {
             );
 
             return forkJoin(distanceCalculations).pipe(
-              map((placesWithDistances: any) => {
+              switchMap((placesWithDistances: any) => {
                 // Filtrar por distância real
                 // params.radius está em quilômetros, distance do Google Maps também está em quilômetros
                 const maxDistanceKm = params.radius;
@@ -326,11 +329,14 @@ export class LocationService {
                   this.convertGooglePlaceToVeterinary(place)
                 );
 
-                return {
-                  locations,
-                  total: locations.length,
-                  searchParams: params
-                } as LocationSearchResponse;
+                // Buscar horários reais do Google para cada local (em paralelo)
+                return this.enrichLocationsWithRealHours(locations).pipe(
+                  map(enrichedLocations => ({
+                    locations: enrichedLocations,
+                    total: enrichedLocations.length,
+                    searchParams: params
+                  } as LocationSearchResponse))
+                );
               })
             );
           })
@@ -590,10 +596,58 @@ export class LocationService {
     return emergencyKeywords.some(keyword => nameLower.includes(keyword));
   }
 
+  /**
+   * Enriquece localizações com horários reais do Google Maps
+   */
+  private enrichLocationsWithRealHours(locations: Location[]): Observable<Location[]> {
+    if (locations.length === 0) {
+      return of([]);
+    }
+
+    console.log(`Buscando horários reais para ${locations.length} locais...`);
+
+    // Buscar horários de cada local em paralelo
+    const hoursRequests = locations.map(location =>
+      this.googleMapsService.getPlaceOpeningHours(location.id).pipe(
+        map(hours => ({
+          location,
+          hours
+        })),
+        catchError(() => of({ location, hours: null }))
+      )
+    );
+
+    return forkJoin(hoursRequests).pipe(
+      map(results => {
+        return results.map(result => {
+          if (result.hours && result.hours.weekdayText && result.hours.weekdayText.length > 0) {
+            // Atualizar com horários reais do Google
+            const realHours = this.convertGoogleHoursToOpeningHours(result.hours);
+            return {
+              ...result.location,
+              openingHours: realHours,
+              isOpen: result.hours.openNow
+            };
+          }
+          // Manter como está se não houver horários
+          return result.location;
+        });
+      }),
+      catchError(error => {
+        console.error('Erro ao buscar horários reais:', error);
+        // Em caso de erro, retornar locais sem alteração
+        return of(locations);
+      })
+    );
+  }
+
   private convertGoogleHoursToOpeningHours(googleHours?: { openNow: boolean; weekdayText: string[] }) {
-    if (!googleHours || !googleHours.weekdayText) {
+    if (!googleHours || !googleHours.weekdayText || googleHours.weekdayText.length === 0) {
+      console.warn('No Google hours available, using default hours');
       return this.getDefaultOpeningHours();
     }
+
+    console.log('Converting Google hours:', googleHours.weekdayText);
 
     const openingHours = {
       sunday: this.parseGoogleDaySchedule(googleHours.weekdayText[0]),
@@ -605,6 +659,8 @@ export class LocationService {
       saturday: this.parseGoogleDaySchedule(googleHours.weekdayText[6])
     };
 
+    console.log('Parsed opening hours:', openingHours);
+
     return openingHours;
   }
 
@@ -613,69 +669,87 @@ export class LocationService {
       return { isOpen: false };
     }
 
-    const timeText = dayText.split(': ')[1];
+    // Extrair a parte após o nome do dia (após os dois pontos)
+    const parts = dayText.split(': ');
+    const timeText = parts.length > 1 ? parts[1] : dayText;
     
-    if (!timeText || timeText.toLowerCase().includes('closed') || timeText.toLowerCase().includes('fechado')) {
+    // Verificar se está fechado
+    if (!timeText || 
+        timeText.toLowerCase().includes('closed') || 
+        timeText.toLowerCase().includes('fechado') ||
+        timeText.toLowerCase().includes('unavailable')) {
       return { isOpen: false };
     }
 
-    if (timeText.toLowerCase().includes('24 hours') || timeText.toLowerCase().includes('24 horas')) {
+    // Verificar se é 24 horas
+    if (timeText.toLowerCase().includes('24 hours') || 
+        timeText.toLowerCase().includes('24 horas') ||
+        timeText.toLowerCase().includes('open 24 hours')) {
       return { isOpen: true, openTime: '00:00', closeTime: '23:59' };
     }
 
-    const timeMatch = timeText.match(/(\d{1,2}):?(\d{0,2})\s?(AM|PM)?\s?[–-]\s?(\d{1,2}):?(\d{0,2})\s?(AM|PM)?/i);
-    
-    if (timeMatch) {
-      const openHour = parseInt(timeMatch[1]);
-      const openMin = timeMatch[2] ? parseInt(timeMatch[2]) : 0;
-      const openPeriod = timeMatch[3];
-      const closeHour = parseInt(timeMatch[4]);
-      const closeMin = timeMatch[5] ? parseInt(timeMatch[5]) : 0;
-      const closePeriod = timeMatch[6];
+    // Tentar extrair horários em diferentes formatos
+    // Formato: 9:00 AM – 6:00 PM ou 09:00 - 18:00
+    const patterns = [
+      /(\d{1,2}):(\d{2})\s?(AM|PM)?\s?[–\-]\s?(\d{1,2}):(\d{2})\s?(AM|PM)?/i,
+      /(\d{1,2}):(\d{2})\s?[–\-]\s?(\d{1,2}):(\d{2})/,
+      /(\d{1,2})\s?(AM|PM)?\s?[–\-]\s?(\d{1,2})\s?(AM|PM)?/i
+    ];
 
-      let openTime24 = openHour;
-      let closeTime24 = closeHour;
+    for (const pattern of patterns) {
+      const timeMatch = timeText.match(pattern);
+      
+      if (timeMatch) {
+        let openHour = parseInt(timeMatch[1]);
+        let openMin = timeMatch[2] ? parseInt(timeMatch[2]) : 0;
+        const openPeriod = timeMatch[3];
+        let closeHour = parseInt(timeMatch[4] || timeMatch[3]);
+        let closeMin = timeMatch[5] ? parseInt(timeMatch[5]) : 0;
+        const closePeriod = timeMatch[6] || timeMatch[4];
 
-      if (openPeriod) {
-        if (openPeriod.toLowerCase() === 'pm' && openHour !== 12) {
-          openTime24 = openHour + 12;
-        } else if (openPeriod.toLowerCase() === 'am' && openHour === 12) {
-          openTime24 = 0;
+        // Converter para formato 24h se houver AM/PM
+        if (openPeriod && openPeriod.toLowerCase() === 'pm' && openHour !== 12) {
+          openHour += 12;
+        } else if (openPeriod && openPeriod.toLowerCase() === 'am' && openHour === 12) {
+          openHour = 0;
         }
-      }
 
-      if (closePeriod) {
-        if (closePeriod.toLowerCase() === 'pm' && closeHour !== 12) {
-          closeTime24 = closeHour + 12;
-        } else if (closePeriod.toLowerCase() === 'am' && closeHour === 12) {
-          closeTime24 = 0;
+        if (closePeriod && closePeriod.toLowerCase() === 'pm' && closeHour !== 12) {
+          closeHour += 12;
+        } else if (closePeriod && closePeriod.toLowerCase() === 'am' && closeHour === 12) {
+          closeHour = 0;
         }
+
+        const openTime = `${openHour.toString().padStart(2, '0')}:${openMin.toString().padStart(2, '0')}`;
+        const closeTime = `${closeHour.toString().padStart(2, '0')}:${closeMin.toString().padStart(2, '0')}`;
+
+        console.log(`Parsed hours for "${dayText}": ${openTime} - ${closeTime}`);
+
+        return {
+          isOpen: true,
+          openTime,
+          closeTime
+        };
       }
-
-      const openTime = `${openTime24.toString().padStart(2, '0')}:${openMin.toString().padStart(2, '0')}`;
-      const closeTime = `${closeTime24.toString().padStart(2, '0')}:${closeMin.toString().padStart(2, '0')}`;
-
-      return {
-        isOpen: true,
-        openTime,
-        closeTime
-      };
     }
 
+    // Se chegou aqui e não é fechado, assumir aberto com horário padrão
+    console.warn(`Could not parse hours for: "${dayText}", using default open hours`);
     return { isOpen: true, openTime: '09:00', closeTime: '18:00' };
   }
 
   private getDefaultOpeningHours() {
-    const defaultHours = { isOpen: true, openTime: '08:00', closeTime: '18:00' };
+    // Não usar horários mockados - retornar estrutura vazia
+    const noHours = { isOpen: false, openTime: undefined, closeTime: undefined };
     
     return {
-      monday: defaultHours,
-      tuesday: defaultHours,
-      wednesday: defaultHours,
-      thursday: defaultHours,
-      friday: defaultHours,
-      saturday: { isOpen: true, openTime: '08:00', closeTime: '14:00' },
-      sunday: { isOpen: false }
+      monday: noHours,
+      tuesday: noHours,
+      wednesday: noHours,
+      thursday: noHours,
+      friday: noHours,
+      saturday: noHours,
+      sunday: noHours
     };
   }
 

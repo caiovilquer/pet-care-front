@@ -253,13 +253,20 @@ import { of } from 'rxjs';
                     </div>
                     
                     <div class="day-time">
-                      <span *ngIf="isDayOpen(day.key); else closedDay">
+                      <span *ngIf="isDayOpen(day.key) && getDayHours(day.key) !== 'Horário não informado'; else closedOrUnknown">
                         {{ getDayHours(day.key) }}
                       </span>
-                      <ng-template #closedDay>
-                        <span class="closed-text">Fechado</span>
+                      <ng-template #closedOrUnknown>
+                        <span class="closed-text">{{ getDayHours(day.key) }}</span>
                       </ng-template>
                     </div>
+                  </div>
+                  
+                  <!-- Mensagem quando não há horários disponíveis -->
+                  <div class="no-hours-info" *ngIf="!hasOpeningHoursData()">
+                    <mat-icon>info_outline</mat-icon>
+                    <p>Horários de funcionamento não disponíveis no Google Maps.</p>
+                    <p class="small-text">Entre em contato diretamente com o estabelecimento para confirmar os horários.</p>
                   </div>
                 </div>
 
@@ -756,6 +763,34 @@ import { of } from 'rxjs';
 
     .closed-text {
       font-style: italic;
+      color: #999;
+    }
+
+    .no-hours-info {
+      text-align: center;
+      padding: 2rem 1rem;
+      margin-top: 1rem;
+      background: #fff3e0;
+      border-radius: 8px;
+      border: 1px dashed #ff9800;
+    }
+
+    .no-hours-info mat-icon {
+      font-size: 32px;
+      width: 32px;
+      height: 32px;
+      color: #ff9800;
+      margin-bottom: 0.5rem;
+    }
+
+    .no-hours-info p {
+      margin: 0.5rem 0;
+      color: #666;
+    }
+
+    .no-hours-info .small-text {
+      font-size: 0.85rem;
+      color: #888;
     }
 
     .next-open {
@@ -1242,6 +1277,15 @@ export class LocationDetailComponent implements OnInit, OnDestroy {
       (this.detailedInfo.accessibility && this.detailedInfo.accessibility.length > 0) ||
       (this.detailedInfo.paymentMethods && this.detailedInfo.paymentMethods.length > 0)
     );
+  }
+
+  hasOpeningHoursData(): boolean {
+    // Verifica se há pelo menos um dia com horário definido
+    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    return days.some(day => {
+      const schedule = this.location.openingHours[day as keyof typeof this.location.openingHours];
+      return schedule && (schedule.openTime !== undefined || schedule.closeTime !== undefined);
+    });
   }
 
   isToday(dayIndex: number): boolean {
