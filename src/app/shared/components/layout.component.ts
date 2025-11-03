@@ -220,6 +220,13 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
       border-right: 1px solid var(--border-light);
       box-shadow: 2px 0 20px rgba(99, 102, 241, 0.08);
       overflow: hidden;
+      scrollbar-width: none;
+    }
+
+    .sidenav::-webkit-scrollbar {
+      display: none;
+      width: 0;
+      height: 0;
     }
 
     .sidenav-header {
@@ -331,6 +338,13 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
       overflow: hidden;
       height: auto;
       max-height: none;
+      scrollbar-width: none;
+    }
+
+    mat-nav-list::-webkit-scrollbar {
+      display: none;
+      width: 0;
+      height: 0;
     }
 
     mat-nav-list a {
@@ -425,7 +439,7 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      max-width: 100%;
+      max-width: 240px;
       line-height: 1.2;
     }
 
@@ -437,14 +451,14 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      max-width: 100%;
+      max-width: 240px;
       word-break: break-all;
     }
 
     /* User Menu Specific Styles */
     .user-menu {
-      min-width: 280px;
-      max-width: 320px;
+      min-width: 320px;
+      max-width: 380px;
       border-radius: 12px;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
       border: 1px solid var(--border-light);
@@ -461,7 +475,7 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
       border-radius: 0;
       background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
       width: 100%;
-      max-width: 320px;
+      max-width: 380px;
       box-sizing: border-box;
     }
 
@@ -796,9 +810,27 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
     /* Remove barra de rolagem do sidenav */
     ::ng-deep .mat-drawer-inner-container {
       overflow: hidden !important;
+      scrollbar-width: none !important;
+    }
+
+    ::ng-deep .mat-drawer-inner-container::-webkit-scrollbar {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
     }
 
     ::ng-deep .mat-sidenav {
+      overflow: hidden !important;
+      scrollbar-width: none !important;
+    }
+
+    ::ng-deep .mat-sidenav::-webkit-scrollbar {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+    }
+
+    ::ng-deep .mat-sidenav-container {
       overflow: hidden !important;
     }
 
@@ -955,7 +987,7 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
 
       .user-menu {
         max-width: 90vw;
-        min-width: 280px;
+        min-width: 320px;
       }
 
       .user-menu .user-info {
@@ -970,7 +1002,11 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
 
       .user-menu .user-email {
         font-size: 12px;
-        max-width: 180px;
+        max-width: 220px;
+      }
+
+      .user-menu .user-name {
+        max-width: 220px;
       }
 
       .user-avatar {
@@ -1029,7 +1065,7 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
 
       .user-menu {
         max-width: 95vw;
-        min-width: 260px;
+        min-width: 300px;
       }
 
       .user-menu .user-info {
@@ -1039,12 +1075,12 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
 
       .user-menu .user-email {
         font-size: 11px;
-        max-width: 160px;
+        max-width: 200px;
       }
 
       .user-menu .user-name {
         font-size: 14px;
-        max-width: 160px;
+        max-width: 200px;
       }
     }
   `]
