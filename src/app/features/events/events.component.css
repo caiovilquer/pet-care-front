@@ -26,14 +26,15 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: var(--spacing-xl);
-  padding: var(--spacing-lg);
+  padding: var(--spacing-md) var(--spacing-lg);
   background: var(--bg-card);
   backdrop-filter: blur(20px);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-hover);
+  box-shadow: var(--shadow-card);
   border: 1px solid var(--border-light);
   position: relative;
   z-index: 1;
+  overflow: hidden;
   animation: fadeInUp 0.6s ease-out;
 }
 

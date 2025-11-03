@@ -94,15 +94,7 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
             <span matListItemTitle>Perfil</span>
           </a>
 
-          <!-- Seção de Debug (apenas em desenvolvimento) -->
-          <div *ngIf="!isProduction">
-            <mat-divider></mat-divider>
-            <h3 class="nav-section-title">Debug</h3>
-            <a mat-list-item routerLink="/search-monitor" routerLinkActive="active" (click)="closeSidenavOnMobile()">
-              <mat-icon matListItemIcon>analytics</mat-icon>
-              <span matListItemTitle>Monitor de Busca</span>
-            </a>
-          </div>
+
         </mat-nav-list>
       </mat-sidenav>
 
