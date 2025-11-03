@@ -107,13 +107,13 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
           <span class="spacer"></span>
           
           <div class="toolbar-actions">
-            <button mat-icon-button [matMenuTriggerFor]="notificationMenu">
-              <mat-icon [matBadge]="upcomingEventsCount > 0 ? upcomingEventsCount : null" 
-                        matBadgeColor="accent" 
-                        [class.has-notifications]="upcomingEventsCount > 0"
-                        aria-hidden="false">
+            <button mat-icon-button [matMenuTriggerFor]="notificationMenu" class="notification-button">
+              <mat-icon [class.has-notifications]="upcomingEventsCount > 0">
                 notifications
               </mat-icon>
+              <span class="notification-badge" *ngIf="upcomingEventsCount > 0">
+                {{ upcomingEventsCount > 99 ? '99+' : upcomingEventsCount }}
+              </span>
             </button>
             
             <button mat-icon-button [matMenuTriggerFor]="userMenu" class="avatar-button">
@@ -836,16 +836,52 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
       overflow: hidden !important;
     }
 
-    ::ng-deep .mat-badge-content {
-      background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
-      color: white !important;
-      font-weight: 700 !important;
-      font-size: 10px !important;
-      min-width: 18px !important;
-      height: 18px !important;
-      line-height: 18px !important;
-      border: 2px solid white !important;
-      box-shadow: 0 2px 8px rgba(220, 38, 38, 0.4) !important;
+    /* Notification Button and Badge */
+    .notification-button {
+      position: relative;
+    }
+
+    .notification-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 9px;
+      border: 2px solid var(--primary-color);
+      box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4);
+      z-index: 10;
+      animation: badgePulse 2s ease-in-out infinite;
+    }
+
+    @keyframes badgePulse {
+      0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4);
+      }
+      50% {
+        transform: scale(1.1);
+        box-shadow: 0 3px 10px rgba(239, 68, 68, 0.6);
+      }
+    }
+
+    .notification-button mat-icon.has-notifications {
+      color: #fbbf24;
+      animation: notificationShake 3s ease-in-out infinite;
+    }
+
+    @keyframes notificationShake {
+      0%, 90%, 100% { transform: rotate(0deg); }
+      5%, 15% { transform: rotate(-15deg); }
+      10%, 20% { transform: rotate(15deg); }
     }
 
     .toolbar-avatar {
@@ -1033,6 +1069,15 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
         max-height: 300px;
         overflow-y: auto;
       }
+
+      .notification-badge {
+        top: 6px;
+        right: 6px;
+        min-width: 16px;
+        height: 16px;
+        font-size: 10px;
+        border-radius: 8px;
+      }
     }
 
     @media (max-width: 480px) {
@@ -1083,6 +1128,17 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
       .user-menu .user-name {
         font-size: 14px;
         width: 100%;
+      }
+
+      .notification-badge {
+        top: 4px;
+        right: 4px;
+        min-width: 14px;
+        height: 14px;
+        padding: 0 3px;
+        font-size: 9px;
+        border-radius: 7px;
+        border-width: 1.5px;
       }
     }
   `]
