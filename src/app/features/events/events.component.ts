@@ -116,7 +116,10 @@ export class EventsComponent implements OnInit {
         // Definir dados padrão em caso de erro
         this.events = [];
         this.totalItems = 0;
-        this.snackBar.open('Erro ao carregar eventos. Tente novamente mais tarde.', 'Fechar', { duration: 3000 });
+        this.snackBar.open('Erro ao carregar eventos. Tente novamente mais tarde.', 'Fechar', { 
+          duration: 3000,
+          panelClass: ['error-snackbar']
+        });
         this.isLoading = false;
       }
     });
@@ -146,7 +149,10 @@ export class EventsComponent implements OnInit {
           // Definir dados padrão em caso de erro
           this.events = [];
           this.totalItems = 0;
-          this.snackBar.open(`Erro ao carregar eventos do pet. Tente novamente mais tarde.`, 'Fechar', { duration: 3000 });
+          this.snackBar.open(`Erro ao carregar eventos do pet. Tente novamente mais tarde.`, 'Fechar', { 
+            duration: 3000,
+            panelClass: ['error-snackbar']
+          });
           this.isLoading = false;
         }
       });
@@ -200,11 +206,17 @@ export class EventsComponent implements OnInit {
       this.eventService.delete(event.id).subscribe({
         next: () => {
           this.eventStateService.notifyEventUpdated();
-          this.snackBar.open('Evento excluído com sucesso!', 'Fechar', { duration: 3000 });
+          this.snackBar.open('Evento excluído com sucesso!', 'Fechar', { 
+            duration: 3000,
+            panelClass: ['success-snackbar']
+          });
           this.petId ? this.loadEventsByPet() : this.loadAllEvents();
         },
         error: (err) => {
-          this.snackBar.open('Erro ao excluir evento.', 'Fechar', { duration: 3000 });
+          this.snackBar.open('Erro ao excluir evento.', 'Fechar', { 
+            duration: 3000,
+            panelClass: ['error-snackbar']
+          });
         }
       });
     }
@@ -220,7 +232,10 @@ export class EventsComponent implements OnInit {
         this.snackBar.open(
           `Evento ${event.status === 'DONE' ? 'concluído' : 'reativado'} com sucesso!`, 
           'Fechar', 
-          { duration: 3000 }
+          { 
+            duration: 3000,
+            panelClass: ['success-snackbar']
+          }
         );
         
         // Recarregar os dados para garantir sincronização
@@ -239,7 +254,10 @@ export class EventsComponent implements OnInit {
         // Reverter o estado em caso de erro
         event.status = originalState;
         
-        this.snackBar.open('Erro ao atualizar status do evento.', 'Fechar', { duration: 3000 });
+        this.snackBar.open('Erro ao atualizar status do evento.', 'Fechar', { 
+          duration: 3000,
+          panelClass: ['error-snackbar']
+        });
       }
     });
   }

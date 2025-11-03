@@ -61,7 +61,10 @@ export class PetsComponent implements OnInit {
         // Definir dados padrão em caso de erro
         this.pets = [];
         this.totalItems = 0;
-        this.snackBar.open('Erro ao carregar pets. Tente novamente mais tarde.', 'Fechar', { duration: 3000 });
+        this.snackBar.open('Erro ao carregar pets. Tente novamente mais tarde.', 'Fechar', { 
+          duration: 3000,
+          panelClass: ['error-snackbar']
+        });
         this.isLoading = false;
       }
     });
@@ -102,11 +105,17 @@ export class PetsComponent implements OnInit {
     if (confirm(`Tem certeza que deseja excluir ${pet.name}?`)) {
       this.petService.delete(pet.id).subscribe({
         next: () => {
-          this.snackBar.open('Pet excluído com sucesso!', 'Fechar', { duration: 3000 });
+          this.snackBar.open('Pet excluído com sucesso!', 'Fechar', { 
+            duration: 3000,
+            panelClass: ['success-snackbar']
+          });
           this.loadPets();
         },
         error: (err) => {
-          this.snackBar.open('Erro ao excluir pet.', 'Fechar', { duration: 3000 });
+          this.snackBar.open('Erro ao excluir pet.', 'Fechar', { 
+            duration: 3000,
+            panelClass: ['error-snackbar']
+          });
         }
       });
     }

@@ -301,14 +301,7 @@
   color: var(--primary-color) !important;
 }
 
-/* Snackbar styling */
-::ng-deep .mat-mdc-snack-bar-container.success-snackbar {
-  --mdc-snackbar-container-color: var(--success-color);
-}
-
-::ng-deep .mat-mdc-snack-bar-container.error-snackbar {
-  --mdc-snackbar-container-color: var(--error-color);
-}
+/* Snackbar styling movido para styles.css global */
 
 /* Responsive */
 @media (max-width: 768px) {

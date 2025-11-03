@@ -178,21 +178,7 @@ body {
   transform: translateY(-2px) scale(1.05);
 }
 
-/* Snackbar Styles */
-.success-snackbar {
-  --mdc-snackbar-container-color: var(--success-color);
-  --mdc-snackbar-supporting-text-color: white;
-}
-
-.error-snackbar {
-  --mdc-snackbar-container-color: var(--error-color);
-  --mdc-snackbar-supporting-text-color: white;
-}
-
-.warning-snackbar {
-  --mdc-snackbar-container-color: var(--warning-color);
-  --mdc-snackbar-supporting-text-color: white;
-}
+/* Snackbar Styles - Movidos para seção global mais abaixo */
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
@@ -818,19 +804,81 @@ body {
 }
 
 /* Snackbar personalizados */
-.success-snackbar {
-  --mdc-snackbar-container-color: var(--success-color) !important;
+::ng-deep .mat-mdc-snack-bar-container {
+  --mdc-snackbar-container-color: #1f2937 !important;
   --mdc-snackbar-supporting-text-color: white !important;
+  --mdc-snackbar-action-color: var(--primary-color) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-xl) !important;
 }
 
-.error-snackbar {
-  --mdc-snackbar-container-color: var(--error-color) !important;
+::ng-deep .success-snackbar {
+  --mdc-snackbar-container-color: #059669 !important;
   --mdc-snackbar-supporting-text-color: white !important;
+  --mdc-snackbar-action-color: #d1fae5 !important;
 }
 
-.warning-snackbar {
-  --mdc-snackbar-container-color: var(--warning-color) !important;
+::ng-deep .error-snackbar {
+  --mdc-snackbar-container-color: #dc2626 !important;
   --mdc-snackbar-supporting-text-color: white !important;
+  --mdc-snackbar-action-color: #fecaca !important;
+}
+
+::ng-deep .warning-snackbar {
+  --mdc-snackbar-container-color: #d97706 !important;
+  --mdc-snackbar-supporting-text-color: white !important;
+  --mdc-snackbar-action-color: #fef3c7 !important;
+}
+
+::ng-deep .info-snackbar {
+  --mdc-snackbar-container-color: #0891b2 !important;
+  --mdc-snackbar-supporting-text-color: white !important;
+  --mdc-snackbar-action-color: #cffafe !important;
+}
+
+/* Melhorar contraste e legibilidade dos snackbars */
+::ng-deep .mat-mdc-snack-bar-container .mdc-snackbar__label {
+  color: white !important;
+  font-weight: 500 !important;
+  font-size: 0.9rem !important;
+  line-height: 1.4 !important;
+}
+
+::ng-deep .mat-mdc-snack-bar-container .mat-mdc-snack-bar-action {
+  color: var(--mdc-snackbar-action-color) !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  font-size: 0.8rem !important;
+  letter-spacing: 0.5px !important;
+}
+
+/* Adicionar ícones aos snackbars para melhor UX */
+::ng-deep .success-snackbar .mdc-snackbar__label::before {
+  content: '✓';
+  margin-right: 8px;
+  font-weight: bold;
+  color: #d1fae5;
+}
+
+::ng-deep .error-snackbar .mdc-snackbar__label::before {
+  content: '✕';
+  margin-right: 8px;
+  font-weight: bold;
+  color: #fecaca;
+}
+
+::ng-deep .warning-snackbar .mdc-snackbar__label::before {
+  content: '⚠';
+  margin-right: 8px;
+  font-weight: bold;
+  color: #fef3c7;
+}
+
+::ng-deep .info-snackbar .mdc-snackbar__label::before {
+  content: 'ⓘ';
+  margin-right: 8px;
+  font-weight: bold;
+  color: #cffafe;
 }
 
 /* FINAL RULE: Remove ALL possible blue outlines and focus states */
