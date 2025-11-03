@@ -377,7 +377,9 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
       display: flex;
       align-items: center;
       gap: 16px;
-      min-width: 0; /* Prevents flex items from shrinking below content size */
+      min-width: 0;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     .user-avatar {
@@ -424,8 +426,8 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
 
     .user-details {
       flex: 1;
-      min-width: 0; /* Allow text to truncate */
-      overflow: hidden; /* Ensure container handles overflow */
+      min-width: 0;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -439,7 +441,7 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      max-width: 240px;
+      width: 100%;
       line-height: 1.2;
     }
 
@@ -451,7 +453,7 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      max-width: 240px;
+      width: 100%;
       word-break: break-all;
     }
 
@@ -1002,11 +1004,11 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
 
       .user-menu .user-email {
         font-size: 12px;
-        max-width: 220px;
+        width: 100%;
       }
 
       .user-menu .user-name {
-        max-width: 220px;
+        width: 100%;
       }
 
       .user-avatar {
@@ -1075,12 +1077,12 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
 
       .user-menu .user-email {
         font-size: 11px;
-        max-width: 200px;
+        width: 100%;
       }
 
       .user-menu .user-name {
         font-size: 14px;
-        max-width: 200px;
+        width: 100%;
       }
     }
   `]
