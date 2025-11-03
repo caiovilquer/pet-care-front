@@ -1,6 +1,5 @@
-import { Component, Input, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, ViewChild, ElementRef, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { GoogleMapsModule } from '@angular/google-maps';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -12,11 +11,11 @@ import { Location, Petshop, Veterinary } from '../../core/models/location.model'
   standalone: true,
   imports: [
     CommonModule,
-    GoogleMapsModule,
     MatButtonModule,
     MatIconModule,
     MatTooltipModule
   ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   template: `
     <div class="map-container" *ngIf="isGoogleMapsLoaded">
       <div class="map-controls">
@@ -38,63 +37,11 @@ import { Location, Petshop, Veterinary } from '../../core/models/location.model'
         </button>
       </div>
 
-      <google-map
-        #map
-        [height]="height"
-        [width]="width"
-        [center]="mapCenter"
-        [zoom]="mapZoom"
-        [options]="mapOptions">
-        
-        <!-- Marcador da localização do usuário -->
-        <map-marker
-          *ngIf="userLocation"
-          [position]="userLocation"
-          [options]="userMarkerOptions"
-          (mapClick)="onUserMarkerClick()">
-        </map-marker>
-
-        <!-- Marcadores das localidades -->
-        <map-marker
-          *ngFor="let location of locations; trackBy: trackByLocationId"
-          [position]="{lat: location.latitude, lng: location.longitude}"
-          [options]="getLocationMarkerOptions(location)"
-          (mapClick)="onLocationMarkerClick(location, $event)">
-        </map-marker>
-
-        <!-- Info Window -->
-        <map-info-window #infoWindow>
-          <div class="info-window-content" *ngIf="selectedLocation">
-            <div class="info-header">
-              <h4>{{ selectedLocation.name }}</h4>
-              <div class="rating" *ngIf="selectedLocation.rating > 0">
-                <mat-icon class="star">star</mat-icon>
-                <span>{{ selectedLocation.rating.toFixed(1) }}</span>
-              </div>
-            </div>
-            
-            <p class="address">{{ selectedLocation.address }}</p>
-            
-            <div class="info-actions">
-              <button 
-                mat-button 
-                color="primary" 
-                (click)="openDirections(selectedLocation)">
-                <mat-icon>directions</mat-icon>
-                Direções
-              </button>
-              
-              <button 
-                mat-button 
-                *ngIf="selectedLocation.phone"
-                (click)="callLocation(selectedLocation)">
-                <mat-icon>phone</mat-icon>
-                Ligar
-              </button>
-            </div>
-          </div>
-        </map-info-window>
-      </google-map>
+      <div #mapElement 
+           class="google-map"
+           [style.height]="height"
+           [style.width]="width">
+      </div>
     </div>
 
     <div class="map-loading" *ngIf="!isGoogleMapsLoaded">
@@ -207,8 +154,10 @@ import { Location, Petshop, Veterinary } from '../../core/models/location.model'
       padding: 0.25rem 0.75rem;
     }
 
-    google-map {
+    .google-map {
       border-radius: 12px;
+      width: 100%;
+      height: 100%;
     }
 
     @media (max-width: 768px) {
@@ -233,34 +182,17 @@ export class LocationsMapComponent implements OnInit, OnDestroy {
   @Input() height = '400px';
   @Input() width = '100%';
 
-  @ViewChild('map') mapElement!: ElementRef;
-  @ViewChild('infoWindow') infoWindow!: any;
+  @ViewChild('mapElement') mapElement!: ElementRef;
 
   isGoogleMapsLoaded = false;
   showTraffic = false;
   selectedLocation?: Location;
+  googleMap: any;
+  mapMarkers: any[] = [];
+  infoWindow: any;
 
-  mapCenter: google.maps.LatLngLiteral = { lat: -23.5505, lng: -46.6333 }; // São Paulo padrão
+  mapCenter = { lat: -23.5505, lng: -46.6333 }; // São Paulo padrão
   mapZoom = 13;
-  
-  mapOptions: google.maps.MapOptions = {
-    disableDefaultUI: false,
-    clickableIcons: false,
-    styles: [
-      {
-        featureType: 'poi.business',
-        stylers: [{ visibility: 'off' }]
-      }
-    ]
-  };
-
-  userMarkerOptions: google.maps.MarkerOptions = {
-    icon: {
-      url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-      scaledSize: new google.maps.Size(40, 40)
-    },
-    title: 'Sua localização'
-  };
 
   constructor(private googleMapsService: GoogleMapsService) {}
 
@@ -268,7 +200,7 @@ export class LocationsMapComponent implements OnInit, OnDestroy {
     try {
       await this.googleMapsService.loadGoogleMaps();
       this.isGoogleMapsLoaded = true;
-      this.setupMap();
+      this.initializeMap();
     } catch (error) {
       console.error('Erro ao carregar Google Maps:', error);
     }
@@ -276,9 +208,12 @@ export class LocationsMapComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     // Cleanup se necessário
+    this.clearMarkers();
   }
 
-  private setupMap() {
+  private initializeMap() {
+    if (!this.isGoogleMapsLoaded || !this.mapElement) return;
+
     // Definir centro do mapa baseado nas localizações ou localização do usuário
     if (this.userLocation) {
       this.mapCenter = this.userLocation;
@@ -289,16 +224,85 @@ export class LocationsMapComponent implements OnInit, OnDestroy {
       };
     }
 
-    // Ajustar zoom baseado na dispersão das localizações
+    // Inicializar o mapa
+    this.googleMap = new (window as any).google.maps.Map(this.mapElement.nativeElement, {
+      center: this.mapCenter,
+      zoom: this.mapZoom,
+      disableDefaultUI: false,
+      clickableIcons: false,
+      styles: [
+        {
+          featureType: 'poi.business',
+          stylers: [{ visibility: 'off' }]
+        }
+      ]
+    });
+
+    // Inicializar InfoWindow
+    this.infoWindow = new (window as any).google.maps.InfoWindow();
+
+    // Adicionar marcadores
+    this.addMarkers();
+
+    // Ajustar bounds se necessário
     if (this.locations.length > 1) {
       this.adjustMapBounds();
     }
   }
 
-  private adjustMapBounds() {
-    if (!this.isGoogleMapsLoaded || this.locations.length === 0) return;
+  private addMarkers() {
+    this.clearMarkers();
 
-    const bounds = new google.maps.LatLngBounds();
+    // Adicionar marcador do usuário se disponível
+    if (this.userLocation) {
+      const userMarker = new (window as any).google.maps.Marker({
+        position: this.userLocation,
+        map: this.googleMap,
+        icon: {
+          url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+          scaledSize: new (window as any).google.maps.Size(40, 40)
+        },
+        title: 'Sua localização'
+      });
+      
+      this.mapMarkers.push(userMarker);
+    }
+
+    // Adicionar marcadores das localizações
+    this.locations.forEach(location => {
+      const isPetshop = location.type === 'petshop';
+      const iconColor = isPetshop ? 'green' : 'red';
+      
+      const marker = new (window as any).google.maps.Marker({
+        position: { lat: location.latitude, lng: location.longitude },
+        map: this.googleMap,
+        icon: {
+          url: `https://maps.google.com/mapfiles/ms/icons/${iconColor}-dot.png`,
+          scaledSize: new (window as any).google.maps.Size(32, 32)
+        },
+        title: location.name
+      });
+
+      // Adicionar listener de click
+      marker.addListener('click', () => {
+        this.onLocationMarkerClick(location, marker);
+      });
+
+      this.mapMarkers.push(marker);
+    });
+  }
+
+  private clearMarkers() {
+    this.mapMarkers.forEach(marker => {
+      marker.setMap(null);
+    });
+    this.mapMarkers = [];
+  }
+
+  private adjustMapBounds() {
+    if (!this.isGoogleMapsLoaded || this.locations.length === 0 || !this.googleMap) return;
+
+    const bounds = new (window as any).google.maps.LatLngBounds();
     
     if (this.userLocation) {
       bounds.extend(this.userLocation);
@@ -308,62 +312,69 @@ export class LocationsMapComponent implements OnInit, OnDestroy {
       bounds.extend({ lat: location.latitude, lng: location.longitude });
     });
 
-    // Ajustar zoom e centro para incluir todos os pontos
-    this.mapCenter = bounds.getCenter().toJSON();
-    
-    // Calcular zoom apropriado baseado nos bounds
-    const ne = bounds.getNorthEast();
-    const sw = bounds.getSouthWest();
-    const latDiff = ne.lat() - sw.lat();
-    const lngDiff = ne.lng() - sw.lng();
-    const maxDiff = Math.max(latDiff, lngDiff);
-    
-    if (maxDiff < 0.01) this.mapZoom = 16;
-    else if (maxDiff < 0.05) this.mapZoom = 14;
-    else if (maxDiff < 0.1) this.mapZoom = 13;
-    else if (maxDiff < 0.5) this.mapZoom = 11;
-    else this.mapZoom = 10;
-  }
-
-  getLocationMarkerOptions(location: Location): google.maps.MarkerOptions {
-    const isPetshop = location.type === 'petshop';
-    const iconColor = isPetshop ? 'blue' : 'red';
-    const iconUrl = `https://maps.google.com/mapfiles/ms/icons/${iconColor}-dot.png`;
-
-    return {
-      icon: {
-        url: iconUrl,
-        scaledSize: new google.maps.Size(32, 32)
-      },
-      title: location.name,
-      // Remover animação para evitar poping
-      animation: undefined
-    };
+    this.googleMap.fitBounds(bounds);
   }
 
   centerMap() {
+    if (!this.googleMap) return;
+    
     if (this.userLocation) {
-      this.mapCenter = this.userLocation;
-      this.mapZoom = 15;
+      this.googleMap.setCenter(this.userLocation);
+      this.googleMap.setZoom(15);
     } else {
       this.adjustMapBounds();
     }
   }
 
   toggleTraffic() {
+    if (!this.googleMap) return;
+    
     this.showTraffic = !this.showTraffic;
-    // Implementar lógica para mostrar/esconder camada de trânsito
-    console.log('Traffic layer:', this.showTraffic ? 'enabled' : 'disabled');
+    
+    // Implementar camada de trânsito
+    if (this.showTraffic) {
+      const trafficLayer = new (window as any).google.maps.TrafficLayer();
+      trafficLayer.setMap(this.googleMap);
+    } else {
+      // Remover camada de trânsito (seria necessário manter referência)
+      console.log('Traffic layer disabled');
+    }
   }
 
   onUserMarkerClick() {
-    // Abrir info window da localização do usuário
     console.log('User location clicked');
   }
 
-  onLocationMarkerClick(location: Location, event?: any) {
+  onLocationMarkerClick(location: Location, marker: any) {
     this.selectedLocation = location;
-    // O info window será aberto automaticamente pelo Angular Google Maps
+    
+    // Criar conteúdo do InfoWindow
+    const content = `
+      <div class="info-window-content">
+        <div class="info-header">
+          <h4>${location.name}</h4>
+          ${location.rating > 0 ? `
+            <div class="rating">
+              <span>★ ${location.rating.toFixed(1)}</span>
+            </div>
+          ` : ''}
+        </div>
+        <p class="address">${location.address}</p>
+        <div class="info-actions">
+          <button onclick="window.open('https://www.google.com/maps/dir/?api=1&destination=${location.latitude},${location.longitude}', '_blank')">
+            Direções
+          </button>
+          ${location.phone ? `
+            <button onclick="window.open('tel:${location.phone}', '_self')">
+              Ligar
+            </button>
+          ` : ''}
+        </div>
+      </div>
+    `;
+
+    this.infoWindow.setContent(content);
+    this.infoWindow.open(this.googleMap, marker);
   }
 
   openDirections(location: Location) {

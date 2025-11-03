@@ -11,7 +11,6 @@ import { finalize } from 'rxjs/operators';
 
 import { LocationSearchComponent } from '../../shared/components/location-search.component';
 import { LocationCardComponent } from '../../shared/components/location-card.component';
-import { LocationsMapComponent } from '../../shared/components/locations-map.component';
 import { LocationDetailComponent } from '../../shared/components/location-detail.component';
 import { LocationService } from '../../core/services/location.service';
 import { 
@@ -39,23 +38,27 @@ import {
   ],
   template: `
     <div class="veterinaries-container">
-      <div class="header">
-        <mat-toolbar color="primary" class="page-toolbar">
+      <div class="veterinaries-header">
+        <h1>
           <mat-icon>local_hospital</mat-icon>
-          <span>Veterinários Próximos</span>
-          <span class="spacer"></span>
+          Veterinários Próximos
+        </h1>
+        <div class="header-actions">
           <span *ngIf="searchResults().total > 0" class="results-count">
             {{ searchResults().total }} veterinários encontrados
           </span>
           <button 
-            mat-icon-button 
+            mat-raised-button
+            color="accent"
             *ngIf="emergencyCount() > 0"
             matBadge="{{ emergencyCount() }}"
             matBadgeColor="warn"
-            matTooltip="Emergência 24h disponível">
+            matTooltip="Emergência 24h disponível"
+            (click)="filterEmergencyOnly()">
             <mat-icon>emergency</mat-icon>
+            Emergência 24h
           </button>
-        </mat-toolbar>
+        </div>
       </div>
 
       <div class="content">
@@ -110,7 +113,7 @@ import {
             </div>
           </div>
 
-          <div class="results-grid" *ngIf="!isLoading() && searchResults().locations.length > 0">
+          <div class="results-list" *ngIf="!isLoading() && searchResults().locations.length > 0">
             <app-location-card
               *ngFor="let veterinary of searchResults().locations; trackBy: trackByLocationId"
               [location]="veterinary"
@@ -171,28 +174,115 @@ import {
       background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
     }
 
-    .header {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: var(--shadow-soft);
-    }
-
-    .page-toolbar {
+    .veterinaries-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding: 1.5rem;
       background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(20px);
-      color: var(--text-primary);
-      border-bottom: 1px solid var(--border-light);
+      border-radius: 16px;
+      box-shadow: var(--shadow-card);
+      border: 1px solid var(--border-light);
+      position: relative;
+      overflow: hidden;
+      animation: fadeInUp 0.6s ease-out;
     }
 
-    .spacer {
-      flex: 1;
+    .veterinaries-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #991b1b, #dc2626, #ef4444, #fca5a5);
+      border-radius: 16px 16px 0 0;
+      opacity: 0;
+      animation: slideInLeft 0.8s ease-out 0.2s both;
+    }
+
+    .veterinaries-header h1 {
+      margin: 0;
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: transparent;
+      background: linear-gradient(135deg, #991b1b, #dc2626, #ef4444, #fca5a5);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      animation: slideInLeft 0.6s ease-out 0.1s both;
+    }
+
+    .veterinaries-header h1 mat-icon {
+      color: #dc2626;
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
+      -webkit-text-fill-color: #dc2626;
+      background: none;
+      animation: gentlePulse 3s ease-in-out infinite;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      animation: slideInRight 0.6s ease-out 0.1s both;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes gentlePulse {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      50% {
+        transform: scale(1.05);
+        opacity: 0.8;
+      }
     }
 
     .results-count {
       font-size: 0.9rem;
-      opacity: 0.8;
       color: var(--text-secondary);
+      font-weight: 500;
     }
 
     .content {
@@ -329,8 +419,9 @@ import {
       line-height: 1.5;
     }
 
-    .results-grid {
-      display: grid;
+    .results-list {
+      display: flex;
+      flex-direction: column;
       gap: 1.5rem;
     }
 
@@ -473,6 +564,22 @@ import {
     @media (max-width: 768px) {
       .content {
         padding: 1rem;
+      }
+
+      .veterinaries-header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+        padding: 1.25rem;
+      }
+
+      .veterinaries-header h1 {
+        justify-content: center;
+      }
+
+      .header-actions {
+        justify-content: center;
+        flex-wrap: wrap;
       }
 
       .emergency-content {

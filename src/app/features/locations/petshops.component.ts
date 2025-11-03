@@ -10,7 +10,6 @@ import { finalize } from 'rxjs/operators';
 
 import { LocationSearchComponent } from '../../shared/components/location-search.component';
 import { LocationCardComponent } from '../../shared/components/location-card.component';
-import { LocationsMapComponent } from '../../shared/components/locations-map.component';
 import { LocationDetailComponent } from '../../shared/components/location-detail.component';
 import { LocationService } from '../../core/services/location.service';
 import { 
@@ -33,20 +32,20 @@ import {
     MatToolbarModule,
     MatDialogModule,
     LocationSearchComponent,
-    LocationCardComponent,
-    LocationsMapComponent
+    LocationCardComponent
   ],
   template: `
     <div class="petshops-container">
-      <div class="header">
-        <mat-toolbar color="primary" class="page-toolbar">
+      <div class="petshops-header">
+        <h1>
           <mat-icon>store</mat-icon>
-          <span>Petshops Próximos</span>
-          <span class="spacer"></span>
+          Petshops Próximos
+        </h1>
+        <div class="header-actions">
           <span *ngIf="searchResults().total > 0" class="results-count">
             {{ searchResults().total }} petshops encontrados
           </span>
-        </mat-toolbar>
+        </div>
       </div>
 
       <div class="content">
@@ -88,26 +87,15 @@ import {
             </div>
           </div>
 
-          <div class="results-grid" *ngIf="!isLoading() && searchResults().locations.length > 0">
-            <!-- Mapa das localizações -->
-            <div class="map-section">
-              <app-locations-map
-                [locations]="searchResults().locations"
-                [userLocation]="userLocation"
-                height="400px">
-              </app-locations-map>
-            </div>
-
+          <div class="results-list" *ngIf="!isLoading() && searchResults().locations.length > 0">            
             <!-- Lista de petshops -->
-            <div class="locations-list">
-              <app-location-card
-                *ngFor="let petshop of searchResults().locations; trackBy: trackByLocationId"
-                [location]="petshop"
-                (callLocation)="onCallPetshop($event)"
-                (getDirections)="onGetDirections($event)"
-                (viewDetails)="onViewDetails($event)">
-              </app-location-card>
-            </div>
+            <app-location-card
+              *ngFor="let petshop of searchResults().locations; trackBy: trackByLocationId"
+              [location]="petshop"
+              (callLocation)="onCallPetshop($event)"
+              (getDirections)="onGetDirections($event)"
+              (viewDetails)="onViewDetails($event)">
+            </app-location-card>
           </div>
         </div>
 
@@ -145,28 +133,115 @@ import {
       background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
     }
 
-    .header {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: var(--shadow-soft);
-    }
-
-    .page-toolbar {
+    .petshops-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding: 1.5rem;
       background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(20px);
-      color: var(--text-primary);
-      border-bottom: 1px solid var(--border-light);
+      border-radius: 16px;
+      box-shadow: var(--shadow-card);
+      border: 1px solid var(--border-light);
+      position: relative;
+      overflow: hidden;
+      animation: fadeInUp 0.6s ease-out;
     }
 
-    .spacer {
-      flex: 1;
+    .petshops-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #065f46, #059669, #10b981, #6ee7b7);
+      border-radius: 16px 16px 0 0;
+      opacity: 0;
+      animation: slideInLeft 0.8s ease-out 0.2s both;
+    }
+
+    .petshops-header h1 {
+      margin: 0;
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: transparent;
+      background: linear-gradient(135deg, #065f46, #059669, #10b981, #6ee7b7);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      animation: slideInLeft 0.6s ease-out 0.1s both;
+    }
+
+    .petshops-header h1 mat-icon {
+      color: #059669;
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
+      -webkit-text-fill-color: #059669;
+      background: none;
+      animation: gentlePulse 3s ease-in-out infinite;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      animation: slideInRight 0.6s ease-out 0.1s both;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes gentlePulse {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      50% {
+        transform: scale(1.05);
+        opacity: 0.8;
+      }
     }
 
     .results-count {
       font-size: 0.9rem;
-      opacity: 0.8;
       color: var(--text-secondary);
+      font-weight: 500;
     }
 
     .content {
@@ -266,19 +341,7 @@ import {
       line-height: 1.5;
     }
 
-    .results-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 2rem;
-      align-items: start;
-    }
-
-    .map-section {
-      position: sticky;
-      top: 1rem;
-    }
-
-    .locations-list {
+    .results-list {
       display: flex;
       flex-direction: column;
       gap: 1.5rem;
@@ -362,21 +425,27 @@ import {
         padding: 1rem;
       }
 
-      .results-header {
+      .petshops-header {
         flex-direction: column;
         gap: 1rem;
         text-align: center;
         padding: 1.25rem;
       }
 
-      .results-grid {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
+      .petshops-header h1 {
+        justify-content: center;
       }
 
-      .map-section {
-        position: static;
-        order: -1; /* Mapa aparece primeiro no mobile */
+      .header-actions {
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .results-header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+        padding: 1.25rem;
       }
 
       .welcome-content,
