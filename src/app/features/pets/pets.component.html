@@ -1,13 +1,24 @@
 <div class="pets-container">
-  <div class="pets-header">
-    <h1>Meus Pets</h1>
-    <button mat-raised-button color="primary" (click)="openPetForm()">
-      <mat-icon>add</mat-icon>
-      Adicionar Pet
-    </button>
-  </div>
+  <!-- Loading State -->
+  @if (isLoading) {
+    <div class="loading-container">
+      <div class="loading-card">
+        <mat-spinner diameter="60"></mat-spinner>
+        <h2>Carregando seus pets...</h2>
+        <p>Buscando informações dos pets cadastrados</p>
+      </div>
+    </div>
+  } @else {
+    <!-- Main Content -->
+    <div class="pets-header">
+      <h1>Meus Pets</h1>
+      <button mat-raised-button color="primary" (click)="openPetForm()">
+        <mat-icon>add</mat-icon>
+        Adicionar Pet
+      </button>
+    </div>
 
-  <mat-card>
+    <mat-card>
     <mat-card-content>
       <div class="table-container" *ngIf="pets.length > 0; else noPets">
         <table mat-table [dataSource]="pets" class="pets-table">
@@ -75,4 +86,5 @@
       </ng-template>
     </mat-card-content>
   </mat-card>
+  } <!-- Fim do @else -->
 </div>

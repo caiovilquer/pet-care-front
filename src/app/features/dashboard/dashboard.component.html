@@ -1,12 +1,29 @@
 <div class="dashboard-container">
-  <div class="dashboard-header">
-    <h1>Dashboard</h1>
-    @if (currentUser) {
-      <p>Bem-vindo, {{currentUser.firstName}}!</p>
-    }
-  </div>
+  <!-- Loading State -->
+  @if (isLoading) {
+    <div class="loading-container">
+      <div class="loading-card">
+        <mat-spinner diameter="60"></mat-spinner>
+        <h2>Carregando seu dashboard...</h2>
+        <p>Buscando informações dos seus pets e eventos</p>
+      </div>
+    </div>
+  } @else {
+    <!-- Main Content -->
+    <div class="dashboard-header">
+      <h1>Dashboard</h1>
+      @if (currentUser) {
+        <p>Bem-vindo, {{currentUser.firstName}}!</p>
+      } @else {
+        <p>Bem-vindo! Alguns dados podem não estar disponíveis no momento.</p>
+        <button mat-raised-button color="primary" (click)="retryLoadData()">
+          <mat-icon>refresh</mat-icon>
+          Tentar novamente
+        </button>
+      }
+    </div>
 
-  <div class="stats-grid">
+    <div class="stats-grid">
     <mat-card class="stat-card">
       <mat-card-header>
         <div mat-card-avatar class="stat-icon pets-icon">
@@ -62,7 +79,11 @@
           </mat-list-item>
         </mat-list>
         <ng-template #noPets>
-          <p class="no-data">Nenhum pet cadastrado ainda.</p>
+          @if (currentUser) {
+            <p class="no-data">Nenhum pet cadastrado ainda.</p>
+          } @else {
+            <p class="no-data">Não foi possível carregar os pets no momento.</p>
+          }
         </ng-template>
       </mat-card-content>
       <mat-card-actions>
@@ -88,7 +109,11 @@
           </mat-list-item>
         </mat-list>
         <ng-template #noEvents>
-          <p class="no-data">Nenhum evento próximo.</p>
+          @if (currentUser) {
+            <p class="no-data">Nenhum evento próximo.</p>
+          } @else {
+            <p class="no-data">Não foi possível carregar os eventos no momento.</p>
+          }
         </ng-template>
       </mat-card-content>
       <mat-card-actions>
@@ -100,4 +125,5 @@
       </mat-card-actions>
     </mat-card>
   </div>
+  } <!-- Fim do @else -->
 </div>

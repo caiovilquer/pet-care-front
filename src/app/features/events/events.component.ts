@@ -10,6 +10,7 @@ import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { map } from 'rxjs/operators';
 import { EventService } from '../../core/services/event.service';
 import { EventStateService } from '../../core/services/event-state.service';
@@ -30,7 +31,8 @@ import { EventFormComponent } from './event-form.component';
     MatPaginatorModule,
     MatDialogModule,
     MatChipsModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatProgressSpinnerModule
   ],
   templateUrl: './events.component.html',
   styleUrls: ['./events.component.css']
@@ -44,6 +46,7 @@ export class EventsComponent implements OnInit {
   petId: number | null = null;
   petName: string = '';
   petNamesMap: { [key: number]: string } = {};
+  isLoading = true;
 
   constructor(
     private eventService: EventService,
@@ -101,19 +104,27 @@ export class EventsComponent implements OnInit {
   }
 
   loadAllEvents(): void {
+    this.isLoading = true;
     this.eventService.getAll(this.currentPage, this.pageSize).subscribe({
       next: (page: EventsPage) => {
         this.events = page.items;
         this.totalItems = page.total;
+        this.isLoading = false;
       },
       error: (err) => {
-        this.snackBar.open('Erro ao carregar eventos.', 'Fechar', { duration: 3000 });
+        console.error('Erro ao carregar eventos:', err);
+        // Definir dados padrão em caso de erro
+        this.events = [];
+        this.totalItems = 0;
+        this.snackBar.open('Erro ao carregar eventos. Tente novamente mais tarde.', 'Fechar', { duration: 3000 });
+        this.isLoading = false;
       }
     });
   }
 
   loadEventsByPet(): void {
     if (this.petId) {
+      this.isLoading = true;
       this.eventService.listByPet(this.petId).pipe(
         map((events: Event[]): EventSummary[] => {
           return events.map(event => {
@@ -128,9 +139,15 @@ export class EventsComponent implements OnInit {
         next: (summaries: EventSummary[]) => {
           this.events = summaries;
           this.totalItems = summaries.length;
+          this.isLoading = false;
         },
         error: (err) => {
-          this.snackBar.open(`Erro ao carregar eventos do pet.`, 'Fechar', { duration: 3000 });
+          console.error('Erro ao carregar eventos do pet:', err);
+          // Definir dados padrão em caso de erro
+          this.events = [];
+          this.totalItems = 0;
+          this.snackBar.open(`Erro ao carregar eventos do pet. Tente novamente mais tarde.`, 'Fechar', { duration: 3000 });
+          this.isLoading = false;
         }
       });
     }

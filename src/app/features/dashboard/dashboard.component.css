@@ -66,6 +66,28 @@
   color: var(--text-secondary);
   font-weight: 400;
   animation: slideInRight 0.6s ease-out 0.2s both;
+  margin-bottom: var(--spacing-md);
+}
+
+.dashboard-header button {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)) !important;
+  color: white !important;
+  border-radius: var(--radius-xl) !important;
+  padding: var(--spacing-sm) var(--spacing-lg) !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  box-shadow: var(--shadow-card) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  animation: slideInUp 0.6s ease-out 0.3s both;
+}
+
+.dashboard-header button:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.02) !important;
+  box-shadow: var(--shadow-hover) !important;
+}
+
+.dashboard-header button mat-icon {
+  margin-right: var(--spacing-xs) !important;
 }
 
 .stats-grid {
@@ -539,6 +561,114 @@ mat-card-actions button mat-icon {
 
   .action-button span {
     font-size: 0.9rem;
+  }
+}
+
+/* Loading State Styles */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  padding: var(--spacing-xl);
+}
+
+.loading-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border-light);
+  padding: var(--spacing-xl);
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.loading-card mat-spinner {
+  margin: 0 auto var(--spacing-lg);
+}
+
+.loading-card h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-sm);
+  background: linear-gradient(135deg, var(--text-primary), var(--primary-color));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.loading-card p {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Custom spinner colors */
+.loading-card ::ng-deep .mat-mdc-progress-spinner circle {
+  stroke: var(--primary-color);
+}
+
+/* Loading animation for smooth transitions */
+@keyframes loadingPulse {
+  0%, 100% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+}
+
+.loading-card {
+  animation: fadeInUp 0.6s ease-out, loadingPulse 2s ease-in-out infinite;
+}
+
+/* Loading responsive styles */
+@media (max-width: 768px) {
+  .loading-container {
+    min-height: 50vh;
+    padding: var(--spacing-lg);
+  }
+  
+  .loading-card {
+    padding: var(--spacing-lg);
+  }
+  
+  .loading-card h2 {
+    font-size: 1.3rem;
+  }
+  
+  .loading-card p {
+    font-size: 0.9rem;
+  }
+  
+  .loading-card mat-spinner {
+    margin-bottom: var(--spacing-md);
+  }
+}
+
+@media (max-width: 480px) {
+  .loading-container {
+    min-height: 40vh;
+    padding: var(--spacing-md);
+  }
+  
+  .loading-card {
+    padding: var(--spacing-md);
+  }
+  
+  .loading-card h2 {
+    font-size: 1.2rem;
+  }
+  
+  .loading-card mat-spinner {
+    transform: scale(0.8);
   }
 }
 

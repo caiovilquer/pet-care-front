@@ -229,6 +229,92 @@
   height: 20px !important;
 }
 
+/* Loading State Styles */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  padding: var(--spacing-xl);
+}
+
+.loading-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border-light);
+  padding: var(--spacing-xl);
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.loading-card mat-spinner {
+  margin: 0 auto var(--spacing-lg);
+}
+
+.loading-card h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-sm);
+  background: linear-gradient(135deg, var(--text-primary), var(--dog-color));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.loading-card p {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.loading-card ::ng-deep .mat-mdc-progress-spinner circle {
+  stroke: var(--dog-color);
+}
+
+@keyframes loadingPulse {
+  0%, 100% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+}
+
+.loading-card {
+  animation: fadeInUp 0.6s ease-out, loadingPulse 2s ease-in-out infinite;
+}
+
+@media (max-width: 768px) {
+  .loading-container {
+    min-height: 50vh;
+    padding: var(--spacing-lg);
+  }
+  
+  .loading-card {
+    padding: var(--spacing-lg);
+  }
+  
+  .loading-card h2 {
+    font-size: 1.3rem;
+  }
+  
+  .loading-card p {
+    font-size: 0.9rem;
+  }
+  
+  .loading-card mat-spinner {
+    margin-bottom: var(--spacing-md);
+  }
+}
+
 @media (max-width: 768px) {
   .pets-container {
     padding: 1rem;

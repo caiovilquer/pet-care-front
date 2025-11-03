@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatListModule } from '@angular/material/list';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { forkJoin, Subscription } from 'rxjs';
 import { TutorService } from '../../core/services/tutor.service';
 import { EventService } from '../../core/services/event.service';
@@ -28,7 +29,8 @@ import { PetSummary } from '../../core/models/pet.model';
     MatIconModule,
     MatGridListModule,
     MatListModule,
-    MatChipsModule
+    MatChipsModule,
+    MatProgressSpinnerModule
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
@@ -40,6 +42,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   upcomingEvents = 0;
   recentPets: PetSummary[] = [];
   recentEvents: EventSummary[] = [];
+  isLoading = true;
   private eventUpdateSubscription?: Subscription;
 
   constructor(
@@ -67,23 +70,42 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private refreshEventData(): void {
     if (this.currentUser && this.currentUser.pets.length > 0) {
       this.loadEventsForAllPets(this.currentUser.pets);
+    } else {
+      // Se não há usuário ou pets, manter dados zerados
+      this.totalEvents = 0;
+      this.upcomingEvents = 0;
+      this.recentEvents = [];
     }
   }
 
   loadDashboardData(): void {
-    this.tutorService.getMyProfile().subscribe((user: Tutor) => {
-      this.currentUser = user;
-      this.totalPets = user.pets.length;
-      this.recentPets = user.pets.slice(0, 5);
-      
-      
-      // Carregar eventos de todos os pets
-      if (user.pets.length > 0) {
-        this.loadEventsForAllPets(user.pets);
-      } else {
+    this.isLoading = true;
+    this.tutorService.getMyProfile().subscribe({
+      next: (user: Tutor) => {
+        this.currentUser = user;
+        this.totalPets = user.pets.length;
+        this.recentPets = user.pets.slice(0, 5);
+        
+        // Carregar eventos de todos os pets
+        if (user.pets.length > 0) {
+          this.loadEventsForAllPets(user.pets);
+        } else {
+          this.totalEvents = 0;
+          this.upcomingEvents = 0;
+          this.recentEvents = [];
+          this.isLoading = false; // Terminar loading se não há pets
+        }
+      },
+      error: (error) => {
+        console.error('Erro ao carregar dados do usuário:', error);
+        // Definir dados padrão em caso de erro
+        this.currentUser = null;
+        this.totalPets = 0;
         this.totalEvents = 0;
         this.upcomingEvents = 0;
+        this.recentPets = [];
         this.recentEvents = [];
+        this.isLoading = false; // Mostrar dashboard vazia
       }
     });
   }
@@ -116,11 +138,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
         const upcomingEvents = this.getUpcomingEvents(allEvents);
         this.upcomingEvents = upcomingEvents.length;
         this.recentEvents = upcomingEvents.slice(0, 5);
+        this.isLoading = false; // Finalizar loading quando todos os dados estão carregados
       },
       error: (error) => {
         this.totalEvents = 0;
         this.upcomingEvents = 0;
         this.recentEvents = [];
+        this.isLoading = false; // Finalizar loading mesmo em caso de erro
       }
     });
   }
@@ -163,5 +187,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   formatDate(dateString: string): string {
     if (!dateString) return 'N/A';
     return this.dateTimeService.formatDateTimeForDisplay(dateString); // FIX: usar serviço centralizado
+  }
+
+  retryLoadData(): void {
+    this.loadDashboardData();
   }
 }
