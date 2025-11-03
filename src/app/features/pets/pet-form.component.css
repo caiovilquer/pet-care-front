@@ -1,28 +1,200 @@
+/* Pet Form Styles */
 .full-width {
   width: 100%;
-  margin-bottom: 16px;
+  margin-bottom: var(--spacing-md);
+}
+
+.form-section {
+  margin-bottom: var(--spacing-lg);
+  padding: var(--spacing-md);
+  background: var(--bg-hover);
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--primary-color);
+}
+
+.form-section-title {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin-bottom: var(--spacing-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.form-section-title mat-icon {
+  color: var(--primary-color);
+  font-size: 20px;
+}
+
+.form-row {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.half-width {
+  flex: 1;
+}
+
+/* Dialog styling */
+::ng-deep .pet-form-dialog .mat-mdc-dialog-container {
+  border-radius: var(--radius-xl) !important;
+  overflow: hidden;
+}
+
+::ng-deep .pet-form-dialog .mat-mdc-dialog-surface {
+  border-radius: var(--radius-xl) !important;
 }
 
 mat-dialog-content {
-  max-height: 500px;
+  max-height: 600px;
   overflow-y: auto;
+  padding: var(--spacing-lg) !important;
 }
 
 mat-dialog-actions {
-  margin-top: 16px;
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg) !important;
+  background: var(--bg-hover);
+  border-top: 1px solid var(--border-light);
+  gap: var(--spacing-sm) !important;
 }
 
-/* Remove all focus outlines */
-::ng-deep .mat-mdc-form-field .mdc-text-field:focus-within {
-  outline: none !important;
-  box-shadow: none !important;
+/* Enhanced form field styling */
+::ng-deep .pet-form-dialog .mat-mdc-form-field {
+  width: 100%;
 }
 
-::ng-deep .mat-mdc-form-field input:focus {
-  outline: none !important;
-  box-shadow: none !important;
+::ng-deep .pet-form-dialog .mat-mdc-text-field-wrapper {
+  background-color: var(--bg-input) !important;
+  border-radius: var(--radius-md) !important;
+  transition: all 0.3s ease !important;
+  border: 1px solid var(--border-light) !important;
 }
 
-::ng-deep .mat-mdc-form-field.mat-focused .mdc-text-field {
-  box-shadow: none !important;
+::ng-deep .pet-form-dialog .mat-mdc-form-field:hover .mat-mdc-text-field-wrapper {
+  background-color: var(--bg-surface) !important;
+  border-color: var(--border-medium) !important;
+  box-shadow: var(--shadow-soft) !important;
+}
+
+::ng-deep .pet-form-dialog .mat-mdc-form-field.mat-focused .mat-mdc-text-field-wrapper {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 2px rgba(251, 146, 60, 0.1) !important;
+}
+
+::ng-deep .pet-form-dialog .mat-mdc-form-field .mdc-notched-outline {
+  border-color: transparent !important;
+}
+
+/* Select and other input types */
+::ng-deep .pet-form-dialog .mat-mdc-select-trigger {
+  border-radius: var(--radius-md) !important;
+}
+
+::ng-deep .pet-form-dialog .mat-mdc-select-panel {
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-hover) !important;
+}
+
+/* Date picker styling */
+::ng-deep .pet-form-dialog .mat-datepicker-toggle-default-icon {
+  color: var(--primary-color) !important;
+}
+
+/* File upload area */
+.file-upload-area {
+  border: 2px dashed var(--border-medium);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  text-align: center;
+  background: var(--bg-hover);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.file-upload-area:hover {
+  border-color: var(--primary-color);
+  background: var(--bg-surface);
+  transform: translateY(-2px);
+}
+
+.file-upload-area.drag-over {
+  border-color: var(--primary-color);
+  background: rgba(251, 146, 60, 0.1);
+}
+
+.upload-icon {
+  color: var(--primary-color);
+  font-size: 48px;
+  margin-bottom: var(--spacing-sm);
+}
+
+.upload-text {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* Pet type selection */
+.pet-type-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: var(--spacing-sm);
+  margin: var(--spacing-sm) 0;
+}
+
+.pet-type-option {
+  aspect-ratio: 1;
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: var(--spacing-xs) !important;
+  transition: all 0.3s ease !important;
+  cursor: pointer;
+}
+
+.pet-type-option:hover {
+  border-color: var(--primary-color);
+  background: var(--bg-hover);
+  transform: translateY(-2px);
+}
+
+.pet-type-option.selected {
+  border-color: var(--primary-color);
+  background: rgba(251, 146, 60, 0.1);
+  color: var(--primary-color);
+}
+
+.pet-type-option mat-icon {
+  font-size: 32px !important;
+  width: 32px !important;
+  height: 32px !important;
+}
+
+.pet-type-option.dog mat-icon { color: var(--dog-color); }
+.pet-type-option.cat mat-icon { color: var(--cat-color); }
+.pet-type-option.bird mat-icon { color: var(--bird-color); }
+.pet-type-option.other mat-icon { color: var(--other-color); }
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .form-row {
+    flex-direction: column;
+  }
+  
+  .pet-type-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  mat-dialog-content {
+    padding: var(--spacing-sm) !important;
+  }
+  
+  mat-dialog-actions {
+    padding: var(--spacing-sm) !important;
+  }
 }

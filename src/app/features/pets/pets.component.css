@@ -1,49 +1,137 @@
 .pets-container {
-  padding: 2rem;
+  padding: var(--spacing-lg);
   min-height: 100vh;
   background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+  background-attachment: fixed;
+  position: relative;
+}
+
+/* Pet-themed background pattern */
+.pets-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 15% 85%, rgba(245, 158, 11, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 85% 15%, rgba(139, 92, 246, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.03) 0%, transparent 50%);
+  pointer-events: none;
 }
 
 .pets-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
-  padding: 1.5rem;
-  background: rgba(255, 255, 255, 0.95);
+  margin-bottom: var(--spacing-xl);
+  padding: var(--spacing-lg);
+  background: var(--bg-card);
   backdrop-filter: blur(20px);
-  border-radius: 16px;
-  box-shadow: var(--shadow-card);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-hover);
   border: 1px solid var(--border-light);
+  position: relative;
+  z-index: 1;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.pets-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--dog-color), var(--cat-color), var(--bird-color));
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  opacity: 0;
+  animation: slideInLeft 0.8s ease-out 0.2s both;
 }
 
 .pets-header h1 {
-  font-size: 2rem;
-  font-weight: 600;
+  font-size: 2.2rem;
+  font-weight: 700;
   color: var(--text-primary);
+  background: linear-gradient(135deg, var(--text-primary), var(--dog-color));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.pets-header h1 mat-icon {
+  color: var(--dog-color);
+  font-size: 2rem;
+  animation: wiggle 3s ease-in-out infinite;
 }
 
 .table-container {
   overflow: auto;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--bg-card);
   backdrop-filter: blur(20px);
-  border-radius: 16px;
+  border-radius: var(--radius-xl);
   box-shadow: var(--shadow-card);
   border: 1px solid var(--border-light);
+  position: relative;
+  z-index: 1;
+  animation: fadeInUp 0.6s ease-out 0.1s both;
 }
 
 .pets-table {
   width: 100%;
 }
 
+/* Modern table styling */
+::ng-deep .pets-table .mat-mdc-header-row {
+  background: linear-gradient(135deg, var(--bg-surface), var(--bg-hover));
+  border-bottom: 2px solid var(--border-light);
+}
+
+::ng-deep .pets-table .mat-mdc-header-cell {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+::ng-deep .pets-table .mat-mdc-row {
+  transition: all 0.3s ease;
+  border-bottom: 1px solid var(--border-light);
+}
+
+::ng-deep .pets-table .mat-mdc-row:hover {
+  background-color: var(--bg-hover);
+  transform: scale(1.01);
+}
+
+::ng-deep .pets-table .mat-mdc-cell {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: none;
+}
+
 .pet-name {
   display: flex;
   align-items: center;
+  gap: var(--spacing-sm);
+  font-weight: 500;
 }
 
 .pet-icon {
-  margin-right: 8px;
-  color: var(--primary-color);
+  font-size: 1.4rem;
+  transition: all 0.3s ease;
+}
+
+.pet-icon.dog { color: var(--dog-color); }
+.pet-icon.cat { color: var(--cat-color); }
+.pet-icon.bird { color: var(--bird-color); }
+.pet-icon.other { color: var(--other-color); }
+
+.pet-name:hover .pet-icon {
+  transform: scale(1.2) rotate(5deg);
 }
 
 .mat-column-actions {
@@ -51,33 +139,93 @@
   text-align: right;
 }
 
+/* Pet status chips in table */
+.pet-status-chip {
+  padding: 4px 12px;
+  border-radius: var(--radius-xl);
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.status-healthy {
+  background-color: var(--success-bg);
+  color: var(--success-color);
+  border: 1px solid rgba(5, 150, 105, 0.2);
+}
+
+.status-attention {
+  background-color: var(--warning-bg);
+  color: var(--warning-color);
+  border: 1px solid rgba(217, 119, 6, 0.2);
+}
+
 .no-pets {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 3rem;
+  padding: var(--spacing-xl);
   text-align: center;
   color: var(--text-muted);
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--bg-card);
   backdrop-filter: blur(20px);
-  border-radius: 16px;
+  border-radius: var(--radius-xl);
   box-shadow: var(--shadow-card);
   border: 1px solid var(--border-light);
+  position: relative;
+  z-index: 1;
+  animation: fadeInUp 0.6s ease-out 0.2s both;
 }
 
 .no-pets-icon {
-  font-size: 4rem;
-  width: 4rem;
-  height: 4rem;
-  margin-bottom: 1rem;
-  color: var(--primary-color);
+  font-size: 5rem;
+  width: 5rem;
+  height: 5rem;
+  margin-bottom: var(--spacing-md);
+  color: var(--dog-color);
+  animation: bounce 2s ease-in-out infinite;
 }
 
 .no-pets h2 {
-  font-size: 1.5rem;
-  margin-bottom: 0.5rem;
+  font-size: 1.8rem;
+  margin-bottom: var(--spacing-xs);
   color: var(--text-primary);
+  font-weight: 600;
+}
+
+.no-pets p {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  margin-bottom: var(--spacing-lg);
+  line-height: 1.6;
+}
+
+.no-pets-cta {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: var(--radius-lg) !important;
+  font-weight: 600 !important;
+  padding: 12px 24px !important;
+  font-size: 1rem !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: var(--spacing-xs) !important;
+}
+
+.no-pets-cta:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.05) !important;
+  box-shadow: var(--shadow-hover) !important;
+}
+
+.no-pets-cta mat-icon {
+  font-size: 20px !important;
+  width: 20px !important;
+  height: 20px !important;
 }
 
 @media (max-width: 768px) {

@@ -154,11 +154,12 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
       background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(20px);
       border-radius: 20px;
-      box-shadow: var(--shadow-xl);
+      box-shadow: var(--shadow-card);
       border: 1px solid var(--border-light);
       position: relative;
       z-index: 1;
       animation: fadeInUp 0.6s ease-out;
+      transition: none;
     }
 
     .header-image {
@@ -241,12 +242,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
       width: 100%;
     }
 
-    ::ng-deep .mat-mdc-form-field .mdc-text-field {
-      background-color: var(--bg-input) !important;
-      border-radius: 12px !important;
-      border: 1px solid var(--border-light) !important;
-      transition: all 0.3s ease !important;
-    }
+
 
     ::ng-deep .mat-mdc-form-field.mat-focused .mdc-text-field {
       border-color: var(--primary-color) !important;
@@ -275,13 +271,19 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
       padding: 12px 24px !important;
       height: 48px !important;
       background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%) !important;
-      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3) !important;
+      color: white !important;
+      box-shadow: 0 4px 12px rgba(251, 146, 60, 0.3) !important;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+
+    ::ng-deep .mat-mdc-raised-button:not([disabled]) {
+      color: white !important;
     }
 
     ::ng-deep .mat-mdc-raised-button:hover:not([disabled]) {
       transform: translateY(-2px) !important;
-      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4) !important;
+      box-shadow: 0 6px 20px rgba(251, 146, 60, 0.4) !important;
+      color: white !important;
     }
 
     ::ng-deep .mat-mdc-raised-button:disabled {
@@ -289,6 +291,16 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
       color: white !important;
       transform: none !important;
       box-shadow: none !important;
+    }
+
+    /* Ensure button text is always white */
+    ::ng-deep .mat-mdc-raised-button span,
+    ::ng-deep .mat-mdc-raised-button .mdc-button__label {
+      color: white !important;
+    }
+
+    ::ng-deep .mat-mdc-raised-button mat-icon {
+      color: white !important;
     }
 
     /* Icon button styling */

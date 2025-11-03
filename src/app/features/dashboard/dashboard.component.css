@@ -1,99 +1,182 @@
 .dashboard-container {
-  padding: 2rem;
+  padding: var(--spacing-lg);
   min-height: 100vh;
   background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+  background-attachment: fixed;
+  position: relative;
+}
+
+/* Pet-themed background pattern */
+.dashboard-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 20%, rgba(251, 146, 60, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(168, 85, 247, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 40% 60%, rgba(6, 182, 212, 0.03) 0%, transparent 50%);
+  pointer-events: none;
 }
 
 .dashboard-header {
-  margin-bottom: 2rem;
+  margin-bottom: var(--spacing-xl);
   text-align: center;
-  padding: 2rem;
-  background: rgba(255, 255, 255, 0.95);
+  padding: var(--spacing-xl);
+  background: var(--bg-card);
   backdrop-filter: blur(20px);
-  border-radius: 16px;
-  box-shadow: var(--shadow-card);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-hover);
   border: 1px solid var(--border-light);
+  position: relative;
+  z-index: 1;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.dashboard-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary-color), var(--accent-color), var(--secondary-color));
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  opacity: 0;
+  animation: slideInLeft 0.8s ease-out 0.3s both;
 }
 
 .dashboard-header h1 {
-  font-size: 2.5rem;
-  font-weight: 600;
+  font-size: 2.8rem;
+  font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--spacing-xs);
+  background: linear-gradient(135deg, var(--text-primary), var(--primary-color));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: slideInLeft 0.6s ease-out 0.1s both;
 }
 
 .dashboard-header p {
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   color: var(--text-secondary);
+  font-weight: 400;
+  animation: slideInRight 0.6s ease-out 0.2s both;
 }
 
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 2rem;
-  margin-bottom: 3rem;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
   max-width: 1200px;
   margin-left: auto;
   margin-right: auto;
+  position: relative;
+  z-index: 1;
 }
 
 .stat-card {
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--bg-card);
   backdrop-filter: blur(20px);
-  border-radius: 16px;
+  border-radius: var(--radius-xl);
   box-shadow: var(--shadow-card);
   border: 1px solid var(--border-light);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   position: relative;
+  animation: fadeInUp 0.6s ease-out;
 }
 
+.stat-card:nth-child(1) { animation-delay: 0.1s; }
+.stat-card:nth-child(2) { animation-delay: 0.2s; }
+.stat-card:nth-child(3) { animation-delay: 0.3s; }
+
 .stat-card:hover {
-  transform: translateY(-6px);
+  transform: translateY(-8px) scale(1.02);
   box-shadow: var(--shadow-xl);
+  border-color: var(--primary-color);
+}
+
+.stat-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.stat-card:hover::after {
+  opacity: 1;
 }
 
 .stat-card mat-card-header {
-  padding: 2rem 1.5rem 1rem;
+  padding: var(--spacing-xl) var(--spacing-lg) var(--spacing-sm);
   text-align: center;
   position: relative;
 }
 
 .stat-icon {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  margin: 0 auto 1.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  margin: 0 auto var(--spacing-md);
+  box-shadow: var(--shadow-card);
   position: relative;
   z-index: 2;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .stat-icon::before {
   content: '';
   position: absolute;
-  top: -4px;
-  left: -4px;
-  right: -4px;
-  bottom: -4px;
-  border-radius: 50%;
-  background: linear-gradient(45deg, rgba(255,255,255,0.2), transparent);
+  top: -6px;
+  left: -6px;
+  right: -6px;
+  bottom: -6px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(45deg, rgba(255,255,255,0.3), transparent);
   z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.stat-card:hover .stat-icon {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.stat-card:hover .stat-icon::before {
+  opacity: 1;
 }
 
 .stat-icon mat-icon {
-  font-size: 32px;
-  width: 32px;
-  height: 32px;
+  font-size: 36px;
+  width: 36px;
+  height: 36px;
 }
 
-.pets-icon { background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); }
-.events-icon { background: linear-gradient(135deg, var(--secondary-color), var(--secondary-dark)); }
-.urgent-icon { background: linear-gradient(135deg, var(--accent-color), var(--accent-dark)); }
+/* Pet-themed icon colors */
+.pets-icon { 
+  background: linear-gradient(135deg, var(--dog-color), #d97706); 
+}
+.events-icon { 
+  background: linear-gradient(135deg, var(--secondary-color), var(--secondary-dark)); 
+}
+.urgent-icon { 
+  background: linear-gradient(135deg, var(--error-color), #b91c1c);
+  animation: gentlePulse 2s ease-in-out infinite;
+}
 
 .stat-card mat-card-title {
   font-size: 2.8rem;
@@ -114,49 +197,88 @@
 mat-card-actions {
   display: flex;
   justify-content: center;
-  gap: 8px;
-  padding: 0 1.5rem 1.5rem !important;
+  gap: var(--spacing-xs);
+  padding: 0 var(--spacing-lg) var(--spacing-lg) !important;
 }
 
 mat-card-actions button {
-  border-radius: 20px !important;
+  border-radius: var(--radius-xl) !important;
   font-weight: 600 !important;
   text-transform: none !important;
-  padding: 8px 24px !important;
-  background: rgba(99, 102, 241, 0.1) !important;
+  padding: var(--spacing-xs) var(--spacing-lg) !important;
+  background: rgba(251, 146, 60, 0.1) !important;
   color: var(--primary-color) !important;
-  border: 1px solid rgba(99, 102, 241, 0.2) !important;
-  transition: all 0.3s ease !important;
+  border: 1px solid rgba(251, 146, 60, 0.2) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  font-size: 0.9rem !important;
+  min-height: 36px !important;
 }
 
-mat-card-actions button:hover {
+mat-card-actions button:hover:not(:disabled) {
   background: var(--primary-color) !important;
   color: white !important;
-  transform: translateY(-1px) !important;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3) !important;
+  transform: translateY(-2px) scale(1.02) !important;
+  box-shadow: var(--shadow-hover) !important;
+  border-color: var(--primary-color) !important;
+}
+
+mat-card-actions button mat-icon {
+  font-size: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+  margin-right: 4px !important;
 }
 
 .content-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 2rem;
+  gap: var(--spacing-lg);
   max-width: 1200px;
   margin: 0 auto;
+  position: relative;
+  z-index: 1;
 }
 
 .recent-pets-card, .recent-events-card {
   height: 100%;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--bg-card);
   backdrop-filter: blur(20px);
-  border-radius: 16px;
+  border-radius: var(--radius-xl);
   box-shadow: var(--shadow-card);
   border: 1px solid var(--border-light);
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  animation: fadeInUp 0.6s ease-out 0.4s both;
+}
+
+.recent-pets-card::before, .recent-events-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.recent-pets-card::before {
+  background: linear-gradient(90deg, var(--dog-color), var(--cat-color));
+}
+
+.recent-events-card::before {
+  background: linear-gradient(90deg, var(--secondary-color), var(--accent-color));
 }
 
 .recent-pets-card:hover, .recent-events-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: var(--shadow-hover);
+  border-color: var(--border-medium);
+}
+
+.recent-pets-card:hover::before, .recent-events-card:hover::before {
+  opacity: 1;
 }
 
 .no-data {

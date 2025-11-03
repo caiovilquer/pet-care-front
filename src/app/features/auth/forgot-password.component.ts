@@ -40,13 +40,12 @@ import { PasswordResetService } from '../../core/services/password-reset.service
             </div>
 
             <form [formGroup]="forgotForm" (ngSubmit)="onSubmit()" class="auth-form">
-              <mat-form-field appearance="outline" class="full-width">
+              <mat-form-field class="full-width">
                 <mat-label>Email</mat-label>
                 <input
                   matInput
                   type="email"
                   formControlName="email"
-                  placeholder="seu@email.com"
                   autocomplete="email"
                 >
                 <mat-icon matSuffix>email</mat-icon>
@@ -57,6 +56,10 @@ import { PasswordResetService } from '../../core/services/password-reset.service
                   Digite um email válido
                 </mat-error>
               </mat-form-field>
+
+              
+
+              
 
               <button
                 mat-raised-button

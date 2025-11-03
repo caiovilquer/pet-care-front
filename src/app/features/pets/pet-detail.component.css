@@ -1,58 +1,174 @@
 .pet-detail-container {
-  padding: 2rem;
+  padding: var(--spacing-lg);
   max-width: 1200px;
   margin: 0 auto;
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+  background-attachment: fixed;
+  position: relative;
+}
+
+/* Pet detail background pattern */
+.pet-detail-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 25% 25%, rgba(245, 158, 11, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(139, 92, 246, 0.03) 0%, transparent 50%);
+  pointer-events: none;
 }
 
 .detail-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: var(--spacing-xl);
+  padding: var(--spacing-lg);
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-hover);
+  border: 1px solid var(--border-light);
+  position: relative;
+  z-index: 1;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.detail-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--dog-color), var(--cat-color), var(--bird-color));
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  opacity: 0;
+  animation: slideInLeft 0.8s ease-out 0.2s both;
 }
 
 .back-button {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--spacing-xs);
+  color: var(--text-secondary);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+}
+
+.back-button:hover {
+  color: var(--primary-color);
+  background-color: var(--bg-hover);
+  border-color: var(--border-light);
+  transform: translateX(-2px);
 }
 
 .header-actions {
   display: flex;
-  gap: 1rem;
+  gap: var(--spacing-sm);
+  animation: slideInRight 0.6s ease-out 0.1s both;
 }
 
 .pet-info-card {
-  margin-bottom: 2rem;
+  margin-bottom: var(--spacing-xl);
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border-light);
+  position: relative;
+  z-index: 1;
+  animation: fadeInUp 0.6s ease-out 0.1s both;
+  overflow: hidden;
 }
 
 .pet-avatar {
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+  background: linear-gradient(135deg, var(--dog-color) 0%, #d97706 100%);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 80px !important;
+  height: 80px !important;
+  border-radius: var(--radius-full) !important;
+  box-shadow: var(--shadow-card);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.pet-avatar::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  right: -6px;
+  bottom: -6px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(45deg, rgba(255,255,255,0.3), transparent);
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.pet-avatar:hover {
+  transform: scale(1.05) rotate(5deg);
+}
+
+.pet-avatar:hover::before {
+  opacity: 1;
+}
+
+.pet-avatar.cat {
+  background: linear-gradient(135deg, var(--cat-color) 0%, #7c3aed 100%);
+}
+
+.pet-avatar.bird {
+  background: linear-gradient(135deg, var(--bird-color) 0%, #047857 100%);
+}
+
+.pet-avatar.other {
+  background: linear-gradient(135deg, var(--other-color) 0%, #4b5563 100%);
 }
 
 .pet-icon {
-  font-size: 24px;
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
 }
 
 .pet-details-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
-  margin-top: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-md);
 }
 
 .detail-item {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 1rem;
-  background: var(--bg-input);
-  border-radius: 8px;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background: var(--bg-surface);
+  border-radius: var(--radius-md);
   border-left: 4px solid var(--primary-color);
+  transition: all 0.3s ease;
+  animation: slideInLeft 0.6s ease-out;
+}
+
+.detail-item:nth-child(even) {
+  animation: slideInRight 0.6s ease-out;
+}
+
+.detail-item:hover {
+  background: var(--bg-hover);
+  transform: translateX(4px);
+  box-shadow: var(--shadow-soft);
 }
 
 .detail-icon {
@@ -79,35 +195,81 @@
 }
 
 .recent-events-card {
-  margin-bottom: 2rem;
+  margin-bottom: var(--spacing-xl);
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border-light);
+  position: relative;
+  z-index: 1;
+  animation: fadeInUp 0.6s ease-out 0.2s both;
+  overflow: hidden;
+}
+
+.recent-events-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--secondary-color), var(--accent-color));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.recent-events-card:hover::before {
+  opacity: 1;
 }
 
 .event-item {
   display: flex;
   align-items: center;
-  padding: 1rem;
+  padding: var(--spacing-md);
   border-bottom: 1px solid var(--border-light);
-  gap: 1rem;
+  gap: var(--spacing-sm);
+  transition: all 0.3s ease;
+  position: relative;
 }
 
 .event-item:last-child {
   border-bottom: none;
 }
 
+.event-item:hover {
+  background: var(--bg-hover);
+  transform: translateX(4px);
+  padding-left: calc(var(--spacing-md) + 4px);
+}
+
 .event-icon-wrapper {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-full);
   background: var(--bg-secondary);
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.event-item:hover .event-icon-wrapper {
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: var(--shadow-soft);
 }
 
 .event-type-icon {
-  color: var(--primary-color);
-  font-size: 20px;
+  font-size: 22px;
+  transition: all 0.3s ease;
 }
+
+.event-type-icon.vaccine { color: #6366f1; }
+.event-type-icon.medicine { color: var(--error-color); }
+.event-type-icon.checkup { color: var(--info-color); }
+.event-type-icon.grooming { color: var(--accent-color); }
+.event-type-icon.feeding { color: var(--warning-color); }
 
 .event-details {
   flex: 1;

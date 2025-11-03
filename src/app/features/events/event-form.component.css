@@ -1,38 +1,223 @@
+/* Event Form Styles */
 .full-width {
   width: 100%;
-  margin-bottom: 16px;
+  margin-bottom: var(--spacing-md);
 }
 
 .half-width {
-  width: calc(50% - 8px);
+  flex: 1;
 }
 
 .form-row {
   display: flex;
-  justify-content: space-between;
-  gap: 16px;
+  gap: var(--spacing-sm);
+}
+
+.form-section {
+  margin-bottom: var(--spacing-lg);
+  padding: var(--spacing-md);
+  background: var(--bg-hover);
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--secondary-color);
+}
+
+.form-section-title {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin-bottom: var(--spacing-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.form-section-title mat-icon {
+  color: var(--secondary-color);
+  font-size: 20px;
+}
+
+/* Dialog styling */
+::ng-deep .event-form-dialog .mat-mdc-dialog-container {
+  border-radius: var(--radius-xl) !important;
+  overflow: hidden;
+}
+
+::ng-deep .event-form-dialog .mat-mdc-dialog-surface {
+  border-radius: var(--radius-xl) !important;
 }
 
 mat-dialog-content {
-  max-height: 600px;
+  max-height: 700px;
   overflow-y: auto;
+  padding: var(--spacing-lg) !important;
 }
 
 mat-dialog-actions {
-  margin-top: 16px;
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg) !important;
+  background: var(--bg-hover);
+  border-top: 1px solid var(--border-light);
+  gap: var(--spacing-sm) !important;
 }
 
-/* Remove all focus outlines */
-::ng-deep .mat-mdc-form-field .mdc-text-field:focus-within {
-  outline: none !important;
-  box-shadow: none !important;
+/* Enhanced form field styling */
+::ng-deep .event-form-dialog .mat-mdc-form-field {
+  width: 100%;
 }
 
-::ng-deep .mat-mdc-form-field input:focus {
-  outline: none !important;
-  box-shadow: none !important;
+::ng-deep .event-form-dialog .mat-mdc-text-field-wrapper {
+  background-color: var(--bg-input) !important;
+  border-radius: var(--radius-md) !important;
+  transition: all 0.3s ease !important;
+  border: 1px solid var(--border-light) !important;
 }
 
-::ng-deep .mat-mdc-form-field.mat-focused .mdc-text-field {
-  box-shadow: none !important;
+::ng-deep .event-form-dialog .mat-mdc-form-field:hover .mat-mdc-text-field-wrapper {
+  background-color: var(--bg-surface) !important;
+  border-color: var(--border-medium) !important;
+  box-shadow: var(--shadow-soft) !important;
+}
+
+::ng-deep .event-form-dialog .mat-mdc-form-field.mat-focused .mat-mdc-text-field-wrapper {
+  border-color: var(--secondary-color) !important;
+  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.1) !important;
+}
+
+::ng-deep .event-form-dialog .mat-mdc-form-field .mdc-notched-outline {
+  border-color: transparent !important;
+}
+
+/* Event type selection */
+.event-type-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--spacing-sm);
+  margin: var(--spacing-sm) 0;
+}
+
+.event-type-option {
+  aspect-ratio: 1;
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: var(--spacing-xs) !important;
+  transition: all 0.3s ease !important;
+  cursor: pointer;
+  text-align: center !important;
+}
+
+.event-type-option:hover {
+  border-color: var(--secondary-color);
+  background: var(--bg-hover);
+  transform: translateY(-2px);
+}
+
+.event-type-option.selected {
+  border-color: var(--secondary-color);
+  background: rgba(6, 182, 212, 0.1);
+  color: var(--secondary-color);
+}
+
+.event-type-option mat-icon {
+  font-size: 28px !important;
+  width: 28px !important;
+  height: 28px !important;
+  margin-bottom: var(--spacing-xs) !important;
+}
+
+.event-type-option.vaccine mat-icon { color: #6366f1; }
+.event-type-option.medicine mat-icon { color: var(--error-color); }
+.event-type-option.checkup mat-icon { color: var(--info-color); }
+.event-type-option.grooming mat-icon { color: var(--accent-color); }
+.event-type-option.feeding mat-icon { color: var(--warning-color); }
+
+.event-type-option span {
+  font-size: 0.85rem !important;
+  font-weight: 500 !important;
+}
+
+/* Priority selection */
+.priority-chips {
+  display: flex;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+  margin: var(--spacing-sm) 0;
+}
+
+.priority-chip {
+  padding: var(--spacing-xs) var(--spacing-sm) !important;
+  border-radius: var(--radius-lg) !important;
+  font-size: 0.85rem !important;
+  font-weight: 500 !important;
+  border: 2px solid transparent !important;
+  transition: all 0.3s ease !important;
+  cursor: pointer !important;
+}
+
+.priority-chip.low {
+  background: rgba(16, 185, 129, 0.1) !important;
+  color: var(--success-color) !important;
+}
+
+.priority-chip.medium {
+  background: rgba(245, 158, 11, 0.1) !important;
+  color: var(--warning-color) !important;
+}
+
+.priority-chip.high {
+  background: rgba(239, 68, 68, 0.1) !important;
+  color: var(--error-color) !important;
+}
+
+.priority-chip.selected {
+  border-color: currentColor !important;
+  transform: scale(1.05) !important;
+}
+
+/* Date and time inputs */
+.datetime-row {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: flex-end;
+}
+
+.datetime-input {
+  flex: 1;
+}
+
+/* Textarea styling */
+::ng-deep .event-form-dialog .mat-mdc-form-field textarea {
+  min-height: 120px !important;
+  resize: vertical !important;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .form-row {
+    flex-direction: column;
+  }
+  
+  .event-type-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .datetime-row {
+    flex-direction: column;
+  }
+  
+  .priority-chips {
+    justify-content: center;
+  }
+  
+  mat-dialog-content {
+    padding: var(--spacing-sm) !important;
+  }
+  
+  mat-dialog-actions {
+    padding: var(--spacing-sm) !important;
+  }
 }
