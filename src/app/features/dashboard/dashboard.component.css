@@ -187,6 +187,7 @@
   font-size: 36px;
   width: 36px;
   height: 36px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Pet-themed icon colors */
@@ -199,6 +200,11 @@
 .urgent-icon { 
   background: linear-gradient(135deg, var(--error-color), #b91c1c);
   animation: gentlePulse 2s ease-in-out infinite;
+}
+
+.stat-card:hover .urgent-icon {
+  animation: none;
+  transform: scale(1.1) rotate(5deg) !important;
 }
 
 .stat-card mat-card-title {
@@ -373,11 +379,35 @@ mat-card-actions button mat-icon {
 }
 
 /* Event Icons */
-.event-icon-vaccine { color: var(--primary-color); }
-.event-icon-medicine { color: var(--error-color); }
-.event-icon-diary { color: var(--warning-color); }
-.event-icon-breed { color: var(--accent-color); }
-.event-icon-service { color: var(--secondary-color); }
+.event-icon-vaccine { 
+  color: var(--primary-color); 
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.event-icon-medicine { 
+  color: var(--error-color); 
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.event-icon-diary { 
+  color: var(--warning-color); 
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.event-icon-breed { 
+  color: var(--accent-color); 
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.event-icon-service { 
+  color: var(--secondary-color); 
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hover effect on event icons */
+mat-list-item:hover .event-icon-vaccine,
+mat-list-item:hover .event-icon-medicine,
+mat-list-item:hover .event-icon-diary,
+mat-list-item:hover .event-icon-breed,
+mat-list-item:hover .event-icon-service {
+  transform: scale(1.15) rotate(5deg);
+}
 
 /* Melhorias visuais extras */
 .stat-card::before {
