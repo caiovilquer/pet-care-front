@@ -203,8 +203,8 @@ mat-dialog-actions {
 }
 
 .preview-image {
-  width: 120px;
-  height: 120px;
+  width: 160px;
+  height: 160px;
   object-fit: cover;
   border-radius: var(--radius-md);
   transition: all 0.3s ease;
@@ -279,8 +279,8 @@ mat-dialog-actions {
   }
   
   .preview-image {
-    width: 100px;
-    height: 100px;
+    width: 120px;
+    height: 120px;
   }
   
   .photo-section {

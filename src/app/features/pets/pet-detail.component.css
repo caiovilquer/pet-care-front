@@ -106,8 +106,8 @@
 /* Large pet avatar for detail page */
 .pet-avatar-large {
   position: relative;
-  width: 120px !important;
-  height: 120px !important;
+  width: 180px !important;
+  height: 180px !important;
   border-radius: var(--radius-full) !important;
   overflow: hidden;
   display: flex;
@@ -175,7 +175,7 @@
 }
 
 .pet-emoji-large {
-  font-size: 48px;
+  font-size: 72px;
   line-height: 1;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
   transition: all 0.3s ease;
@@ -478,11 +478,11 @@
   }
   
   .pet-avatar-large {
-    width: 100px !important;
-    height: 100px !important;
+    width: 140px !important;
+    height: 140px !important;
   }
   
   .pet-emoji-large {
-    font-size: 40px;
+    font-size: 56px;
   }
 }

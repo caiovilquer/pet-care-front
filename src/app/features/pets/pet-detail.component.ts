@@ -219,22 +219,22 @@ export class PetDetailComponent implements OnInit {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     if (ctx && this.pet) {
-      canvas.width = 200;
-      canvas.height = 200;
+      canvas.width = 300;
+      canvas.height = 300;
       
       // Background gradient
-      const gradient = ctx.createLinearGradient(0, 0, 200, 200);
+      const gradient = ctx.createLinearGradient(0, 0, 300, 300);
       gradient.addColorStop(0, '#f3f4f6');
       gradient.addColorStop(1, '#e5e7eb');
       ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, 200, 200);
+      ctx.fillRect(0, 0, 300, 300);
       
       // Emoji
-      ctx.font = '80px Arial';
+      ctx.font = '120px Arial';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillStyle = '#374151';
-      ctx.fillText(this.getDefaultPetImage(this.pet.specie), 100, 100);
+      ctx.fillText(this.getDefaultPetImage(this.pet.specie), 150, 150);
       
       img.src = canvas.toDataURL();
       img.classList.add('fallback-image');

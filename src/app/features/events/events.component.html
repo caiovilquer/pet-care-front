@@ -54,9 +54,24 @@
           <ng-container matColumnDef="pet">
             <th mat-header-cell *matHeaderCellDef>Pet</th>
             <td mat-cell *matCellDef="let event">
-              <div class="pet-name">
-                <mat-icon class="pet-icon">pets</mat-icon>
-                {{getPetName(event.petId)}}
+              <div class="pet-info">
+                <div class="pet-avatar-small">
+                  @if (getPetData(event.petId).photoUrl) {
+                    <img 
+                      [src]="getPetData(event.petId).photoUrl" 
+                      [alt]="getPetData(event.petId).name"
+                      class="pet-photo-small"
+                      (error)="onImageError($event, getPetData(event.petId).specie)">
+                  } @else {
+                    <div class="pet-placeholder-small">
+                      <span class="pet-emoji-small">{{getDefaultPetImage(getPetData(event.petId).specie)}}</span>
+                    </div>
+                  }
+                </div>
+                <div class="pet-details">
+                  <span class="pet-name">{{getPetData(event.petId).name}}</span>
+                  <span class="pet-specie">{{getPetData(event.petId).specie}}</span>
+                </div>
               </div>
             </td>
           </ng-container>

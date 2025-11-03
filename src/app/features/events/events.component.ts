@@ -46,6 +46,7 @@ export class EventsComponent implements OnInit {
   petId: number | null = null;
   petName: string = '';
   petNamesMap: { [key: number]: string } = {};
+  petsMap: { [key: number]: { name: string; specie: string; photoUrl?: string } } = {};
   isLoading = true;
 
   constructor(
@@ -93,8 +94,14 @@ export class EventsComponent implements OnInit {
     this.petService.getPets().subscribe({
       next: (pets) => {
         this.petNamesMap = {};
+        this.petsMap = {};
         pets.forEach(pet => {
           this.petNamesMap[pet.id] = pet.name;
+          this.petsMap[pet.id] = {
+            name: pet.name,
+            specie: pet.specie,
+            photoUrl: pet.photoUrl
+          };
         });
       },
       error: (err) => {
@@ -328,6 +335,50 @@ export class EventsComponent implements OnInit {
 
   getPetName(petId: number): string {
     return this.petNamesMap[petId] || `Pet #${petId}`;
+  }
+
+  getPetData(petId: number): { name: string; specie: string; photoUrl?: string } {
+    return this.petsMap[petId] || { name: `Pet #${petId}`, specie: 'Desconhecido' };
+  }
+
+  getDefaultPetImage(specie: string): string {
+    const specieIcons: { [key: string]: string } = {
+      'Cão': '🐕',
+      'Gato': '🐱',
+      'Pássaro': '🐦',
+      'Peixe': '🐠',
+      'Hamster': '🐹',
+      'Coelho': '🐰'
+    };
+    return specieIcons[specie] || '🐾';
+  }
+
+  onImageError(event: any, specie: string): void {
+    // Substituir a imagem por um canvas com emoji quando falhar
+    const img = event.target;
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      canvas.width = 64;
+      canvas.height = 64;
+      
+      // Background gradient
+      const gradient = ctx.createLinearGradient(0, 0, 64, 64);
+      gradient.addColorStop(0, '#f3f4f6');
+      gradient.addColorStop(1, '#e5e7eb');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, 64, 64);
+      
+      // Emoji
+      ctx.font = '28px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#374151';
+      ctx.fillText(this.getDefaultPetImage(specie), 32, 32);
+      
+      img.src = canvas.toDataURL();
+      img.classList.add('fallback-image');
+    }
   }
 
   // Ordenar eventos por data (mais próximos primeiro)
