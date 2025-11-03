@@ -474,14 +474,55 @@ export class LocationService {
       durationText: place.durationText,
       isOpen: place.openingHours?.openNow || false,
       type: 'petshop',
-      hasGrooming: false,
+      hasGrooming: this.inferServiceFromTypes(place.types || [], 'grooming'),
       hasDaycare: false,
       hasHotel: false,
       hasVaccination: false,
       acceptedPetTypes: [PetType.DOG, PetType.CAT],
-      services: ['petshop'],
-      openingHours: this.convertGoogleHoursToOpeningHours(place.openingHours)
+      services: this.extractServices(place.types || [], 'petshop'),
+      openingHours: this.convertGoogleHoursToOpeningHours(place.openingHours),
+      photos: place.photos || [],
+      website: place.website
     };
+  }
+
+  /**
+   * Infere se um serviço está disponível baseado nos tipos do Google
+   */
+  private inferServiceFromTypes(types: string[], service: string): boolean {
+    const serviceMap: { [key: string]: string[] } = {
+      grooming: ['pet_groomer', 'pet grooming'],
+      daycare: ['pet_store', 'pet boarding'],
+      hotel: ['pet boarding', 'pet hotel'],
+      vaccination: ['veterinary_care', 'pet_store']
+    };
+
+    const keywords = serviceMap[service] || [];
+    return types.some(type => 
+      keywords.some(keyword => type.toLowerCase().includes(keyword.toLowerCase()))
+    );
+  }
+
+  /**
+   * Extrai serviços baseado nos tipos do Google
+   */
+  private extractServices(types: string[], baseService: string): string[] {
+    const services = [baseService];
+    
+    if (this.inferServiceFromTypes(types, 'grooming')) {
+      services.push('grooming');
+    }
+    if (this.inferServiceFromTypes(types, 'daycare')) {
+      services.push('daycare');
+    }
+    if (this.inferServiceFromTypes(types, 'hotel')) {
+      services.push('hotel');
+    }
+    if (this.inferServiceFromTypes(types, 'vaccination')) {
+      services.push('vaccination');
+    }
+    
+    return services;
   }
 
   /**
@@ -516,7 +557,9 @@ export class LocationService {
       specialties: [],
       acceptedPetTypes: [PetType.DOG, PetType.CAT],
       services: hasEmergency ? ['veterinary', 'emergency'] : ['veterinary'],
-      openingHours: this.convertGoogleHoursToOpeningHours(place.openingHours)
+      openingHours: this.convertGoogleHoursToOpeningHours(place.openingHours),
+      photos: place.photos || [],
+      website: place.website
     };
   }
 

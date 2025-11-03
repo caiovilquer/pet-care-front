@@ -18,6 +18,8 @@ export interface Location {
   openingHours: OpeningHours;
   services: string[];
   type: 'petshop' | 'veterinary';
+  photos?: string[]; // URLs das fotos do Google Places
+  website?: string; // Website do estabelecimento
 }
 
 export interface OpeningHours {

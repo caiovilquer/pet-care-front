@@ -39,10 +39,17 @@ import { of } from 'rxjs';
         <div class="header-content">
           <div class="location-image-large">
             <div class="image-container">
-              <div class="placeholder-image">
-                <mat-icon>{{ getTypeIcon() }}</mat-icon>
-                <span class="placeholder-text">{{ getTypeLabel() }}</span>
-              </div>
+              @if (location.photos && location.photos.length > 0) {
+                <img [src]="location.photos[0]" 
+                     [alt]="location.name"
+                     class="location-photo"
+                     (error)="onImageError($event)">
+              } @else {
+                <div class="placeholder-image">
+                  <mat-icon>{{ getTypeIcon() }}</mat-icon>
+                  <span class="placeholder-text">{{ getTypeLabel() }}</span>
+                </div>
+              }
             </div>
             <div class="image-overlay">
               <div class="status-badge" [class.open]="isOpen" [class.closed]="!isOpen">
@@ -155,7 +162,22 @@ import { of } from 'rxjs';
                       <p>{{ detailedInfo.description }}</p>
                     </div>
 
-                    <div class="detail-item" *ngIf="detailedInfo.priceLevel">
+                    <div class="detail-item" *ngIf="detailedInfo.phone">
+                      <strong>Telefone</strong>
+                      <p><a [href]="'tel:' + detailedInfo.phone">{{ detailedInfo.phone }}</a></p>
+                    </div>
+
+                    <div class="detail-item" *ngIf="detailedInfo.website">
+                      <strong>Website</strong>
+                      <p><a [href]="detailedInfo.website" target="_blank" rel="noopener">{{ detailedInfo.website }}</a></p>
+                    </div>
+
+                    <div class="detail-item" *ngIf="detailedInfo.googleMapsUrl">
+                      <strong>Ver no Google Maps</strong>
+                      <p><a [href]="detailedInfo.googleMapsUrl" target="_blank" rel="noopener">Abrir no Google Maps</a></p>
+                    </div>
+
+                    <div class="detail-item" *ngIf="detailedInfo.priceLevel && detailedInfo.priceLevel > 0">
                       <strong>Nível de preços</strong>
                       <p>{{ getPriceLevelText(detailedInfo.priceLevel) }}</p>
                     </div>
@@ -176,6 +198,13 @@ import { of } from 'rxjs';
                           {{ getPaymentMethodLabel(method) }}
                         </mat-chip>
                       </mat-chip-set>
+                    </div>
+
+                    <!-- Mensagem quando não houver detalhes adicionais -->
+                    <div class="no-additional-details" *ngIf="!hasAdditionalDetails()">
+                      <mat-icon>info_outline</mat-icon>
+                      <p>Este estabelecimento não possui informações detalhadas adicionais no momento.</p>
+                      <p class="small-text">As informações básicas de contato e localização estão disponíveis na aba "Informações".</p>
                     </div>
                   </div>
                 </mat-card-content>
@@ -254,7 +283,7 @@ import { of } from 'rxjs';
               <mat-card-content>
                 <div class="services-grid">
                   <mat-chip-set>
-                    <mat-chip *ngFor="let service of location.services" class="service-chip">
+                    <mat-chip *ngFor="let service of getDisplayServices()" class="service-chip">
                       <mat-icon>{{ getServiceIcon(service) }}</mat-icon>
                       {{ getServiceLabel(service) }}
                     </mat-chip>
@@ -462,6 +491,14 @@ import { of } from 'rxjs';
     .image-container {
       width: 100%;
       height: 100%;
+      position: relative;
+    }
+
+    .location-photo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
     }
 
     .location-img {
@@ -618,6 +655,30 @@ import { of } from 'rxjs';
       display: flex;
       gap: 1rem;
       align-items: flex-start;
+    }
+
+    .detail-item strong {
+      display: block;
+      margin-bottom: 0.25rem;
+      color: #333;
+      font-size: 0.95rem;
+    }
+
+    .detail-item p {
+      margin: 0;
+      color: #555;
+      line-height: 1.6;
+    }
+
+    .detail-item a {
+      color: #1976d2;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .detail-item a:hover {
+      text-decoration: underline;
+      color: #1565c0;
     }
 
     .contact-item mat-icon {
@@ -882,6 +943,49 @@ import { of } from 'rxjs';
       color: #666;
     }
 
+    .no-additional-details {
+      text-align: center;
+      padding: 2rem;
+      color: #666;
+      background: #f8f9fa;
+      border-radius: 8px;
+      margin-top: 1rem;
+    }
+
+    .no-additional-details mat-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+      color: #999;
+    }
+
+    .no-additional-details p {
+      margin: 0.5rem 0;
+    }
+
+    .no-additional-details .small-text {
+      font-size: 0.85rem;
+      color: #888;
+      margin-top: 0.5rem;
+    }
+
+    .load-details {
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .load-details button {
+      margin-bottom: 1rem;
+    }
+
+    .load-info {
+      color: #666;
+      font-size: 0.9rem;
+      margin: 0;
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
       .location-detail-container {
@@ -936,7 +1040,7 @@ export class LocationDetailComponent implements OnInit, OnDestroy {
   isOpen = false;
   detailedInfo: any = null;
   reviews: any[] = [];
-  loadingDetails = true;
+  loadingDetails = false;
   loadingReviews = false;
   reviewsLoaded = false;
   
@@ -981,16 +1085,53 @@ export class LocationDetailComponent implements OnInit, OnDestroy {
     
     // ULTRA ECONÔMICO: Carregar apenas detalhes essenciais, sem reviews
     this.googleMapsService.getPlaceDetails(this.location.id).pipe(
-      catchError(() => of(null)),
       takeUntil(this.destroy$),
       finalize(() => this.loadingDetails = false)
     ).subscribe({
       next: (details) => {
-        this.detailedInfo = details;
-        this.reviews = []; // Não carregar reviews automaticamente para economizar API
+        console.log('Detalhes carregados:', details);
+        if (details) {
+          this.detailedInfo = details;
+        } else {
+          // Se não houver detalhes, criar objeto vazio mas válido
+          this.detailedInfo = {
+            description: '',
+            priceLevel: 0,
+            photos: [],
+            phone: this.location.phone || '',
+            website: this.location.website || '',
+            googleMapsUrl: '',
+            types: [],
+            vicinity: '',
+            addressComponents: [],
+            accessibility: [],
+            paymentMethods: [],
+            businessStatus: '',
+            openingHours: null
+          };
+          this.snackBar.open('Algumas informações não estão disponíveis', 'Fechar', {
+            duration: 3000
+          });
+        }
       },
       error: (error) => {
         console.error('Erro ao carregar detalhes:', error);
+        // Mesmo em caso de erro, criar estrutura básica
+        this.detailedInfo = {
+          description: '',
+          priceLevel: 0,
+          photos: [],
+          phone: this.location.phone || '',
+          website: this.location.website || '',
+          googleMapsUrl: '',
+          types: [],
+          vicinity: '',
+          addressComponents: [],
+          accessibility: [],
+          paymentMethods: [],
+          businessStatus: '',
+          openingHours: null
+        };
         this.snackBar.open('Erro ao carregar detalhes do estabelecimento', 'Fechar', {
           duration: 3000
         });
@@ -1032,6 +1173,8 @@ export class LocationDetailComponent implements OnInit, OnDestroy {
 
   getServiceIcon(service: string): string {
     const icons: { [key: string]: string } = {
+      petshop: 'store',
+      veterinary: 'local_hospital',
       grooming: 'spa',
       daycare: 'pets',
       hotel: 'hotel',
@@ -1052,6 +1195,9 @@ export class LocationDetailComponent implements OnInit, OnDestroy {
 
   getServiceLabel(service: string): string {
     const labels: { [key: string]: string } = {
+      // Traduzir tipos genéricos
+      petshop: 'Petshop',
+      veterinary: 'Clínica Veterinária',
       grooming: 'Banho e tosa',
       daycare: 'Creche',
       hotel: 'Hotel',
@@ -1066,8 +1212,14 @@ export class LocationDetailComponent implements OnInit, OnDestroy {
       cardiology: 'Cardiologia',
       dermatology: 'Dermatologia',
       orthopedics: 'Ortopedia'
+      
     };
     return labels[service] || service;
+  }
+
+  // Retornar todos os serviços (com tradução)
+  getDisplayServices(): string[] {
+    return this.location.services;
   }
 
   isPetshop(location: Location): location is Petshop {
@@ -1076,6 +1228,20 @@ export class LocationDetailComponent implements OnInit, OnDestroy {
 
   isVeterinary(location: Location): location is Veterinary {
     return location.type === 'veterinary';
+  }
+
+  hasAdditionalDetails(): boolean {
+    if (!this.detailedInfo) return false;
+    
+    return !!(
+      this.detailedInfo.description ||
+      this.detailedInfo.phone ||
+      this.detailedInfo.website ||
+      this.detailedInfo.googleMapsUrl ||
+      (this.detailedInfo.priceLevel && this.detailedInfo.priceLevel > 0) ||
+      (this.detailedInfo.accessibility && this.detailedInfo.accessibility.length > 0) ||
+      (this.detailedInfo.paymentMethods && this.detailedInfo.paymentMethods.length > 0)
+    );
   }
 
   isToday(dayIndex: number): boolean {
@@ -1142,6 +1308,11 @@ export class LocationDetailComponent implements OnInit, OnDestroy {
     if (this.location.phone) {
       window.open(`tel:${this.location.phone}`, '_self');
     }
+  }
+
+  onImageError(event: any) {
+    // Se a imagem falhar ao carregar, esconder e mostrar placeholder
+    event.target.style.display = 'none';
   }
 
   onDirections() {

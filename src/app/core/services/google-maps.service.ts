@@ -95,10 +95,24 @@ export class GoogleMapsService {
       'types', 'opening_hours'
     ];
 
-    // MODO ULTRA ECONÔMICO: apenas campos essenciais
+    // Campos completos com todos os dados de contato e detalhes
     const detailFields = isUltraEconomic ? 
-      [...basicFields, 'formatted_phone_number'] : 
-      [...searchFields, 'formatted_phone_number', 'website'];
+      [...basicFields, 'formatted_phone_number', 'website'] : 
+      [
+        ...searchFields, 
+        'formatted_phone_number',  // Telefone formatado
+        'international_phone_number', // Telefone internacional
+        'website',                  // Website oficial
+        'url',                      // URL do Google Maps
+        'photos',                   // Fotos do local
+        'price_level',              // Nível de preços
+        'editorial_summary',        // Resumo editorial do Google
+        'current_opening_hours',    // Horários atuais
+        'reviews',                  // Avaliações
+        'types',                    // Tipos de estabelecimento
+        'vicinity',                 // Endereço simplificado
+        'address_components'        // Componentes do endereço
+      ];
 
     switch (type) {
       case 'basic': return basicFields;
@@ -489,7 +503,7 @@ export class GoogleMapsService {
           openingHours: undefined,
           phoneNumber: '',
           website: '',
-          photos: [], // REMOVIDO: fotos aumentam muito o custo - só carregar quando necessário
+          photos: [],
           types: [],
           priceLevel: 0
         } as PlaceResult);
@@ -586,7 +600,9 @@ export class GoogleMapsService {
     const latValue: number = typeof location?.lat === 'function' ? location.lat() : Number(location?.lat ?? 0);
     const lngValue: number = typeof location?.lng === 'function' ? location.lng() : Number(location?.lng ?? 0);
 
-    // ECONOMIA MÁXIMA: Retornar apenas dados básicos essenciais
+    // Processar fotos se disponíveis (com cache automático)
+    const photos = this.extractPhotoUrls(place.photos);
+
     return {
       placeId: place.place_id || '',
       name: place.name || '',
@@ -600,18 +616,42 @@ export class GoogleMapsService {
         weekdayText: place.opening_hours.weekday_text || []
       } : undefined,
       phoneNumber: place.formatted_phone_number,
-      // REMOVIDOS: website, photos, types, priceLevel para economizar dados
-      website: undefined,
-      photos: [],
-      types: [],
-      priceLevel: undefined
+      website: place.website,
+      photos: photos,
+      types: place.types || [],
+      priceLevel: place.price_level
     };
   }
 
   /**
-   * Busca detalhes completos de um lugar específico (sobrescreve o método anterior)
+   * Extrai URLs das fotos com tamanho otimizado
+   */
+  private extractPhotoUrls(photos?: google.maps.places.PlacePhoto[]): string[] {
+    if (!photos || photos.length === 0) {
+      return [];
+    }
+
+    // Limitar a 5 fotos para economizar
+    return photos.slice(0, 5).map(photo => {
+      // Usar tamanho médio (maxWidth: 800) para equilibrar qualidade e custo
+      return photo.getUrl({ maxWidth: 800, maxHeight: 600 });
+    });
+  }
+
+  /**
+   * Busca detalhes completos de um lugar específico com cache robusto
    */
   getPlaceDetails(placeId: string): Observable<any> {
+    const cacheKey = this.cacheService.generateKey('place_full_details', { placeId });
+    
+    return this.cacheService.getOrSet(
+      cacheKey,
+      () => this.performFullPlaceDetailsSearch(placeId),
+      { ttl: 12 * 60, maxSize: 100 } // 12 horas de cache para detalhes completos
+    );
+  }
+
+  private performFullPlaceDetailsSearch(placeId: string): Observable<any> {
     return from(this.loadGoogleMaps()).pipe(
       switchMap(() => {
         const service = new google.maps.places.PlacesService(
@@ -620,22 +660,36 @@ export class GoogleMapsService {
 
         const request = {
           placeId: placeId,
-          fields: this.getOptimizedFields('details') // CAMPO DRASTICAMENTE REDUZIDO
+          fields: this.getOptimizedFields('details')
         };
 
         return new Promise((resolve, reject) => {
           service.getDetails(request, (place, status) => {
             if (status === google.maps.places.PlacesServiceStatus.OK && place) {
+              const photos = this.extractPhotoUrls(place.photos);
+              
               const details = {
-                description: '', // REMOVIDO: editorial_summary é caro
+                description: (place as any).editorial_summary?.overview || '',
                 priceLevel: place.price_level || 0,
-                accessibility: [], // REMOVIDO: muito caro de processar
-                paymentMethods: [], // REMOVIDO: muito caro de processar
-                googleMapsUrl: '', // REMOVIDO: url é campo caro
-                photos: [] // REMOVIDO: fotos são o que mais gasta na API
+                photos: photos,
+                website: place.website || '',
+                phone: place.formatted_phone_number || place.international_phone_number || '',
+                googleMapsUrl: place.url || '',
+                types: place.types || [],
+                vicinity: place.vicinity || '',
+                addressComponents: place.address_components || [],
+                // Campos que não estão disponíveis na API básica do Google Places
+                accessibility: [],
+                paymentMethods: [],
+                // Informações adicionais úteis
+                businessStatus: place.business_status || '',
+                openingHours: place.opening_hours || null
               };
+              
+              console.log('Detalhes completos extraídos:', details);
               resolve(details);
             } else {
+              console.error(`Places service failed with status: ${status}`);
               reject(new Error(`Places service failed: ${status}`));
             }
           });
@@ -643,15 +697,39 @@ export class GoogleMapsService {
       }),
       catchError(error => {
         console.error('Erro ao buscar detalhes do local:', error);
-        return of(null);
+        return of({
+          description: '',
+          priceLevel: 0,
+          photos: [],
+          website: '',
+          phone: '',
+          googleMapsUrl: '',
+          types: [],
+          vicinity: '',
+          addressComponents: [],
+          accessibility: [],
+          paymentMethods: [],
+          businessStatus: '',
+          openingHours: null
+        });
       })
     );
   }
 
   /**
-   * Busca avaliações de um lugar
+   * Busca avaliações de um lugar com cache
    */
   getPlaceReviews(placeId: string): Observable<any[]> {
+    const cacheKey = this.cacheService.generateKey('place_reviews', { placeId });
+    
+    return this.cacheService.getOrSet(
+      cacheKey,
+      () => this.performReviewsSearch(placeId),
+      { ttl: 6 * 60, maxSize: 50 } // 6 horas de cache para reviews
+    );
+  }
+
+  private performReviewsSearch(placeId: string): Observable<any[]> {
     return from(this.loadGoogleMaps()).pipe(
       switchMap(() => {
         const service = new google.maps.places.PlacesService(
@@ -666,7 +744,7 @@ export class GoogleMapsService {
         return new Promise<any[]>((resolve, reject) => {
           service.getDetails(request, (place, status) => {
             if (status === google.maps.places.PlacesServiceStatus.OK && place?.reviews) {
-              const reviews = place.reviews.map((review: any) => ({
+              const reviews = place.reviews.slice(0, 5).map((review: any) => ({
                 authorName: review.author_name,
                 rating: review.rating,
                 text: review.text,
@@ -683,6 +761,52 @@ export class GoogleMapsService {
       }),
       catchError(error => {
         console.error('Erro ao buscar avaliações:', error);
+        return of([]);
+      })
+    );
+  }
+
+  /**
+   * Carrega fotos adicionais de um lugar sob demanda (lazy loading)
+   * Útil para carregar fotos apenas quando o usuário clicar em "ver detalhes"
+   */
+  loadPlacePhotos(placeId: string, maxPhotos: number = 10): Observable<string[]> {
+    const cacheKey = this.cacheService.generateKey('place_photos', { placeId, maxPhotos });
+    
+    return this.cacheService.getOrSet(
+      cacheKey,
+      () => this.performPhotoSearch(placeId, maxPhotos),
+      { ttl: 24 * 60, maxSize: 100 } // 24 horas de cache para fotos
+    );
+  }
+
+  private performPhotoSearch(placeId: string, maxPhotos: number): Observable<string[]> {
+    return from(this.loadGoogleMaps()).pipe(
+      switchMap(() => {
+        const service = new google.maps.places.PlacesService(
+          document.createElement('div')
+        );
+
+        const request = {
+          placeId: placeId,
+          fields: ['photos']
+        };
+
+        return new Promise<string[]>((resolve, reject) => {
+          service.getDetails(request, (place, status) => {
+            if (status === google.maps.places.PlacesServiceStatus.OK && place?.photos) {
+              const photoUrls = place.photos
+                .slice(0, maxPhotos)
+                .map(photo => photo.getUrl({ maxWidth: 1200, maxHeight: 900 }));
+              resolve(photoUrls);
+            } else {
+              resolve([]);
+            }
+          });
+        });
+      }),
+      catchError(error => {
+        console.error('Erro ao carregar fotos:', error);
         return of([]);
       })
     );

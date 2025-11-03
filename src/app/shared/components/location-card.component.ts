@@ -24,10 +24,18 @@ import { LocationService } from '../../core/services/location.service';
       <div class="card-header">
         <div class="location-image">
           <div class="image-container">
-            <div class="placeholder-image">
-              <mat-icon>{{ getTypeIcon() }}</mat-icon>
-              <span class="placeholder-text">{{ getTypeLabel() }}</span>
-            </div>
+            @if (location.photos && location.photos.length > 0) {
+              <img 
+                [src]="location.photos[0]" 
+                [alt]="location.name"
+                class="location-photo"
+                (error)="onImageError($event)">
+            } @else {
+              <div class="placeholder-image">
+                <mat-icon>{{ getTypeIcon() }}</mat-icon>
+                <span class="placeholder-text">{{ getTypeLabel() }}</span>
+              </div>
+            }
           </div>
           <div class="status-badge" [class.open]="isOpen" [class.closed]="!isOpen">
             <mat-icon>{{ isOpen ? 'schedule' : 'schedule_off' }}</mat-icon>
@@ -70,14 +78,14 @@ import { LocationService } from '../../core/services/location.service';
           </div>
         </div>
 
-        <div class="services" *ngIf="location.services.length > 0">
+        <div class="services" *ngIf="getDisplayServices().length > 0">
           <h4>Serviços:</h4>
           <mat-chip-set>
-            <mat-chip *ngFor="let service of location.services.slice(0, 3)">
+            <mat-chip *ngFor="let service of getDisplayServices().slice(0, 3)">
               {{ getServiceLabel(service) }}
             </mat-chip>
-            <mat-chip *ngIf="location.services.length > 3" class="more-services">
-              +{{ location.services.length - 3 }} mais
+            <mat-chip *ngIf="getDisplayServices().length > 3" class="more-services">
+              +{{ getDisplayServices().length - 3 }} mais
             </mat-chip>
           </mat-chip-set>
         </div>
@@ -193,7 +201,8 @@ import { LocationService } from '../../core/services/location.service';
       height: 100%;
     }
 
-    .location-img {
+    .location-img,
+    .location-photo {
       width: 100%;
       height: 100%;
       object-fit: cover;
@@ -522,6 +531,8 @@ export class LocationCardComponent {
 
   getServiceLabel(service: string): string {
     const serviceLabels: { [key: string]: string } = {
+      petshop: 'Petshop',
+      veterinary: 'Clínica Veterinária',
       grooming: 'Banho e tosa',
       daycare: 'Creche',
       hotel: 'Hotel',
@@ -538,6 +549,15 @@ export class LocationCardComponent {
       orthopedics: 'Ortopedia'
     };
     return serviceLabels[service] || service;
+  }
+
+  getDisplayServices(): string[] {
+    return this.location.services;
+  }
+
+  onImageError(event: Event): void {
+    const imgElement = event.target as HTMLImageElement;
+    imgElement.style.display = 'none';
   }
 
   getTodayHours(): string {
