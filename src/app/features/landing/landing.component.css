@@ -302,14 +302,16 @@
 
 .e2-continua-trail {
   position: relative;
-  width: 40px;
+  width: 52px;
   height: 64px;
+  overflow: visible;
 }
 
 .e2-continua-path {
   position: absolute;
-  inset: 0;
-  width: 100%;
+  top: 0;
+  left: 6px;
+  width: 40px;
   height: 100%;
   overflow: visible;
 }
@@ -337,9 +339,9 @@
   opacity: 0;
 }
 
-.e2-paw:nth-of-type(1) { top: 2px; left: 4px; --paw-rot: -12deg; }
-.e2-paw:nth-of-type(2) { top: 22px; left: 14px; --paw-rot: 8deg; }
-.e2-paw:nth-of-type(3) { top: 42px; left: 6px; --paw-rot: -6deg; }
+.e2-paw:nth-of-type(1) { top: 2px; left: 6px; --paw-rot: -12deg; }
+.e2-paw:nth-of-type(2) { top: 22px; left: 32px; --paw-rot: 10deg; }
+.e2-paw:nth-of-type(3) { top: 42px; left: 0; --paw-rot: -8deg; }
 
 .e2-continua.is-visible .e2-paw {
   animation: paw-step 0.45s ease forwards;
