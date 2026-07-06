@@ -239,21 +239,32 @@ import { isEventDone } from '../../core/models/event.model';
     }
 
     .avatar-btn {
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      flex-shrink: 0;
       overflow: hidden;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
     .avatar-img {
       width: 32px;
       height: 32px;
+      aspect-ratio: 1 / 1;
       border-radius: 50%;
       object-fit: cover;
       display: block;
+      flex-shrink: 0;
     }
     .avatar-fallback {
       width: 32px;
       height: 32px;
+      aspect-ratio: 1 / 1;
       border-radius: 50%;
       display: grid;
       place-items: center;
+      flex-shrink: 0;
       background: var(--q-green-600);
       color: var(--q-surface);
       font-family: var(--q-font-display);
