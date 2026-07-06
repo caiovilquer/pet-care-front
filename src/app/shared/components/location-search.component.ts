@@ -245,6 +245,7 @@ import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
       margin: 0 0 0.5rem 0;
       font-size: 1.8rem;
       font-weight: 600;
+      color: #FFFFFF;
     }
 
     .search-subtitle {
