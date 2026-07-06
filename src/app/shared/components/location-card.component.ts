@@ -184,7 +184,7 @@ import { LocationService } from '../../core/services/location.service';
       display: flex;
       gap: 1rem;
       padding: 1rem;
-      background: #FBF8F0;
+      background: var(--q-surface-2);
     }
 
     .location-image {
@@ -211,12 +211,12 @@ import { LocationService } from '../../core/services/location.service';
     .placeholder-image {
       width: 100%;
       height: 100%;
-      background: linear-gradient(135deg, #FBF8F0 0%, #E7E1CE 100%);
+      background: linear-gradient(135deg, #FBF8F0 0%, var(--q-border) 100%);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      color: #666;
+      color: var(--q-text-2);
       border: 2px dashed #ccc;
     }
 
@@ -269,7 +269,7 @@ import { LocationService } from '../../core/services/location.service';
 
     .location-name {
       margin: 0 0 0.5rem 0;
-      color: #20261F;
+      color: var(--q-ink);
       font-size: 1.25rem;
       font-weight: 600;
     }
@@ -278,7 +278,7 @@ import { LocationService } from '../../core/services/location.service';
       display: flex;
       align-items: center;
       gap: 0.25rem;
-      color: #666;
+      color: var(--q-text-2);
       font-size: 0.9rem;
       margin-bottom: 0.5rem;
     }
@@ -310,7 +310,7 @@ import { LocationService } from '../../core/services/location.service';
     }
 
     .review-count {
-      color: #666;
+      color: var(--q-text-2);
       font-size: 0.85rem;
     }
 
@@ -318,7 +318,7 @@ import { LocationService } from '../../core/services/location.service';
       display: flex;
       align-items: center;
       gap: 0.25rem;
-      color: #666;
+      color: var(--q-text-2);
       font-size: 0.9rem;
     }
 
@@ -329,7 +329,7 @@ import { LocationService } from '../../core/services/location.service';
     }
 
     .duration {
-      color: #888;
+      color: var(--q-text-3);
       font-size: 0.85rem;
     }
 
@@ -338,12 +338,12 @@ import { LocationService } from '../../core/services/location.service';
       align-items: flex-start;
       gap: 0.5rem;
       margin-bottom: 1rem;
-      color: #666;
+      color: var(--q-text-2);
     }
 
     .address mat-icon {
       margin-top: 2px;
-      color: #265949;
+      color: var(--q-green-600);
     }
 
     .contact-info {
@@ -360,7 +360,7 @@ import { LocationService } from '../../core/services/location.service';
     }
 
     .phone a, .email a {
-      color: #265949;
+      color: var(--q-green-600);
       text-decoration: none;
     }
 
@@ -376,7 +376,7 @@ import { LocationService } from '../../core/services/location.service';
       margin: 0 0 0.5rem 0;
       font-size: 0.95rem;
       font-weight: 600;
-      color: #333;
+      color: var(--q-ink);
     }
 
     .feature-list {
@@ -389,8 +389,8 @@ import { LocationService } from '../../core/services/location.service';
       display: flex;
       align-items: center;
       gap: 0.25rem;
-      background: #EDF3EE;
-      color: #265949;
+      background: var(--q-green-50);
+      color: var(--q-green-600);
       padding: 0.25rem 0.5rem;
       border-radius: var(--q-radius-xs);
       font-size: 0.8rem;
@@ -406,9 +406,9 @@ import { LocationService } from '../../core/services/location.service';
       display: flex;
       align-items: flex-start;
       gap: 0.5rem;
-      color: #666;
+      color: var(--q-text-2);
       padding: 0.75rem;
-      background: #FBF8F0;
+      background: var(--q-surface-2);
       border-radius: var(--q-radius-sm);
       border-left: 4px solid #ddd;
     }
@@ -420,7 +420,7 @@ import { LocationService } from '../../core/services/location.service';
     }
 
     .today-hours.closed {
-      background: #F6E4EC;
+      background: var(--q-ev-breed-bg);
       border-left-color: #B3402F;
       color: #8F3326;
     }
@@ -450,12 +450,12 @@ import { LocationService } from '../../core/services/location.service';
     .opening-hours h4 {
       margin: 0 0 0.5rem 0;
       font-size: 0.9rem;
-      color: #666;
+      color: var(--q-text-2);
     }
 
     .more-services {
-      background-color: #FBF8F0 !important;
-      color: #666 !important;
+      background-color: var(--q-surface-2) !important;
+      color: var(--q-text-2) !important;
     }
 
     mat-card-actions {

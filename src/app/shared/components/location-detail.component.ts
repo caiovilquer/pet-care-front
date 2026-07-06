@@ -517,13 +517,13 @@ import { of } from 'rxjs';
     .placeholder-image {
       width: 100%;
       height: 100%;
-      background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(240,240,240,0.9) 100%);
+      background: linear-gradient(135deg, #35705A 0%, #1B4033 100%);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       color: rgba(255,255,255,0.9);
-      border: 2px dashed rgba(255,255,255,0.5);
+      border: none;
     }
 
     .placeholder-image mat-icon {
@@ -667,45 +667,45 @@ import { of } from 'rxjs';
     .detail-item strong {
       display: block;
       margin-bottom: 0.25rem;
-      color: #333;
+      color: var(--q-ink);
       font-size: 0.95rem;
     }
 
     .detail-item p {
       margin: 0;
-      color: #555;
+      color: var(--q-text-2);
       line-height: 1.6;
     }
 
     .detail-item a {
-      color: #265949;
+      color: var(--q-green-600);
       text-decoration: none;
       font-weight: 500;
     }
 
     .detail-item a:hover {
       text-decoration: underline;
-      color: #1B4033;
+      color: var(--q-green-700);
     }
 
     .contact-item mat-icon {
-      color: #666;
+      color: var(--q-text-2);
       margin-top: 0.25rem;
     }
 
     .contact-item strong {
       display: block;
       margin-bottom: 0.25rem;
-      color: #333;
+      color: var(--q-ink);
     }
 
     .contact-item p {
       margin: 0;
-      color: #666;
+      color: var(--q-text-2);
     }
 
     .contact-item a {
-      color: #265949;
+      color: var(--q-green-600);
       text-decoration: none;
     }
 
@@ -722,11 +722,11 @@ import { of } from 'rxjs';
       justify-content: space-between;
       align-items: center;
       padding: 0.75rem 0;
-      border-bottom: 1px solid #eee;
+      border-bottom: 1px solid var(--q-border);
     }
 
     .day-hours.today {
-      background: #FBF8F0;
+      background: var(--q-surface-2);
       padding: 0.75rem;
       border-radius: var(--q-radius-sm);
       border-bottom: none;
@@ -763,14 +763,14 @@ import { of } from 'rxjs';
 
     .closed-text {
       font-style: italic;
-      color: #999;
+      color: var(--q-text-3);
     }
 
     .no-hours-info {
       text-align: center;
       padding: 2rem 1rem;
       margin-top: 1rem;
-      background: #F8EDD2;
+      background: var(--q-ipe-100);
       border-radius: var(--q-radius-sm);
       border: 1px dashed #DFA32E;
     }
@@ -785,12 +785,12 @@ import { of } from 'rxjs';
 
     .no-hours-info p {
       margin: 0.5rem 0;
-      color: #666;
+      color: var(--q-text-2);
     }
 
     .no-hours-info .small-text {
       font-size: 0.85rem;
-      color: #888;
+      color: var(--q-text-3);
     }
 
     .next-open {
@@ -799,9 +799,9 @@ import { of } from 'rxjs';
       gap: 0.5rem;
       margin-top: 1rem;
       padding: 1rem;
-      background: #EDF3EE;
+      background: var(--q-green-50);
       border-radius: var(--q-radius-sm);
-      color: #265949;
+      color: var(--q-green-600);
       font-weight: 500;
     }
 
@@ -823,7 +823,7 @@ import { of } from 'rxjs';
 
     .features-section h3 {
       margin: 0 0 1rem 0;
-      color: #333;
+      color: var(--q-ink);
       font-size: 1.25rem;
     }
 
@@ -837,13 +837,13 @@ import { of } from 'rxjs';
       display: flex;
       gap: 1rem;
       padding: 1rem;
-      background: #FBF8F0;
+      background: var(--q-surface-2);
       border-radius: var(--q-radius-sm);
       align-items: flex-start;
     }
 
     .feature-item mat-icon {
-      color: #265949;
+      color: var(--q-green-600);
       font-size: 24px;
       width: 24px;
       height: 24px;
@@ -852,12 +852,12 @@ import { of } from 'rxjs';
     .feature-item strong {
       display: block;
       margin-bottom: 0.25rem;
-      color: #333;
+      color: var(--q-ink);
     }
 
     .feature-item p {
       margin: 0;
-      color: #666;
+      color: var(--q-text-2);
       font-size: 0.9rem;
     }
 
@@ -876,7 +876,7 @@ import { of } from 'rxjs';
     .rating-number {
       font-size: 3rem;
       font-weight: 700;
-      color: #265949;
+      color: var(--q-green-600);
     }
 
     .stars {
@@ -885,7 +885,7 @@ import { of } from 'rxjs';
     }
 
     .stars mat-icon {
-      color: #ddd;
+      color: var(--q-border-2);
       font-size: 24px;
     }
 
@@ -894,7 +894,7 @@ import { of } from 'rxjs';
     }
 
     .review-count {
-      color: #666;
+      color: var(--q-text-2);
       font-size: 0.9rem;
     }
 
@@ -904,7 +904,7 @@ import { of } from 'rxjs';
 
     .review-item {
       padding: 1rem 0;
-      border-bottom: 1px solid #eee;
+      border-bottom: 1px solid var(--q-border);
     }
 
     .review-item:last-child {
@@ -929,7 +929,7 @@ import { of } from 'rxjs';
     }
 
     .review-stars mat-icon {
-      color: #ddd;
+      color: var(--q-border-2);
       font-size: 16px;
       width: 16px;
       height: 16px;
@@ -940,20 +940,20 @@ import { of } from 'rxjs';
     }
 
     .review-date {
-      color: #666;
+      color: var(--q-text-2);
       font-size: 0.85rem;
     }
 
     .review-text {
       margin: 0;
-      color: #333;
+      color: var(--q-ink);
       line-height: 1.5;
     }
 
     .no-reviews {
       text-align: center;
       padding: 2rem;
-      color: #666;
+      color: var(--q-text-2);
     }
 
     .no-reviews mat-icon {
@@ -975,14 +975,14 @@ import { of } from 'rxjs';
       align-items: center;
       gap: 1rem;
       padding: 2rem;
-      color: #666;
+      color: var(--q-text-2);
     }
 
     .no-additional-details {
       text-align: center;
       padding: 2rem;
-      color: #666;
-      background: #FBF8F0;
+      color: var(--q-text-2);
+      background: var(--q-surface-2);
       border-radius: var(--q-radius-sm);
       margin-top: 1rem;
     }
@@ -993,7 +993,7 @@ import { of } from 'rxjs';
       height: 48px;
       margin-bottom: 1rem;
       opacity: 0.5;
-      color: #999;
+      color: var(--q-text-3);
     }
 
     .no-additional-details p {
@@ -1002,7 +1002,7 @@ import { of } from 'rxjs';
 
     .no-additional-details .small-text {
       font-size: 0.85rem;
-      color: #888;
+      color: var(--q-text-3);
       margin-top: 0.5rem;
     }
 
@@ -1016,7 +1016,7 @@ import { of } from 'rxjs';
     }
 
     .load-info {
-      color: #666;
+      color: var(--q-text-2);
       font-size: 0.9rem;
       margin: 0;
     }

@@ -226,16 +226,16 @@ import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
   `,
   styles: [`
     .search-container {
-      background: white;
+      background: var(--q-surface);
       border-radius: var(--q-radius-lg);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      box-shadow: var(--q-shadow-md);
       overflow: hidden;
       margin-bottom: 2rem;
       transition: all 0.3s ease;
     }
 
     .search-header {
-      background: linear-gradient(135deg, var(--q-green-600) 0%, var(--q-green-700) 100%);
+      background: linear-gradient(135deg, #265949 0%, #1B4033 100%);
       color: white;
       padding: 1.5rem 2rem;
       text-align: center;
