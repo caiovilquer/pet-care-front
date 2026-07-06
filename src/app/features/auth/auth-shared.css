@@ -11,6 +11,73 @@
   overflow: hidden;
 }
 
+.auth-container:has(.auth-back-nav) {
+  padding-top: calc(env(safe-area-inset-top, 0px) + var(--q-space-5) + 52px);
+}
+
+.auth-back-nav {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + var(--q-space-3));
+  left: var(--q-space-4);
+  z-index: 10;
+}
+
+.auth-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 8px 14px 8px 10px;
+  border-radius: var(--q-radius-pill);
+  background: color-mix(in srgb, var(--q-surface) 92%, transparent);
+  border: 1px solid var(--q-border);
+  box-shadow: var(--q-shadow-sm);
+  color: var(--q-text-2);
+  font-family: var(--q-font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    color 0.15s ease,
+    background 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.auth-back-link mat-icon {
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
+}
+
+.auth-back-link:hover {
+  color: var(--q-green-600);
+  background: var(--q-surface);
+  border-color: color-mix(in srgb, var(--q-green-600) 25%, var(--q-border));
+  box-shadow: var(--q-shadow-md);
+}
+
+.auth-back-link:hover mat-icon {
+  transform: translateX(-2px);
+}
+
+.auth-back-link:active {
+  transform: scale(0.98);
+}
+
+.auth-back-link:focus-visible {
+  outline: 2px solid var(--q-green-600);
+  outline-offset: 2px;
+}
+
+.auth-back-label-short {
+  display: none;
+}
+
 /* formas orgânicas ao fundo — assinatura da marca, sem imagem */
 .auth-container::before,
 .auth-container::after {
@@ -152,6 +219,27 @@
 }
 
 @media (max-width: 480px) {
+  .auth-container:has(.auth-back-nav) {
+    padding-top: calc(env(safe-area-inset-top, 0px) + var(--q-space-4) + 48px);
+  }
+
+  .auth-back-nav {
+    left: var(--q-space-3);
+  }
+
+  .auth-back-link {
+    padding: 8px 12px 8px 8px;
+    font-size: 0.8125rem;
+  }
+
+  .auth-back-label {
+    display: none;
+  }
+
+  .auth-back-label-short {
+    display: inline;
+  }
+
   .auth-card {
     padding: var(--q-space-5) var(--q-space-4) var(--q-space-4);
   }
