@@ -1,17 +1,20 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { PetService } from '../../core/services/pet.service';
 import { PetSummary, PetsPage } from '../../core/models/pet.model';
 import { PetFormComponent } from './pet-form.component';
+import { PageHeaderComponent } from '../../shared/components/ui/page-header.component';
+import { PetAvatarComponent } from '../../shared/components/ui/pet-avatar.component';
+import { EmptyStateComponent } from '../../shared/components/ui/empty-state.component';
+import { SkeletonComponent } from '../../shared/components/ui/skeleton.component';
+import { ConfirmDialogComponent } from '../../shared/components/ui/confirm-dialog.component';
 
 @Component({
   selector: 'app-pets',
@@ -19,13 +22,15 @@ import { PetFormComponent } from './pet-form.component';
   imports: [
     CommonModule,
     RouterLink,
-    MatCardModule,
     MatButtonModule,
     MatIconModule,
-    MatTableModule,
     MatPaginatorModule,
     MatDialogModule,
-    MatProgressSpinnerModule
+    MatTooltipModule,
+    PageHeaderComponent,
+    PetAvatarComponent,
+    EmptyStateComponent,
+    SkeletonComponent
   ],
   templateUrl: './pets.component.html',
   styleUrls: ['./pets.component.css']
@@ -35,7 +40,6 @@ export class PetsComponent implements OnInit {
   totalItems = 0;
   currentPage = 0;
   pageSize = 10;
-  displayedColumns: string[] = ['photo', 'name', 'species', 'actions'];
   isLoading = true;
 
   constructor(
@@ -58,10 +62,9 @@ export class PetsComponent implements OnInit {
       },
       error: (err) => {
         console.error('Erro ao carregar pets:', err);
-        // Definir dados padrão em caso de erro
         this.pets = [];
         this.totalItems = 0;
-        this.snackBar.open('Erro ao carregar pets. Tente novamente mais tarde.', 'Fechar', { 
+        this.snackBar.open('Erro ao carregar pets. Tente novamente mais tarde.', 'Fechar', {
           duration: 3000,
           panelClass: ['error-snackbar']
         });
@@ -102,55 +105,32 @@ export class PetsComponent implements OnInit {
   }
 
   deletePet(pet: PetSummary): void {
-    if (confirm(`Tem certeza que deseja excluir ${pet.name}?`)) {
+    const confirmRef = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: `Remover ${pet.name}?`,
+        message: 'O histórico de cuidados vai junto. Essa ação não pode ser desfeita.',
+        confirmLabel: 'Remover',
+        danger: true
+      }
+    });
+
+    confirmRef.afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
       this.petService.delete(pet.id).subscribe({
         next: () => {
-          this.snackBar.open('Pet excluído com sucesso!', 'Fechar', { 
+          this.snackBar.open(`${pet.name} foi removido.`, 'Fechar', {
             duration: 3000,
             panelClass: ['success-snackbar']
           });
           this.loadPets();
         },
-        error: (err) => {
-          this.snackBar.open('Erro ao excluir pet.', 'Fechar', { 
+        error: () => {
+          this.snackBar.open('Erro ao remover pet.', 'Fechar', {
             duration: 3000,
             panelClass: ['error-snackbar']
           });
         }
       });
-    }
-  }
-
-  getDefaultPetImage(species: string): string {
-    // Retorna uma imagem padrão baseada na espécie
-    const defaultImages: { [key: string]: string } = {
-      'Cão': '🐕',
-      'Gato': '🐱',
-      'Pássaro': '🐦',
-      'Hamster': '🐹',
-      'Coelho': '🐰',
-      'Peixe': '🐠'
-    };
-    return defaultImages[species] || '🐾';
-  }
-
-  onImageError(event: Event): void {
-    const imgElement = event.target as HTMLImageElement;
-    const petSpecies = imgElement.getAttribute('data-species') || 'Pet';
-    // Criar um avatar com emoji como fallback
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = 40;
-    canvas.height = 40;
-    
-    if (ctx) {
-      ctx.fillStyle = '#f5f5f5';
-      ctx.fillRect(0, 0, 40, 40);
-      ctx.font = '20px serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(this.getDefaultPetImage(petSpecies), 20, 25);
-    }
-    
-    imgElement.src = canvas.toDataURL();
+    });
   }
 }

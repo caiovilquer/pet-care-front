@@ -177,14 +177,14 @@ import { LocationService } from '../../core/services/location.service';
     }
 
     .location-card.closed {
-      border-left: 4px solid #f44336;
+      border-left: 4px solid #B3402F;
     }
 
     .card-header {
       display: flex;
       gap: 1rem;
       padding: 1rem;
-      background: #f8f9fa;
+      background: #FBF8F0;
     }
 
     .location-image {
@@ -211,7 +211,7 @@ import { LocationService } from '../../core/services/location.service';
     .placeholder-image {
       width: 100%;
       height: 100%;
-      background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+      background: linear-gradient(135deg, #FBF8F0 0%, #E7E1CE 100%);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -269,7 +269,7 @@ import { LocationService } from '../../core/services/location.service';
 
     .location-name {
       margin: 0 0 0.5rem 0;
-      color: #1a1a1a;
+      color: #20261F;
       font-size: 1.25rem;
       font-weight: 600;
     }
@@ -299,11 +299,11 @@ import { LocationService } from '../../core/services/location.service';
       display: flex;
       align-items: center;
       gap: 0.25rem;
-      color: #ff9800;
+      color: #DFA32E;
     }
 
     .rating .star {
-      color: #ff9800;
+      color: #DFA32E;
       font-size: 18px;
       height: 18px;
       width: 18px;
@@ -343,7 +343,7 @@ import { LocationService } from '../../core/services/location.service';
 
     .address mat-icon {
       margin-top: 2px;
-      color: #1976d2;
+      color: #265949;
     }
 
     .contact-info {
@@ -360,7 +360,7 @@ import { LocationService } from '../../core/services/location.service';
     }
 
     .phone a, .email a {
-      color: #1976d2;
+      color: #265949;
       text-decoration: none;
     }
 
@@ -389,8 +389,8 @@ import { LocationService } from '../../core/services/location.service';
       display: flex;
       align-items: center;
       gap: 0.25rem;
-      background: #e3f2fd;
-      color: #1976d2;
+      background: #EDF3EE;
+      color: #265949;
       padding: 0.25rem 0.5rem;
       border-radius: 6px;
       font-size: 0.8rem;
@@ -408,7 +408,7 @@ import { LocationService } from '../../core/services/location.service';
       gap: 0.5rem;
       color: #666;
       padding: 0.75rem;
-      background: #f9f9f9;
+      background: #FBF8F0;
       border-radius: 8px;
       border-left: 4px solid #ddd;
     }
@@ -420,9 +420,9 @@ import { LocationService } from '../../core/services/location.service';
     }
 
     .today-hours.closed {
-      background: #fce4ec;
-      border-left-color: #f44336;
-      color: #c62828;
+      background: #F6E4EC;
+      border-left-color: #B3402F;
+      color: #8F3326;
     }
 
     .hours-info {
@@ -454,7 +454,7 @@ import { LocationService } from '../../core/services/location.service';
     }
 
     .more-services {
-      background-color: #f5f5f5 !important;
+      background-color: #FBF8F0 !important;
       color: #666 !important;
     }
 

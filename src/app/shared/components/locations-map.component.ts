@@ -79,7 +79,7 @@ import { Location, Petshop, Veterinary } from '../../core/models/location.model'
     }
 
     .map-controls button.active {
-      background-color: #ff9800;
+      background-color: #DFA32E;
       color: white;
     }
 
@@ -89,7 +89,7 @@ import { Location, Petshop, Veterinary } from '../../core/models/location.model'
       align-items: center;
       justify-content: center;
       height: 300px;
-      background: #f5f5f5;
+      background: #FBF8F0;
       border-radius: 12px;
       color: #666;
     }
@@ -99,7 +99,7 @@ import { Location, Petshop, Veterinary } from '../../core/models/location.model'
       height: 48px;
       width: 48px;
       margin-bottom: 1rem;
-      color: #2196f3;
+      color: #35705A;
     }
 
     .info-window-content {
@@ -126,7 +126,7 @@ import { Location, Petshop, Veterinary } from '../../core/models/location.model'
       display: flex;
       align-items: center;
       gap: 0.25rem;
-      color: #ff9800;
+      color: #DFA32E;
       font-size: 0.9rem;
     }
 

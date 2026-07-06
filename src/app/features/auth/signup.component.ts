@@ -33,7 +33,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
           </div>
           <mat-card-title>Criar Conta</mat-card-title>
           <mat-card-subtitle>
-            Junte-se a nós para começar sua jornada
+            Crie sua conta no RotinaPet e cuide da rotina de quem você ama
           </mat-card-subtitle>
         </mat-card-header>
 
@@ -129,7 +129,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+      background: linear-gradient(135deg, var(--q-bg) 0%, var(--q-surface-2) 100%);
       padding: 20px;
       position: relative;
     }
@@ -154,8 +154,8 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
       background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(20px);
       border-radius: 20px;
-      box-shadow: var(--shadow-card);
-      border: 1px solid var(--border-light);
+      box-shadow: var(--q-shadow-md);
+      border: 1px solid var(--q-border);
       position: relative;
       z-index: 1;
       animation: fadeInUp 0.6s ease-out;
@@ -163,7 +163,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
     }
 
     .header-image {
-      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+      background: linear-gradient(135deg, var(--q-green-600) 0%, var(--q-green-700) 100%);
       color: white;
       display: flex;
       align-items: center;
@@ -191,14 +191,14 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
     mat-card-title {
       font-size: 1.75rem;
       font-weight: 700;
-      color: var(--text-primary);
+      color: var(--q-ink);
       margin-bottom: 0.5rem;
       letter-spacing: -0.5px;
     }
 
     mat-card-subtitle {
       font-size: 1rem;
-      color: var(--text-secondary);
+      color: var(--q-text-2);
       font-weight: 500;
     }
 
@@ -222,18 +222,18 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
       text-align: center;
       margin: 1.5rem 0 0 0;
       width: 100%;
-      color: var(--text-secondary);
+      color: var(--q-text-2);
     }
 
     .login-link {
-      color: var(--primary-color);
+      color: var(--q-green-600);
       text-decoration: none;
       font-weight: 600;
       transition: color 0.3s ease;
     }
 
     .login-link:hover {
-      color: var(--primary-dark);
+      color: var(--q-green-700);
       text-decoration: underline;
     }
 
@@ -266,12 +266,12 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 
     ::ng-deep .mat-mdc-form-field.mat-focused .mdc-text-field {
-      border-color: var(--primary-color) !important;
+      border-color: var(--q-green-600) !important;
       box-shadow: none !important;
     }
 
     ::ng-deep .mat-mdc-form-field:not(.mat-form-field-disabled) .mdc-text-field:hover {
-      border-color: var(--primary-light) !important;
+      border-color: var(--q-green-500) !important;
     }
 
     /* Remove outlines */
@@ -291,7 +291,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
       text-transform: none !important;
       padding: 12px 24px !important;
       height: 48px !important;
-      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%) !important;
+      background: linear-gradient(135deg, var(--q-green-600) 0%, var(--q-green-700) 100%) !important;
       color: white !important;
       box-shadow: 0 4px 12px rgba(251, 146, 60, 0.3) !important;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
@@ -308,7 +308,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
     }
 
     ::ng-deep .mat-mdc-raised-button:disabled {
-      background: var(--text-muted) !important;
+      background: var(--q-text-3) !important;
       color: white !important;
       transform: none !important;
       box-shadow: none !important;

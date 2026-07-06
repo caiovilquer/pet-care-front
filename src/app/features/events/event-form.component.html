@@ -1,4 +1,4 @@
-<h2 mat-dialog-title>{{isEdit ? 'Editar Evento' : 'Novo Evento'}}</h2>
+<h2 mat-dialog-title>{{isEdit ? 'Editar cuidado' : 'Adicionar cuidado'}}</h2>
     
 <mat-dialog-content>
   <form [formGroup]="eventForm">
@@ -15,7 +15,7 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Tipo do Evento</mat-label>
+      <mat-label>Tipo de cuidado</mat-label>
       <mat-select formControlName="type" required>
         <mat-option value="VACCINE">Vacina</mat-option>
         <mat-option value="MEDICINE">Medicamento</mat-option>
@@ -30,8 +30,8 @@
 
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Descrição</mat-label>
-      <textarea matInput formControlName="description" rows="3" 
-                placeholder="Descreva o evento..." required></textarea>
+      <textarea matInput formControlName="description" rows="3"
+                placeholder="Ex.: V10 — reforço anual" required></textarea>
       <mat-error *ngIf="eventForm.get('description')?.hasError('required')">
         Descrição é obrigatória
       </mat-error>

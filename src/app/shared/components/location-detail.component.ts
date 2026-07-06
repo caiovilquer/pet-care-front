@@ -467,7 +467,7 @@ import { of } from 'rxjs';
 
     .detail-header {
       position: relative;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #35705A 0%, #1B4033 100%);
       color: white;
       padding: 2rem;
     }
@@ -678,14 +678,14 @@ import { of } from 'rxjs';
     }
 
     .detail-item a {
-      color: #1976d2;
+      color: #265949;
       text-decoration: none;
       font-weight: 500;
     }
 
     .detail-item a:hover {
       text-decoration: underline;
-      color: #1565c0;
+      color: #1B4033;
     }
 
     .contact-item mat-icon {
@@ -705,7 +705,7 @@ import { of } from 'rxjs';
     }
 
     .contact-item a {
-      color: #1976d2;
+      color: #265949;
       text-decoration: none;
     }
 
@@ -726,7 +726,7 @@ import { of } from 'rxjs';
     }
 
     .day-hours.today {
-      background: #f3f4f6;
+      background: #FBF8F0;
       padding: 0.75rem;
       border-radius: 8px;
       border-bottom: none;
@@ -741,7 +741,7 @@ import { of } from 'rxjs';
     }
 
     .today-badge {
-      background: #1976d2;
+      background: #265949;
       color: white;
       padding: 0.125rem 0.5rem;
       border-radius: 12px;
@@ -758,7 +758,7 @@ import { of } from 'rxjs';
     }
 
     .day-hours.closed .day-time {
-      color: #d32f2f;
+      color: #B3402F;
     }
 
     .closed-text {
@@ -770,16 +770,16 @@ import { of } from 'rxjs';
       text-align: center;
       padding: 2rem 1rem;
       margin-top: 1rem;
-      background: #fff3e0;
+      background: #F8EDD2;
       border-radius: 8px;
-      border: 1px dashed #ff9800;
+      border: 1px dashed #DFA32E;
     }
 
     .no-hours-info mat-icon {
       font-size: 32px;
       width: 32px;
       height: 32px;
-      color: #ff9800;
+      color: #DFA32E;
       margin-bottom: 0.5rem;
     }
 
@@ -799,9 +799,9 @@ import { of } from 'rxjs';
       gap: 0.5rem;
       margin-top: 1rem;
       padding: 1rem;
-      background: #e3f2fd;
+      background: #EDF3EE;
       border-radius: 8px;
-      color: #1976d2;
+      color: #265949;
       font-weight: 500;
     }
 
@@ -837,13 +837,13 @@ import { of } from 'rxjs';
       display: flex;
       gap: 1rem;
       padding: 1rem;
-      background: #f8f9fa;
+      background: #FBF8F0;
       border-radius: 8px;
       align-items: flex-start;
     }
 
     .feature-item mat-icon {
-      color: #1976d2;
+      color: #265949;
       font-size: 24px;
       width: 24px;
       height: 24px;
@@ -876,7 +876,7 @@ import { of } from 'rxjs';
     .rating-number {
       font-size: 3rem;
       font-weight: 700;
-      color: #1976d2;
+      color: #265949;
     }
 
     .stars {
@@ -890,7 +890,7 @@ import { of } from 'rxjs';
     }
 
     .stars mat-icon.filled {
-      color: #ffc107;
+      color: #DFA32E;
     }
 
     .review-count {
@@ -936,7 +936,7 @@ import { of } from 'rxjs';
     }
 
     .review-stars mat-icon.filled {
-      color: #ffc107;
+      color: #DFA32E;
     }
 
     .review-date {
@@ -982,7 +982,7 @@ import { of } from 'rxjs';
       text-align: center;
       padding: 2rem;
       color: #666;
-      background: #f8f9fa;
+      background: #FBF8F0;
       border-radius: 8px;
       margin-top: 1rem;
     }

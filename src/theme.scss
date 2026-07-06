@@ -1,0 +1,25 @@
+// RotinaPet — tema Material (M3)
+// Gera os tokens de sistema (--mat-sys-*) nos dois esquemas de cor.
+// Os valores exatos da marca sobrescrevem os tokens em styles.css.
+@use '@angular/material' as mat;
+
+html {
+  // light-dark() resolve conforme o color-scheme ativo
+  color-scheme: light dark;
+
+  @include mat.theme((
+    color: (
+      primary: mat.$green-palette,
+      tertiary: mat.$yellow-palette,
+    ),
+    typography: (
+      plain-family: 'Hanken Grotesk, sans-serif',
+      brand-family: 'Bricolage Grotesque, sans-serif',
+    ),
+    density: 0,
+  ));
+}
+
+// Toggle manual (persistido em localStorage pelo shell)
+html[data-theme='light'] { color-scheme: light; }
+html[data-theme='dark'] { color-scheme: dark; }

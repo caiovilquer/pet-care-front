@@ -1,15 +1,11 @@
-import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet, RouterLink, Router } from '@angular/router';
-import { MatSidenavModule, MatSidenav } from '@angular/material/sidenav';
-import { MatToolbarModule } from '@angular/material/toolbar';
+import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
-import { MatBadgeModule } from '@angular/material/badge';
 import { MatDividerModule } from '@angular/material/divider';
-import { BreakpointObserver, Breakpoints, LayoutModule } from '@angular/cdk/layout';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { forkJoin, Subscription } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../core/services/auth.service';
@@ -19,7 +15,7 @@ import { EventStateService } from '../../core/services/event-state.service';
 import { DateTimeService } from '../../core/services/datetime.service';
 import { UserStateService } from '../../core/services/user-state.service';
 import { TutorDetailResult } from '../../shared/models/tutor.model';
-import { EventSummary, isEventDone } from '../../core/models/event.model';
+import { isEventDone } from '../../core/models/event.model';
 
 @Component({
   selector: 'app-layout',
@@ -28,1129 +24,333 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
     CommonModule,
     RouterOutlet,
     RouterLink,
-    MatSidenavModule,
-    MatToolbarModule,
+    RouterLinkActive,
     MatButtonModule,
     MatIconModule,
-    MatListModule,
     MatMenuModule,
-    MatBadgeModule,
     MatDividerModule,
-    LayoutModule
+    MatTooltipModule
   ],
   template: `
-    <mat-sidenav-container class="sidenav-container">
-      <mat-sidenav #drawer class="sidenav" [mode]="mobileQuery.matches ? 'over' : 'side'" 
-                   [fixedInViewport]="mobileQuery.matches" 
-                   [opened]="!mobileQuery.matches"
-                   (closed)="onSidenavClosed()">
-        <mat-toolbar class="sidenav-header">
-          <mat-icon class="logo-icon">pets</mat-icon>
-          <span class="logo-text">Pet Care</span>
-          <div class="paw-decoration">🐾</div>
-          <button mat-icon-button class="close-button" 
-                  (click)="drawer.close()" 
-                  *ngIf="mobileQuery.matches">
-            <mat-icon>close</mat-icon>
+    <div class="shell">
+      <header class="rp-header">
+        <a routerLink="/dashboard" class="wordmark" aria-label="RotinaPet — início">
+          rotina<b>pet</b><span class="dot" aria-hidden="true"></span>
+        </a>
+
+        <nav class="desktop-nav" aria-label="Navegação principal">
+          <a routerLink="/dashboard" routerLinkActive="on">Início</a>
+          <a routerLink="/pets" routerLinkActive="on">Pets</a>
+          <a routerLink="/events" routerLinkActive="on">Agenda</a>
+          <a routerLink="/petshops" [class.on]="isNearbyActive">Por perto</a>
+        </nav>
+
+        <span class="spacer"></span>
+
+        <div class="header-actions">
+          <button mat-icon-button (click)="toggleTheme()"
+                  [matTooltip]="isDark ? 'Tema claro' : 'Tema escuro'">
+            <mat-icon>{{ isDark ? 'light_mode' : 'dark_mode' }}</mat-icon>
           </button>
-        </mat-toolbar>
-        
-        <mat-nav-list>
-          <a mat-list-item routerLink="/dashboard" routerLinkActive="active" (click)="closeSidenavOnMobile()">
-            <mat-icon matListItemIcon>dashboard</mat-icon>
-            <span matListItemTitle>Dashboard</span>
-          </a>
-          
-          <a mat-list-item routerLink="/pets" routerLinkActive="active" (click)="closeSidenavOnMobile()">
-            <mat-icon matListItemIcon>pets</mat-icon>
-            <span matListItemTitle>Meus Pets</span>
-          </a>
-          
-          <a mat-list-item routerLink="/events" routerLinkActive="active" (click)="closeSidenavOnMobile()">
-            <mat-icon matListItemIcon>event</mat-icon>
-            <span matListItemTitle>Eventos</span>
-          </a>
-          
-          <mat-divider></mat-divider>
-          
-          <h3 class="nav-section-title">Localidades</h3>
-          
-          <a mat-list-item routerLink="/petshops" routerLinkActive="active" (click)="closeSidenavOnMobile()">
-            <mat-icon matListItemIcon>store</mat-icon>
-            <span matListItemTitle>Petshops</span>
-          </a>
-          
-          <a mat-list-item routerLink="/veterinaries" routerLinkActive="active" (click)="closeSidenavOnMobile()">
-            <mat-icon matListItemIcon>local_hospital</mat-icon>
-            <span matListItemTitle>Veterinários</span>
-          </a>
-          
-          <mat-divider></mat-divider>
-          
-          <a mat-list-item routerLink="/profile" routerLinkActive="active" (click)="closeSidenavOnMobile()">
-            <mat-icon matListItemIcon>person</mat-icon>
-            <span matListItemTitle>Perfil</span>
-          </a>
 
-
-        </mat-nav-list>
-      </mat-sidenav>
-
-      <mat-sidenav-content>
-        <mat-toolbar color="primary" class="main-toolbar">
-          <button mat-icon-button (click)="drawer.toggle()">
-            <mat-icon>menu</mat-icon>
+          <button mat-icon-button [matMenuTriggerFor]="notificationMenu"
+                  class="bell" matTooltip="Cuidados próximos"
+                  [attr.aria-label]="'Notificações: ' + upcomingEventsCount + ' cuidados próximos'">
+            <mat-icon>notifications_none</mat-icon>
+            @if (upcomingEventsCount > 0) {
+              <span class="badge">{{ upcomingEventsCount > 9 ? '9+' : upcomingEventsCount }}</span>
+            }
           </button>
-          
-          <span class="toolbar-title">Pet Care Scheduler</span>
-          
-          <span class="spacer"></span>
-          
-          <div class="toolbar-actions">
-            <button mat-icon-button [matMenuTriggerFor]="notificationMenu" class="notification-button">
-              <mat-icon [class.has-notifications]="upcomingEventsCount > 0">
-                notifications
-              </mat-icon>
-              <span class="notification-badge" *ngIf="upcomingEventsCount > 0">
-                {{ upcomingEventsCount > 99 ? '99+' : upcomingEventsCount }}
-              </span>
-            </button>
-            
-            <button mat-icon-button [matMenuTriggerFor]="userMenu" class="avatar-button">
-              <div class="toolbar-avatar">
-                <img *ngIf="currentUser?.avatar; else defaultAvatar" 
-                     [src]="currentUser!.avatar" 
-                     [alt]="(currentUser!.firstName || '') + ' ' + (currentUser!.lastName || '')"
-                     class="avatar-image"
-                     (error)="onAvatarError($event)">
-                <ng-template #defaultAvatar>
-                  <mat-icon>account_circle</mat-icon>
-                </ng-template>
-              </div>
-            </button>
-          </div>
-        </mat-toolbar>
 
-        <main class="main-content">
-          <router-outlet></router-outlet>
-        </main>
-      </mat-sidenav-content>
-    </mat-sidenav-container>
+          <button mat-icon-button [matMenuTriggerFor]="userMenu" class="avatar-btn"
+                  aria-label="Menu do usuário">
+            @if (currentUser?.avatar && !avatarFailed) {
+              <img [src]="currentUser!.avatar" alt="" class="avatar-img"
+                   (error)="avatarFailed = true">
+            } @else {
+              <span class="avatar-fallback">{{ userInitial }}</span>
+            }
+          </button>
+        </div>
+      </header>
 
-    <!-- User Menu -->
-    <mat-menu #userMenu="matMenu" class="user-menu">
-      <div class="user-info" *ngIf="currentUser">
-        <div class="user-avatar">
-          <img *ngIf="currentUser.avatar; else defaultMenuAvatar" 
-               [src]="currentUser.avatar" 
-               [alt]="(currentUser.firstName || '') + ' ' + (currentUser.lastName || '')"
-               class="avatar-image"
-               (error)="onAvatarError($event)">
-          <ng-template #defaultMenuAvatar>
-            <mat-icon>person</mat-icon>
-          </ng-template>
+      <main class="rp-main">
+        <router-outlet></router-outlet>
+      </main>
+
+      <nav class="rp-bottom-nav" aria-label="Navegação principal">
+        <a routerLink="/dashboard" routerLinkActive="on">
+          <mat-icon>home</mat-icon><span>Início</span>
+        </a>
+        <a routerLink="/pets" routerLinkActive="on">
+          <mat-icon>pets</mat-icon><span>Pets</span>
+        </a>
+        <a routerLink="/events" routerLinkActive="on">
+          <mat-icon>calendar_month</mat-icon><span>Agenda</span>
+        </a>
+        <a routerLink="/petshops" [class.on]="isNearbyActive">
+          <mat-icon>near_me</mat-icon><span>Por perto</span>
+        </a>
+        <a routerLink="/profile" routerLinkActive="on">
+          <mat-icon>person_outline</mat-icon><span>Perfil</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- Menu do usuário -->
+    <mat-menu #userMenu="matMenu" xPosition="before">
+      @if (currentUser) {
+        <div class="menu-user-info" (click)="$event.stopPropagation()">
+          <p class="menu-user-name">{{ currentUser.firstName }} {{ currentUser.lastName }}</p>
+          <p class="menu-user-email">{{ currentUser.email }}</p>
         </div>
-        <div class="user-details">
-          <p class="user-name">{{currentUser.firstName}} {{currentUser.lastName}}</p>
-          <p class="user-email">{{currentUser.email}}</p>
-        </div>
-      </div>
-      <mat-divider></mat-divider>
-      <button mat-menu-item routerLink="/profile" class="menu-item">
-        <mat-icon>person</mat-icon>
-        <span>Meu Perfil</span>
+        <mat-divider></mat-divider>
+      }
+      <button mat-menu-item routerLink="/profile">
+        <mat-icon>person_outline</mat-icon>
+        <span>Meu perfil</span>
       </button>
-      <button mat-menu-item (click)="logout()" class="menu-item logout-item">
-        <mat-icon>exit_to_app</mat-icon>
+      <button mat-menu-item (click)="logout()">
+        <mat-icon>logout</mat-icon>
         <span>Sair</span>
       </button>
     </mat-menu>
 
-    <!-- Notification Menu -->
-    <mat-menu #notificationMenu="matMenu" class="notification-menu">
-      <div class="notification-header">
-        <mat-icon>notifications</mat-icon>
-        <h3>Eventos próximos</h3>
-        <span class="notification-count" *ngIf="upcomingEventsCount > 0">({{upcomingEventsCount}})</span>
+    <!-- Menu de notificações -->
+    <mat-menu #notificationMenu="matMenu" xPosition="before" class="rp-notif-menu">
+      <div class="notif-head" (click)="$event.stopPropagation()">
+        <span class="q-overline">Próximos 7 dias</span>
+        <h4>Cuidados próximos</h4>
       </div>
       <mat-divider></mat-divider>
-      
-      <!-- Lista de eventos próximos -->
-      <div class="notification-content" *ngIf="upcomingEventsCount > 0; else noNotifications">
-        <div class="notification-item" *ngFor="let event of upcomingEventsList; let i = index">
-          <div class="event-icon">
-            <mat-icon [class]="'event-icon-' + event.type.toLowerCase()">{{getEventIcon(event.type)}}</mat-icon>
+      @if (upcomingEventsCount > 0) {
+        @for (event of upcomingEventsList; track event.id) {
+          <div class="notif-item" (click)="$event.stopPropagation()">
+            <div class="q-ev-icon q-ev-{{ event.type.toLowerCase() }}">
+              <mat-icon>{{ getEventIcon(event.type) }}</mat-icon>
+            </div>
+            <div class="notif-tx">
+              <span class="notif-desc">{{ event.description }}</span>
+              <span class="notif-when">{{ formatEventDate(event.dateStart) }}
+                @if (event.petName) { · {{ event.petName }} }
+              </span>
+            </div>
           </div>
-          <div class="event-info">
-            <div class="event-description">{{event.description}}</div>
-            <div class="event-date">{{formatEventDate(event.dateStart)}}</div>
-            <div class="event-pet" *ngIf="event.petName">{{event.petName}}</div>
-          </div>
-        </div>
-        
+        }
         <mat-divider></mat-divider>
-        <button mat-menu-item routerLink="/events" class="view-all-button">
-          <mat-icon>event</mat-icon>
-          <span>Ver todos os eventos</span>
+        <button mat-menu-item routerLink="/events" class="notif-all">
+          <span>Ver agenda completa</span>
         </button>
-      </div>
-      
-      <!-- Estado vazio -->
-      <ng-template #noNotifications>
-        <div class="no-notifications">
-          <mat-icon class="no-notifications-icon">notifications_off</mat-icon>
-          <p>Nenhum evento próximo</p>
-          <button mat-menu-item routerLink="/events" class="create-event-button">
-            <mat-icon>add_circle</mat-icon>
-            <span>Criar novo evento</span>
-          </button>
+      } @else {
+        <div class="notif-empty" (click)="$event.stopPropagation()">
+          <p>Por aqui está tranquilo — nenhum cuidado nos próximos dias.</p>
         </div>
-      </ng-template>
+        <button mat-menu-item routerLink="/events" class="notif-all">
+          <span>Abrir agenda</span>
+        </button>
+      }
     </mat-menu>
   `,
   styles: [`
-    .sidenav-container {
-      height: 100vh;
-      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
-    }
-
-    .sidenav {
-      width: 280px;
-      background: linear-gradient(180deg, #ffffff 0%, var(--bg-primary) 100%);
-      border-right: 1px solid var(--border-light);
-      box-shadow: 2px 0 20px rgba(99, 102, 241, 0.08);
-      overflow: hidden;
-      scrollbar-width: none;
-    }
-
-    .sidenav::-webkit-scrollbar {
-      display: none;
-      width: 0;
-      height: 0;
-    }
-
-    .sidenav-header {
-      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 50%, var(--secondary-color) 100%);
-      color: white;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 20px 24px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .sidenav-header::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="60" cy="40" r="1.5" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="70" r="1" fill="rgba(255,255,255,0.1)"/><path d="M10,10 Q50,5 90,20" stroke="rgba(255,255,255,0.05)" stroke-width="1" fill="none"/></svg>');
-      pointer-events: none;
-    }
-
-    .logo-icon {
-      font-size: 28px;
-      animation: float 3s ease-in-out infinite;
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-3px); }
-    }
-
-    .logo-text {
-      font-size: 20px;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-      text-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-
-    .paw-decoration {
-      margin-left: auto;
-      font-size: 16px;
-      opacity: 0.7;
-      animation: float 4s ease-in-out infinite reverse;
-    }
-
-    .main-toolbar {
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      background: linear-gradient(90deg, #ffffff 0%, var(--bg-primary) 100%);
-      border-bottom: 1px solid var(--border-light);
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    }
-
-    .toolbar-title {
-      font-size: 22px;
-      font-weight: 600;
-      color: var(--primary-dark);
-      letter-spacing: 0.3px;
-    }
-
-    .spacer {
-      flex: 1 1 auto;
-    }
-
-    .toolbar-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .main-content {
-      padding: 32px;
-      min-height: calc(100vh - 64px);
-      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
-      position: relative;
-    }
-
-    .main-content::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: 
-        radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.03) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.03) 0%, transparent 50%);
-      pointer-events: none;
-    }
-
-    .active {
-      background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.1) 100%);
-      color: var(--primary-dark);
-      border-radius: 12px;
-      margin: 4px 12px;
-      transform: translateX(4px);
-      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.2);
-    }
-
-    .active mat-icon {
-      color: var(--primary-dark);
-    }
-
-    mat-nav-list {
-      overflow: hidden;
-      height: auto;
-      max-height: none;
-      scrollbar-width: none;
-    }
-
-    mat-nav-list::-webkit-scrollbar {
-      display: none;
-      width: 0;
-      height: 0;
-    }
-
-    mat-nav-list a {
-      margin: 4px 12px;
-      border-radius: 12px;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
-      overflow: hidden;
-    }
-
-    mat-nav-list a:hover:not(.active) {
-      background: rgba(99, 102, 241, 0.08);
-      transform: translateX(2px);
-    }
-
-    mat-nav-list a mat-icon {
-      color: var(--primary-color);
-      transition: all 0.3s ease;
-    }
-
-    mat-nav-list a:hover mat-icon {
-      transform: scale(1.1);
-    }
-
-    .user-info {
-      padding: 20px;
-      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
-      border-radius: 12px;
-      margin: 8px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      min-width: 0;
-      width: 100%;
-      box-sizing: border-box;
-    }
-
-    .user-avatar {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
-      overflow: hidden;
-      flex-shrink: 0;
-      position: relative;
-      aspect-ratio: 1 / 1; /* Force 1:1 aspect ratio */
-      min-width: 48px; /* Prevent shrinking */
-      max-width: 48px; /* Prevent growing */
-      min-height: 48px; /* Prevent shrinking */
-      max-height: 48px; /* Prevent growing */
-    }
-
-    .user-avatar .avatar-image {
-      width: 48px;
-      height: 48px;
-      object-fit: cover;
-      border-radius: 50%;
-      position: absolute;
-      top: 0;
-      left: 0;
-      display: block;
-    }
-
-    .user-avatar mat-icon {
-      color: white;
-      font-size: 24px;
-      width: 24px;
-      height: 24px;
-      line-height: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .user-details {
-      flex: 1;
-      min-width: 0;
-      overflow: hidden;
+    .shell {
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      background: var(--q-bg);
     }
 
-    .user-name {
-      font-weight: 600;
-      margin: 0;
-      color: var(--primary-dark);
-      font-size: 16px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      width: 100%;
-      line-height: 1.2;
-    }
-
-    .user-email {
-      font-size: 13px;
-      color: var(--text-secondary);
-      margin: 6px 0 0 0;
-      font-weight: 400;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      width: 100%;
-      word-break: break-all;
-    }
-
-    /* User Menu Specific Styles */
-    .user-menu {
-      min-width: 320px;
-      max-width: 380px;
-      border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-      border: 1px solid var(--border-light);
-      overflow: hidden;
-    }
-
-    .user-menu .mat-mdc-menu-content {
-      padding: 0;
-    }
-
-    .user-menu .user-info {
-      border-bottom: 1px solid var(--border-light);
-      margin: 0;
-      border-radius: 0;
-      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
-      width: 100%;
-      max-width: 380px;
-      box-sizing: border-box;
-    }
-
-    .menu-item {
-      padding: 12px 20px;
-      transition: all 0.3s ease;
-      border-radius: 8px;
-      margin: 4px 8px;
-    }
-
-    .menu-item:hover {
-      background: rgba(99, 102, 241, 0.1);
-      color: var(--primary-dark);
-    }
-
-    .menu-item mat-icon {
-      color: var(--primary-color);
-      margin-right: 12px;
-    }
-
-    .logout-item:hover {
-      background: rgba(244, 67, 54, 0.1);
-      color: #d32f2f;
-    }
-
-    .logout-item:hover mat-icon {
-      color: #d32f2f;
-    }
-
-    /* Estilização moderna dos botões da toolbar */
-    .main-toolbar button {
-      transition: all 0.3s ease;
-      border-radius: 12px;
-    }
-
-    .main-toolbar button:hover {
-      background: rgba(99, 102, 241, 0.1);
-      transform: scale(1.05);
-    }
-
-    .main-toolbar button mat-icon {
-      color: var(--primary-color);
-    }
-
-    /* Estilização do menu de notificações */
-    .notification-header {
-      padding: 20px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
-      color: white;
-    }
-
-    .notification-header mat-icon {
-      font-size: 24px;
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.7; }
-    }
-
-    .notification-header h3 {
-      margin: 0;
-      font-size: 18px;
-      font-weight: 600;
-      letter-spacing: 0.3px;
-    }
-
-    .notification-count {
-      font-size: 12px;
-      background: rgba(255, 255, 255, 0.2);
-      padding: 4px 8px;
-      border-radius: 12px;
-      font-weight: 500;
-    }
-
-    .notification-content {
-      max-height: 420px;
-      overflow-y: auto;
-      min-width: 380px;
-      background: var(--bg-card);
-    }
-
-    .notification-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 16px;
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--border-light);
-      transition: all 0.3s ease;
-      position: relative;
-    }
-
-    .notification-item::before {
-      content: '';
-      position: absolute;
-      left: 0;
+    /* ---------- header ---------- */
+    .rp-header {
+      position: sticky;
       top: 0;
-      bottom: 0;
-      width: 3px;
-      background: linear-gradient(180deg, var(--primary-color) 0%, var(--primary-light) 100%);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    .notification-item:hover {
-      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
-      transform: translateX(4px);
-    }
-
-    .notification-item:hover::before {
-      opacity: 1;
-    }
-
-    .notification-item:last-child {
-      border-bottom: none;
-    }
-
-    .event-icon {
-      flex-shrink: 0;
-      width: 40px;
-      height: 40px;
+      z-index: 100;
       display: flex;
       align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      position: relative;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-
-    .event-icon::after {
-      content: '';
-      position: absolute;
-      top: -2px;
-      left: -2px;
-      right: -2px;
-      bottom: -2px;
-      border-radius: 50%;
-      background: linear-gradient(45deg, transparent, rgba(255,255,255,0.5), transparent);
-      z-index: -1;
-    }
-
-    .event-icon mat-icon {
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
-    }
-
-    .event-icon-vaccine { 
-      background: linear-gradient(135deg, var(--success-bg) 0%, rgba(16, 185, 129, 0.2) 100%); 
-      color: var(--success-color); 
-      border: 2px solid rgba(16, 185, 129, 0.2);
-    }
-    .event-icon-medicine { 
-      background: linear-gradient(135deg, var(--warning-bg) 0%, rgba(245, 158, 11, 0.2) 100%); 
-      color: var(--warning-color); 
-      border: 2px solid rgba(245, 158, 11, 0.2);
-    }
-    .event-icon-diary { 
-      background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(139, 92, 246, 0.2) 100%); 
-      color: var(--primary-light); 
-      border: 2px solid rgba(139, 92, 246, 0.2);
-    }
-    .event-icon-breed { 
-      background: linear-gradient(135deg, rgba(6, 182, 212, 0.1) 0%, rgba(6, 182, 212, 0.2) 100%); 
-      color: var(--secondary-color); 
-      border: 2px solid rgba(6, 182, 212, 0.2);
-    }
-    .event-icon-service { 
-      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(99, 102, 241, 0.2) 100%); 
-      color: var(--primary-color); 
-      border: 2px solid rgba(99, 102, 241, 0.2);
-    }
-
-    .event-info {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .event-description {
-      font-weight: 600;
-      color: var(--primary-dark);
-      font-size: 15px;
-      margin-bottom: 6px;
-      line-height: 1.4;
-    }
-
-    .event-date {
-      font-size: 13px;
-      color: var(--text-secondary);
-      margin-bottom: 4px;
-      font-weight: 500;
-    }
-
-    .event-pet {
-      font-size: 12px;
-      color: var(--text-muted);
-      font-style: italic;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .event-pet::before {
-      content: '🐾';
-      font-size: 10px;
-    }
-
-    .view-all-button {
-      width: 100%;
-      justify-content: center;
-      color: var(--primary-color);
-      font-weight: 600;
-      padding: 16px;
-      border-radius: 0 0 12px 12px;
-      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
-      transition: all 0.3s ease;
-    }
-
-    .view-all-button:hover {
-      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
-      color: white;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-    }
-
-    .no-notifications {
-      padding: 32px 24px;
-      text-align: center;
-      color: var(--text-muted);
-      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
-    }
-
-    .no-notifications-icon {
-      font-size: 64px;
-      width: 64px;
+      gap: var(--q-space-5);
+      padding: 0 var(--q-space-5);
       height: 64px;
-      color: var(--text-muted);
-      margin-bottom: 16px;
-      animation: float 3s ease-in-out infinite;
+      background: color-mix(in srgb, var(--q-bg) 88%, transparent);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--q-border);
     }
 
-    .no-notifications p {
-      margin: 0 0 20px 0;
-      font-size: 16px;
-      font-weight: 500;
+    .wordmark {
+      font-family: var(--q-font-display);
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--q-ink);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: baseline;
     }
-
-    .create-event-button {
-      width: 100%;
-      justify-content: center;
-      color: var(--primary-color);
-      font-weight: 600;
-      background: rgba(99, 102, 241, 0.1);
-      border-radius: 25px;
-      padding: 12px;
-      transition: all 0.3s ease;
-    }
-
-    .create-event-button:hover {
-      background: var(--primary-color);
-      color: white;
-      transform: scale(1.05);
-    }
-
-    /* Animação e estilização do sino de notificação */
-    .has-notifications {
-      color: var(--primary-color);
-      position: relative;
-    }
-
-    .has-notifications::after {
-      content: '';
-      position: absolute;
-      top: -2px;
-      right: -2px;
-      width: 8px;
-      height: 8px;
-      background: #dc2626;
+    .wordmark b { color: var(--q-green-600); font-weight: 700; }
+    .wordmark .dot {
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
-      animation: pulse-dot 2s infinite;
-      border: 1px solid white;
-      box-shadow: 0 1px 4px rgba(220, 38, 38, 0.3);
+      background: var(--q-ipe-500);
+      margin-left: 3px;
+      align-self: flex-start;
+      margin-top: 7px;
     }
 
-    @keyframes pulse-dot {
-      0%, 100% { 
-        transform: scale(1); 
-        opacity: 1; 
-      }
-      50% { 
-        transform: scale(1.3); 
-        opacity: 0.7; 
-      }
+    .desktop-nav {
+      display: flex;
+      gap: var(--q-space-1);
     }
-
-    .has-notifications {
-      animation: bell-ring 3s ease-in-out infinite;
+    .desktop-nav a {
+      font-size: 0.9063rem;
+      font-weight: 600;
+      color: var(--q-text-2);
+      text-decoration: none;
+      padding: 7px 14px;
+      border-radius: var(--q-radius-pill);
+      transition: color 0.15s ease, background 0.15s ease;
     }
+    .desktop-nav a:hover { color: var(--q-ink); background: var(--q-surface-2); }
+    .desktop-nav a.on { color: var(--q-green-600); background: var(--q-green-50); }
 
-    @keyframes bell-ring {
-      0%, 90%, 100% { transform: rotate(0deg); }
-      5%, 15%, 25% { transform: rotate(-8deg); }
-      10%, 20% { transform: rotate(8deg); }
-    }
+    .spacer { flex: 1; }
 
-    /* Responsividade e otimizações */
-    @media (max-width: 768px) {
-      .sidenav { width: 100%; }
-      .main-content { padding: 20px 16px; }
-      .notification-content { min-width: 320px; max-height: 350px; }
-      .toolbar-title { font-size: 18px; }
-    }
-
-    @media (max-width: 480px) {
-      .sidenav-header { padding: 16px 20px; }
-      .logo-text { font-size: 18px; }
-      .main-content { padding: 16px 12px; }
-    }
-
-    /* Customizações globais */
-    ::ng-deep .mat-mdc-menu-panel {
-      border-radius: 16px !important;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.12) !important;
-      border: 1px solid var(--border-light) !important;
-      overflow: hidden !important;
-    }
-
-    /* Remove barra de rolagem do sidenav */
-    ::ng-deep .mat-drawer-inner-container {
-      overflow: hidden !important;
-      scrollbar-width: none !important;
-    }
-
-    ::ng-deep .mat-drawer-inner-container::-webkit-scrollbar {
-      display: none !important;
-      width: 0 !important;
-      height: 0 !important;
-    }
-
-    ::ng-deep .mat-sidenav {
-      overflow: hidden !important;
-      scrollbar-width: none !important;
-    }
-
-    ::ng-deep .mat-sidenav::-webkit-scrollbar {
-      display: none !important;
-      width: 0 !important;
-      height: 0 !important;
-    }
-
-    ::ng-deep .mat-sidenav-container {
-      overflow: hidden !important;
-    }
-
-    /* Notification Button and Badge */
-    .notification-button {
-      position: relative;
-    }
-
-    .notification-badge {
-      position: absolute;
-      top: 4px;
-      right: 4px;
-      min-width: 18px;
-      height: 18px;
-      padding: 0 5px;
+    .header-actions {
       display: flex;
       align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-      color: white;
-      font-size: 11px;
+      gap: var(--q-space-1);
+    }
+    .header-actions .mat-mdc-icon-button { color: var(--q-text-2); }
+
+    .bell { position: relative; }
+    .badge {
+      position: absolute;
+      top: 5px;
+      right: 4px;
+      min-width: 17px;
+      height: 17px;
+      padding: 0 4px;
+      display: grid;
+      place-items: center;
+      background: var(--q-ipe-500);
+      color: #3A2D00;
+      font-size: 0.6563rem;
       font-weight: 700;
       border-radius: 9px;
-      border: 2px solid white;
-      box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4);
-      z-index: 10;
-      animation: badgePulse 2s ease-in-out infinite;
       pointer-events: none;
     }
 
-    @keyframes badgePulse {
-      0%, 100% {
-        transform: scale(1);
-        box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4);
-      }
-      50% {
-        transform: scale(1.1);
-        box-shadow: 0 3px 10px rgba(239, 68, 68, 0.6);
-      }
+    .avatar-btn {
+      overflow: hidden;
     }
-
-    .notification-button mat-icon.has-notifications {
-      color: #fbbf24;
-      animation: notificationShake 3s ease-in-out infinite;
-    }
-
-    @keyframes notificationShake {
-      0%, 90%, 100% { transform: rotate(0deg); }
-      5%, 15% { transform: rotate(-15deg); }
-      10%, 20% { transform: rotate(15deg); }
-    }
-
-    .toolbar-avatar {
-      width: 40px;
-      height: 40px;
+    .avatar-img {
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
-      overflow: visible;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
-    }
-
-    .toolbar-avatar .avatar-image {
-      width: 40px;
-      height: 40px;
       object-fit: cover;
+      display: block;
+    }
+    .avatar-fallback {
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--q-green-600);
+      color: var(--q-surface);
+      font-family: var(--q-font-display);
+      font-weight: 700;
+      font-size: 0.9rem;
     }
 
-    .toolbar-avatar mat-icon {
-      color: white;
-      font-size: 28px;
-      width: 28px;
-      height: 28px;
-      line-height: 1;
+    /* ---------- conteúdo ---------- */
+    .rp-main {
+      flex: 1;
+      width: 100%;
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: var(--q-space-6) var(--q-space-5) var(--q-space-7);
     }
 
-    .avatar-button {
-      padding: 4px !important;
-      width: 48px !important;
-      height: 48px !important;
-      border-radius: 50% !important;
-      overflow: visible !important;
-      min-width: 48px !important;
-      min-height: 48px !important;
+    /* ---------- bottom nav (mobile) ---------- */
+    .rp-bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: var(--q-surface);
+      border-top: 1px solid var(--q-border);
+      padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
+      justify-content: space-around;
     }
-
-    .avatar-button:hover {
-      background-color: rgba(255, 255, 255, 0.1) !important;
-    }
-
-    .nav-section-title {
-      padding: 16px 24px 8px 24px;
-      margin: 0;
-      font-size: 14px;
+    .rp-bottom-nav a {
+      display: grid;
+      justify-items: center;
+      gap: 2px;
+      min-width: 56px;
+      padding: 4px 8px;
+      border-radius: var(--q-radius-sm);
+      font-size: 0.625rem;
       font-weight: 600;
-      color: var(--primary-color);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      opacity: 0.8;
+      color: var(--q-text-3);
+      text-decoration: none;
     }
+    .rp-bottom-nav a mat-icon { font-size: 22px; width: 22px; height: 22px; }
+    .rp-bottom-nav a.on { color: var(--q-green-600); }
 
-    .close-button {
-      margin-left: auto;
-      color: white;
-    }
-
-    /* Mobile Responsive Styles */
-    @media (max-width: 768px) {
-      .sidenav {
-        width: 85vw;
-        max-width: 320px;
-        box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-      }
-
-      .sidenav-header {
-        padding: 16px 20px;
-        min-height: 64px;
-      }
-
-      .logo-text {
-        font-size: 18px;
-      }
-
-      .toolbar-title {
-        font-size: 18px;
-        display: none;
-      }
-
-      .main-toolbar {
-        padding: 0 8px;
-        min-height: 56px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-      }
-
-      .toolbar-actions {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        flex-shrink: 0;
-      }
-
-      .spacer {
-        flex: 1 1 auto;
-        min-width: 0;
-      }
-
-      .main-content {
-        padding: 8px;
-      }
-
-      .nav-section-title {
-        padding: 12px 20px 6px 20px;
-        font-size: 13px;
-      }
-
-      mat-nav-list a {
-        margin: 2px 8px;
-        padding: 12px 16px;
-      }
-
-      mat-nav-list a mat-icon {
-        font-size: 20px;
-        margin-right: 12px;
-      }
-
-      .toolbar-avatar {
-        width: 36px;
-        height: 36px;
-      }
-
-      .toolbar-avatar .avatar-image {
-        width: 36px;
-        height: 36px;
-      }
-
-      .toolbar-avatar mat-icon {
-        font-size: 24px;
-        width: 24px;
-        height: 24px;
-      }
-
-      .avatar-button {
-        width: 44px !important;
-        height: 44px !important;
-        padding: 4px !important;
-      }
-
-      .user-menu {
-        max-width: 90vw;
-        min-width: 320px;
-      }
-
-      .user-menu .user-info {
-        padding: 16px;
-        gap: 12px;
-      }
-
-      .user-menu .user-details {
-        min-width: 0;
-        flex: 1;
-      }
-
-      .user-menu .user-email {
-        font-size: 12px;
-        width: 100%;
-      }
-
-      .user-menu .user-name {
-        width: 100%;
-      }
-
-      .user-avatar {
-        width: 48px !important;
-        height: 48px !important;
-        flex-shrink: 0 !important;
-        min-width: 48px !important;
-        min-height: 48px !important;
-      }
-
-      .user-avatar .avatar-image {
-        width: 48px !important;
-        height: 48px !important;
-      }
-
-      .notification-menu {
-        max-width: 90vw;
-        max-height: 70vh;
-      }
-
-      .notification-content {
-        max-height: 300px;
-        overflow-y: auto;
-      }
-
-      .notification-badge {
-        top: 2px;
-        right: 2px;
-        min-width: 16px;
-        height: 16px;
-        font-size: 10px;
-        border-radius: 8px;
+    @media (max-width: 959px) {
+      .desktop-nav { display: none; }
+      .rp-bottom-nav { display: flex; }
+      .rp-header { height: 56px; padding: 0 var(--q-space-3) 0 var(--q-space-4); }
+      .rp-main {
+        padding: var(--q-space-4) var(--q-space-4) calc(76px + env(safe-area-inset-bottom));
       }
     }
 
-    @media (max-width: 480px) {
-      .sidenav {
-        width: 90vw;
-      }
-
-      .main-content {
-        padding: 4px;
-      }
-
-      .toolbar-title {
-        display: none !important;
-      }
-
-      .spacer {
-        flex: 1 1 auto;
-        min-width: 0;
-      }
-
-      .toolbar-actions {
-        display: flex;
-        align-items: center;
-        gap: 2px;
-        flex-shrink: 0;
-      }
-
-      .main-toolbar {
-        padding: 0 4px;
-        justify-content: space-between;
-      }
-
-      .user-menu {
-        max-width: 95vw;
-        min-width: 300px;
-      }
-
-      .user-menu .user-info {
-        padding: 12px;
-        gap: 10px;
-      }
-
-      .user-menu .user-email {
-        font-size: 11px;
-        width: 100%;
-      }
-
-      .user-menu .user-name {
-        font-size: 14px;
-        width: 100%;
-      }
-
-      .notification-badge {
-        top: 0px;
-        right: 0px;
-        min-width: 14px;
-        height: 14px;
-        padding: 0 3px;
-        font-size: 9px;
-        border-radius: 7px;
-        border-width: 1.5px;
-      }
+    /* ---------- menus ---------- */
+    .menu-user-info { padding: 12px 16px 10px; min-width: 220px; }
+    .menu-user-name { margin: 0; font-weight: 600; font-size: 0.9375rem; color: var(--q-ink); }
+    .menu-user-email {
+      margin: 2px 0 0;
+      font-size: 0.7813rem;
+      color: var(--q-text-3);
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
+
+    .notif-head { padding: 14px 16px 10px; }
+    .notif-head h4 { margin: 4px 0 0; font-size: 1rem; }
+    .notif-item {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      padding: 10px 16px;
+      max-width: 340px;
+    }
+    .notif-tx { min-width: 0; display: grid; }
+    .notif-desc {
+      font-size: 0.8438rem;
+      font-weight: 600;
+      color: var(--q-ink);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .notif-when { font-size: 0.75rem; color: var(--q-text-2); }
+    .notif-all span { color: var(--q-green-600); font-weight: 600; }
+    .notif-empty {
+      padding: 18px 16px;
+      max-width: 300px;
+    }
+    .notif-empty p { margin: 0; font-size: 0.8438rem; color: var(--q-text-2); }
   `]
 })
 export class LayoutComponent implements OnInit, OnDestroy {
-  @ViewChild('drawer') drawer!: MatSidenav;
-  
   currentUser: TutorDetailResult | null = null;
   upcomingEventsCount = 0;
   upcomingEventsList: any[] = [];
-  mobileQuery: MediaQueryList;
+  avatarFailed = false;
+  isDark = false;
   isProduction = environment.production;
   private eventUpdateSubscription?: Subscription;
   private userUpdateSubscription?: Subscription;
@@ -1162,43 +362,55 @@ export class LayoutComponent implements OnInit, OnDestroy {
     private eventStateService: EventStateService,
     private dateTimeService: DateTimeService,
     private userStateService: UserStateService,
-    private router: Router,
-    private breakpointObserver: BreakpointObserver
-  ) { 
-    this.mobileQuery = this.breakpointObserver.observe([
-      '(max-width: 768px)'
-    ]).subscribe().unsubscribe() as any;
-    this.mobileQuery = window.matchMedia('(max-width: 768px)');
+    private router: Router
+  ) {
+    this.isDark = this.resolveIsDark();
   }
 
   ngOnInit(): void {
     this.loadUserProfile();
 
-    // Se inscrever para atualizações de eventos
     this.eventUpdateSubscription = this.eventStateService.eventUpdated$.subscribe(() => {
-  
       this.refreshNotifications();
     });
 
-    // Se inscrever para atualizações do perfil do usuário
     this.userUpdateSubscription = this.userStateService.userUpdated$.subscribe(() => {
-  
       this.refreshUserProfile();
     });
   }
 
   ngOnDestroy(): void {
-    if (this.eventUpdateSubscription) {
-      this.eventUpdateSubscription.unsubscribe();
-    }
-    if (this.userUpdateSubscription) {
-      this.userUpdateSubscription.unsubscribe();
-    }
+    this.eventUpdateSubscription?.unsubscribe();
+    this.userUpdateSubscription?.unsubscribe();
+  }
+
+  get isNearbyActive(): boolean {
+    const url = this.router.url;
+    return url.startsWith('/petshops') || url.startsWith('/veterinaries');
+  }
+
+  get userInitial(): string {
+    return (this.currentUser?.firstName || '?').charAt(0).toUpperCase();
+  }
+
+  toggleTheme(): void {
+    const next = this.isDark ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    try {
+      localStorage.setItem('rp-theme', next);
+    } catch { /* localStorage indisponível */ }
+    this.isDark = next === 'dark';
+  }
+
+  private resolveIsDark(): boolean {
+    const attr = document.documentElement.getAttribute('data-theme');
+    if (attr === 'dark') return true;
+    if (attr === 'light') return false;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
   }
 
   private refreshNotifications(): void {
-    if (this.currentUser && this.currentUser.pets && this.currentUser.pets.length > 0) {
-  
+    if (this.currentUser?.pets && this.currentUser.pets.length > 0) {
       this.loadUpcomingEventsCount(this.currentUser.pets);
     }
   }
@@ -1207,8 +419,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
     this.tutorService.getMyProfile().subscribe({
       next: (user) => {
         this.currentUser = user;
-
-        // Carregar contagem real de eventos próximos
+        this.avatarFailed = false;
         if (user.pets && user.pets.length > 0) {
           this.loadUpcomingEventsCount(user.pets);
         } else {
@@ -1216,18 +427,13 @@ export class LayoutComponent implements OnInit, OnDestroy {
         }
       },
       error: () => {
-  
         this.upcomingEventsCount = 0;
       }
     });
   }
 
   private loadUpcomingEventsCount(pets: any[]): void {
-  
-
-    const petEventRequests = pets.map(pet =>
-      this.eventService.listByPet(pet.id)
-    );
+    const petEventRequests = pets.map(pet => this.eventService.listByPet(pet.id));
 
     forkJoin(petEventRequests).subscribe({
       next: (petEventsArrays) => {
@@ -1235,7 +441,6 @@ export class LayoutComponent implements OnInit, OnDestroy {
 
         petEventsArrays.forEach((petEvents, index) => {
           const pet = pets[index];
-
           if (Array.isArray(petEvents)) {
             petEvents.forEach((event: any) => {
               allEvents.push({
@@ -1251,29 +456,21 @@ export class LayoutComponent implements OnInit, OnDestroy {
           }
         });
 
-        // Contar apenas eventos próximos (próximos 7 dias)
         const now = new Date();
         const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
         const upcomingEvents = allEvents.filter(event => {
           const eventDate = new Date(event.dateStart);
-          const isNotDone = !isEventDone(event.status);
-          const isInFuture = eventDate >= now;
-          const isWithinWeek = eventDate <= nextWeek;
-
-          return isNotDone && isInFuture && isWithinWeek;
+          return !isEventDone(event.status) && eventDate >= now && eventDate <= nextWeek;
         });
 
-        // Ordenar por data (mais próximos primeiro)
-        upcomingEvents.sort((a, b) => new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime());
+        upcomingEvents.sort((a, b) =>
+          new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime());
 
         this.upcomingEventsCount = upcomingEvents.length;
-        this.upcomingEventsList = upcomingEvents.slice(0, 5); // Mostrar apenas os 5 primeiros
-
-  
+        this.upcomingEventsList = upcomingEvents.slice(0, 5);
       },
-      error: (error) => {
-  
+      error: () => {
         this.upcomingEventsCount = 0;
         this.upcomingEventsList = [];
       }
@@ -1299,67 +496,38 @@ export class LayoutComponent implements OnInit, OnDestroy {
   formatEventDate(dateString: string): string {
     if (!dateString) return 'Data inválida';
 
-    const eventDate = this.dateTimeService.parseAPIDate(dateString); // FIX: usar parsing seguro
+    const eventDate = this.dateTimeService.parseAPIDate(dateString);
     if (!eventDate) return 'Data inválida';
-    
+
     const now = new Date();
-    const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-    const dayAfterTomorrow = new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000);
+    const time = eventDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    const dayDiff = this.daysBetween(now, eventDate);
 
-    // Resetar horas para comparação apenas de datas
-    const eventDateOnly = new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate());
-    const nowDateOnly = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const tomorrowDateOnly = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate());
-    const dayAfterTomorrowDateOnly = new Date(dayAfterTomorrow.getFullYear(), dayAfterTomorrow.getMonth(), dayAfterTomorrow.getDate());
-
-    if (eventDateOnly.getTime() === nowDateOnly.getTime()) {
-      return `Hoje às ${eventDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
-    } else if (eventDateOnly.getTime() === tomorrowDateOnly.getTime()) {
-      return `Amanhã às ${eventDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
-    } else if (eventDateOnly.getTime() === dayAfterTomorrowDateOnly.getTime()) {
-      return `Depois de amanhã às ${eventDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
-    } else {
-      return eventDate.toLocaleDateString('pt-BR', {
-        day: '2-digit',
-        month: 'short',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    }
+    if (dayDiff === 0) return `Hoje às ${time}`;
+    if (dayDiff === 1) return `Amanhã às ${time}`;
+    return eventDate.toLocaleDateString('pt-BR', {
+      day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
+    });
   }
 
-  onAvatarError(event: any): void {
-    // Esconder a imagem com erro e mostrar o ícone padrão
-    event.target.style.display = 'none';
-  }
-
-  onSidenavClosed(): void {
-    // Método executado quando o sidenav é fechado em mobile
-  }
-
-  closeSidenavOnMobile(): void {
-    if (this.mobileQuery.matches && this.drawer) {
-      this.drawer.close();
-    }
+  private daysBetween(from: Date, to: Date): number {
+    const a = new Date(from.getFullYear(), from.getMonth(), from.getDate());
+    const b = new Date(to.getFullYear(), to.getMonth(), to.getDate());
+    return Math.round((b.getTime() - a.getTime()) / 86400000);
   }
 
   private refreshUserProfile(): void {
-  
     this.tutorService.getMyProfile().subscribe({
       next: (user) => {
         this.currentUser = user;
-  
-        
-        // Também recarregar notificações porque podem ter mudado com novos pets, etc.
+        this.avatarFailed = false;
         if (user.pets && user.pets.length > 0) {
           this.loadUpcomingEventsCount(user.pets);
         } else {
           this.upcomingEventsCount = 0;
         }
       },
-      error: (error) => {
-  
-      }
+      error: () => { /* mantém estado atual */ }
     });
   }
 }

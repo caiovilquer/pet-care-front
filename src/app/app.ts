@@ -13,5 +13,5 @@ import { RouterOutlet } from '@angular/router';
   `]
 })
 export class App {
-  title = 'Pet Care Scheduler';
+  title = 'RotinaPet';
 }

@@ -209,7 +209,7 @@ import { GoogleMapsService } from '../../core/services/google-maps.service';
       text-align: center;
       padding: 15px;
       border-radius: 8px;
-      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+      background: linear-gradient(135deg, var(--q-bg) 0%, var(--q-surface-2) 100%);
     }
 
     .metric-value {
@@ -219,20 +219,20 @@ import { GoogleMapsService } from '../../core/services/google-maps.service';
     }
 
     .metric-value.cache-hits {
-      color: var(--success-color);
+      color: var(--q-success);
     }
 
     .metric-value.api-calls {
-      color: var(--warning-color);
+      color: var(--q-warning);
     }
 
     .metric-value.savings {
-      color: var(--primary-color);
+      color: var(--q-green-600);
     }
 
     .metric-label {
       font-size: 0.9em;
-      color: var(--text-secondary);
+      color: var(--q-text-2);
       font-weight: 500;
     }
 
@@ -242,13 +242,13 @@ import { GoogleMapsService } from '../../core/services/google-maps.service';
 
     .cache-rate-section h3 {
       margin-bottom: 10px;
-      color: var(--primary-dark);
+      color: var(--q-green-700);
     }
 
     .cache-rate-description {
       margin-top: 10px;
       font-size: 0.9em;
-      color: var(--text-secondary);
+      color: var(--q-text-2);
     }
 
     .optimization-config {
@@ -257,7 +257,7 @@ import { GoogleMapsService } from '../../core/services/google-maps.service';
 
     .optimization-config h3 {
       margin-bottom: 20px;
-      color: var(--primary-dark);
+      color: var(--q-green-700);
     }
 
     .config-item {
@@ -270,7 +270,7 @@ import { GoogleMapsService } from '../../core/services/google-maps.service';
     .config-item label {
       min-width: 150px;
       font-weight: 500;
-      color: var(--text-primary);
+      color: var(--q-ink);
     }
 
     .config-item mat-slider {
@@ -290,16 +290,16 @@ import { GoogleMapsService } from '../../core/services/google-maps.service';
 
     .status-item {
       padding: 10px 15px;
-      background: var(--bg-card);
+      background: var(--q-surface);
       border-radius: 6px;
-      border-left: 3px solid var(--primary-color);
+      border-left: 3px solid var(--q-green-600);
     }
 
     .config-value {
       min-width: 60px;
       text-align: right;
       font-weight: 500;
-      color: var(--primary-color);
+      color: var(--q-green-600);
     }
 
     .status-section {
@@ -308,7 +308,7 @@ import { GoogleMapsService } from '../../core/services/google-maps.service';
 
     .status-section h3 {
       margin-bottom: 15px;
-      color: var(--primary-dark);
+      color: var(--q-green-700);
     }
 
     .status-chips {
@@ -320,25 +320,25 @@ import { GoogleMapsService } from '../../core/services/google-maps.service';
     .report-section {
       margin: 20px 0;
       padding: 15px;
-      background: var(--bg-card);
+      background: var(--q-surface);
       border-radius: 8px;
-      border-left: 4px solid var(--primary-color);
+      border-left: 4px solid var(--q-green-600);
     }
 
     .report-section h3 {
       margin-bottom: 10px;
-      color: var(--primary-dark);
+      color: var(--q-green-700);
     }
 
     .report-summary {
       font-size: 1.1em;
       margin-bottom: 15px;
-      color: var(--text-primary);
+      color: var(--q-ink);
     }
 
     .recommendations h4 {
       margin-bottom: 10px;
-      color: var(--primary-color);
+      color: var(--q-green-600);
     }
 
     .recommendations ul {
@@ -348,7 +348,7 @@ import { GoogleMapsService } from '../../core/services/google-maps.service';
 
     .recommendations li {
       margin-bottom: 5px;
-      color: var(--text-secondary);
+      color: var(--q-text-2);
     }
 
     mat-card-actions {

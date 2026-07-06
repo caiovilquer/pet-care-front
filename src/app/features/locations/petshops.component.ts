@@ -130,7 +130,7 @@ import {
   styles: [`
     .petshops-container {
       min-height: 100vh;
-      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+      background: linear-gradient(135deg, var(--q-bg) 0%, var(--q-surface-2) 100%);
     }
 
     .petshops-header {
@@ -142,8 +142,8 @@ import {
       background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(20px);
       border-radius: 16px;
-      box-shadow: var(--shadow-card);
-      border: 1px solid var(--border-light);
+      box-shadow: var(--q-shadow-md);
+      border: 1px solid var(--q-border);
       position: relative;
       overflow: hidden;
       animation: fadeInUp 0.6s ease-out;
@@ -240,7 +240,7 @@ import {
 
     .results-count {
       font-size: 0.9rem;
-      color: var(--text-secondary);
+      color: var(--q-text-2);
       font-weight: 500;
     }
 
@@ -263,13 +263,13 @@ import {
       background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(20px);
       border-radius: 16px;
-      box-shadow: var(--shadow-card);
-      border: 1px solid var(--border-light);
+      box-shadow: var(--q-shadow-md);
+      border: 1px solid var(--q-border);
     }
 
     .results-header h2 {
       margin: 0;
-      color: var(--text-primary);
+      color: var(--q-ink);
       font-weight: 600;
     }
 
@@ -277,7 +277,7 @@ import {
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      color: var(--text-secondary);
+      color: var(--q-text-2);
       font-size: 0.9rem;
     }
 
@@ -285,7 +285,7 @@ import {
       font-size: 18px;
       height: 18px;
       width: 18px;
-      color: var(--primary-color);
+      color: var(--q-green-600);
     }
 
     .loading-container {
@@ -296,13 +296,13 @@ import {
       background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(20px);
       border-radius: 16px;
-      box-shadow: var(--shadow-card);
-      border: 1px solid var(--border-light);
+      box-shadow: var(--q-shadow-md);
+      border: 1px solid var(--q-border);
     }
 
     .loading-container p {
       margin-top: 1rem;
-      color: var(--text-secondary);
+      color: var(--q-text-2);
     }
 
     .no-results {
@@ -317,8 +317,8 @@ import {
       backdrop-filter: blur(20px);
       padding: 3rem;
       border-radius: 16px;
-      box-shadow: var(--shadow-card);
-      border: 1px solid var(--border-light);
+      box-shadow: var(--q-shadow-md);
+      border: 1px solid var(--q-border);
       max-width: 400px;
     }
 
@@ -326,17 +326,17 @@ import {
       font-size: 64px;
       height: 64px;
       width: 64px;
-      color: var(--text-muted);
+      color: var(--q-text-3);
       margin-bottom: 1rem;
     }
 
     .no-results-content h3 {
       margin: 0 0 1rem 0;
-      color: var(--text-primary);
+      color: var(--q-ink);
     }
 
     .no-results-content p {
-      color: var(--text-secondary);
+      color: var(--q-text-2);
       margin-bottom: 1rem;
       line-height: 1.5;
     }
@@ -359,8 +359,8 @@ import {
       backdrop-filter: blur(20px);
       padding: 3rem;
       border-radius: 16px;
-      box-shadow: var(--shadow-card);
-      border: 1px solid var(--border-light);
+      box-shadow: var(--q-shadow-md);
+      border: 1px solid var(--q-border);
       max-width: 600px;
     }
 
@@ -368,18 +368,18 @@ import {
       font-size: 80px;
       height: 80px;
       width: 80px;
-      color: var(--primary-color);
+      color: var(--q-green-600);
       margin-bottom: 1.5rem;
     }
 
     .welcome-content h2 {
       margin: 0 0 1rem 0;
-      color: var(--text-primary);
+      color: var(--q-ink);
       font-weight: 600;
     }
 
     .welcome-content p {
-      color: var(--text-secondary);
+      color: var(--q-text-2);
       margin-bottom: 2rem;
       line-height: 1.6;
     }
@@ -398,25 +398,25 @@ import {
       align-items: center;
       gap: 1rem;
       padding: 1rem;
-      background: var(--bg-surface);
+      background: var(--q-surface);
       border-radius: 12px;
-      border: 1px solid var(--border-light);
+      border: 1px solid var(--q-border);
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .features-list li:hover {
-      background: var(--bg-hover);
+      background: var(--q-surface-2);
       transform: translateY(-2px);
-      box-shadow: var(--shadow-hover);
+      box-shadow: var(--q-shadow-md);
     }
 
     .features-list mat-icon {
-      color: var(--primary-color);
+      color: var(--q-green-600);
       flex-shrink: 0;
     }
 
     .features-list span {
-      color: var(--text-primary);
+      color: var(--q-ink);
       font-weight: 500;
     }
 

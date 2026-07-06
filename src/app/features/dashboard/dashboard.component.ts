@@ -1,14 +1,13 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatGridListModule } from '@angular/material/grid-list';
-import { MatListModule } from '@angular/material/list';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { forkJoin, Subscription } from 'rxjs';
+import { StatCardComponent } from '../../shared/components/ui/stat-card.component';
+import { PetAvatarComponent } from '../../shared/components/ui/pet-avatar.component';
+import { EmptyStateComponent } from '../../shared/components/ui/empty-state.component';
+import { SkeletonComponent } from '../../shared/components/ui/skeleton.component';
 import { TutorService } from '../../core/services/tutor.service';
 import { EventService } from '../../core/services/event.service';
 import { EventStateService } from '../../core/services/event-state.service';
@@ -24,13 +23,12 @@ import { PetSummary } from '../../core/models/pet.model';
   imports: [
     CommonModule,
     RouterLink,
-    MatCardModule,
     MatButtonModule,
     MatIconModule,
-    MatGridListModule,
-    MatListModule,
-    MatChipsModule,
-    MatProgressSpinnerModule
+    StatCardComponent,
+    PetAvatarComponent,
+    EmptyStateComponent,
+    SkeletonComponent
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
@@ -191,5 +189,19 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   retryLoadData(): void {
     this.loadDashboardData();
+  }
+
+  get greeting(): string {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Bom dia';
+    if (hour < 18) return 'Boa tarde';
+    return 'Boa noite';
+  }
+
+  get todayLabel(): string {
+    const label = new Date().toLocaleDateString('pt-BR', {
+      weekday: 'long', day: 'numeric', month: 'long'
+    });
+    return label.charAt(0).toUpperCase() + label.slice(1);
   }
 }

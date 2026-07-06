@@ -1,154 +1,91 @@
-<div class="events-container">
-  <!-- Loading State -->
+<div class="events-page">
+  <rp-page-header overline="Rotina de cuidados"
+                  [title]="petId ? 'Agenda de ' + (petName || 'pet') : 'Agenda'"
+                  [subtitle]="petId ? undefined : 'Tudo o que seus pets precisam, organizado por dia.'">
+    @if (petId) {
+      <button mat-stroked-button (click)="goBackToAllEvents()">
+        <mat-icon>arrow_back</mat-icon>
+        Agenda completa
+      </button>
+    }
+    <button mat-flat-button (click)="openEventForm()">
+      <mat-icon>add</mat-icon>
+      Adicionar cuidado
+    </button>
+  </rp-page-header>
+
   @if (isLoading) {
-    <div class="loading-container">
-      <div class="loading-card">
-        <mat-spinner diameter="60"></mat-spinner>
-        <h2>Carregando eventos...</h2>
-        <p>Buscando informações dos eventos {{ petId ? 'do pet' : 'cadastrados' }}</p>
-      </div>
-    </div>
-  } @else {
-    <!-- Main Content -->
-    <div class="events-header">
-      <h1>{{ petId ? 'Eventos de ' + (petName || 'Pet') : 'Todos os Eventos' }}</h1>
-      <div class="header-actions">
-        <button *ngIf="petId" mat-button (click)="goBackToAllEvents()" class="back-button">
-          <mat-icon>arrow_back</mat-icon>
-          Voltar para todos os eventos
-        </button>
-        <button mat-raised-button color="primary" (click)="openEventForm()">
-          <mat-icon>add</mat-icon>
-          Novo Evento
-        </button>
-      </div>
-    </div>
+    <rp-skeleton variant="list" [count]="5"></rp-skeleton>
+  } @else if (events.length > 0) {
+    @for (group of eventGroups; track group.label) {
+      <section class="day-group">
+        <h2 class="day-label" [class.today]="group.isToday">{{ group.label }}</h2>
+        <div class="day-events">
+          @for (event of group.events; track event.id) {
+            <article class="event-item" [class.done]="event.status === 'DONE'">
+              <button mat-icon-button class="check-btn"
+                      (click)="toggleEventStatus(event)"
+                      [matTooltip]="getToggleTooltip(event.status)">
+                <mat-icon>{{ event.status === 'DONE' ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+              </button>
 
-    <mat-card>
-      <mat-card-content>
-        <!-- Legenda para eventos próximos -->
-        <div class="legend-container" *ngIf="events.length > 0">
-          <div class="legend-item">
-            <span class="legend-icon">⚡</span>
-            <span class="legend-text">Eventos próximos (7 dias) estão destacados</span>
-          </div>
-        </div>
-
-        <div class="table-container" *ngIf="events.length > 0; else noEvents">
-        <table mat-table [dataSource]="events" class="events-table">
-          <ng-container matColumnDef="type">
-            <th mat-header-cell *matHeaderCellDef>Tipo</th>
-            <td mat-cell *matCellDef="let event">
-              <div class="type-cell">
-                <mat-chip [class]="getEventChipClass(event.type)">
-                  <mat-icon matChipIcon>{{getEventIcon(event.type)}}</mat-icon>
-                  {{getEventTypeName(event.type)}}
-                </mat-chip>
-                <span class="upcoming-badge" *ngIf="isUpcomingEvent(event.dateStart, event.status)">
-                  ⚡
-                </span>
+              <div class="q-ev-icon q-ev-{{ event.type.toLowerCase() }}">
+                <mat-icon>{{ getEventIcon(event.type) }}</mat-icon>
               </div>
-            </td>
-          </ng-container>
 
-          <ng-container matColumnDef="pet">
-            <th mat-header-cell *matHeaderCellDef>Pet</th>
-            <td mat-cell *matCellDef="let event">
-              <div class="pet-info">
-                <div class="pet-avatar-small">
-                  @if (getPetData(event.petId).photoUrl) {
-                    <img 
-                      [src]="getPetData(event.petId).photoUrl" 
-                      [alt]="getPetData(event.petId).name"
-                      class="pet-photo-small"
-                      (error)="onImageError($event, getPetData(event.petId).species)">
-                  } @else {
-                    <div class="pet-placeholder-small">
-                      <span class="pet-emoji-small">{{getDefaultPetImage(getPetData(event.petId).species)}}</span>
-                    </div>
+              <div class="ev-tx">
+                <div class="ev-title">
+                  {{ event.description || getEventTypeName(event.type) }}
+                </div>
+                <div class="ev-meta">
+                  <span>{{ formatTime(event.dateStart) }}</span>
+                  <span class="sep">·</span>
+                  <span class="q-ev-chip q-ev-{{ event.type.toLowerCase() }}">{{ getEventTypeName(event.type) }}</span>
+                  @if (!petId) {
+                    <span class="sep">·</span>
+                    <span class="ev-pet">{{ getPetData(event.petId).name }}</span>
+                  }
+                  @if (getEventStatus(event.dateStart, event.status) !== 'Pendente') {
+                    <span class="q-status"
+                          [class.q-status-done]="event.status === 'DONE'"
+                          [class.q-status-overdue]="event.status !== 'DONE'">
+                      {{ getEventStatus(event.dateStart, event.status) }}
+                    </span>
                   }
                 </div>
-                <div class="pet-details">
-                  <span class="pet-name">{{getPetData(event.petId).name}}</span>
-                  <span class="pet-specie">{{getPetData(event.petId).species}}</span>
-                </div>
               </div>
-            </td>
-          </ng-container>
 
-          <ng-container matColumnDef="description">
-            <th mat-header-cell *matHeaderCellDef>Descrição</th>
-            <td mat-cell *matCellDef="let event">
-              {{event.description || getEventTypeName(event.type)}}
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="dateStart">
-            <th mat-header-cell *matHeaderCellDef>Data/Hora</th>
-            <td mat-cell *matCellDef="let event">
-              <div class="date-cell">
-                <mat-icon class="date-icon">schedule</mat-icon>
-                {{formatDate(event.dateStart)}}
+              <div class="ev-actions">
+                <button mat-icon-button (click)="editEvent(event)" matTooltip="Editar">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button (click)="deleteEvent(event)" matTooltip="Remover" class="danger">
+                  <mat-icon>delete_outline</mat-icon>
+                </button>
               </div>
-            </td>
-          </ng-container>
+            </article>
+          }
+        </div>
+      </section>
+    }
 
-          <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef>Status</th>
-            <td mat-cell *matCellDef="let event">
-              <mat-chip [class]="getStatusChipClass(event.dateStart, event.status)">
-                {{getEventStatus(event.dateStart, event.status)}}
-              </mat-chip>
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef>Ações</th>
-            <td mat-cell *matCellDef="let event">
-              <button mat-icon-button (click)="editEvent(event)" 
-                      matTooltip="Editar">
-                <mat-icon>edit</mat-icon>
-              </button>
-              <button mat-icon-button (click)="toggleEventStatus(event)" 
-                      [matTooltip]="getToggleTooltip(event.status)"
-                      [color]="event.status === 'DONE' ? 'accent' : 'primary'">
-                <mat-icon>{{event.status === 'DONE' ? 'undo' : 'check_circle'}}</mat-icon>
-              </button>
-              <button mat-icon-button (click)="deleteEvent(event)" 
-                      matTooltip="Excluir" color="warn">
-                <mat-icon>delete</mat-icon>
-              </button>
-            </td>
-          </ng-container>
-
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;" 
-              [class.upcoming-event]="isUpcomingEvent(row.dateStart, row.status)"></tr>
-        </table>
-
-        <mat-paginator 
-          *ngIf="!petId"
-          [length]="totalItems"
-          [pageSize]="pageSize"
-          [pageSizeOptions]="[5, 10, 20]"
-          [pageIndex]="currentPage"
-          (page)="onPageChange($event)"
-          showFirstLastButtons>
-        </mat-paginator>
-      </div>
-
-        <ng-template #noEvents>
-          <div class="no-events">
-            <mat-icon class="no-events-icon">event_busy</mat-icon>
-            <h2>Nenhum evento encontrado</h2>
-            <p>Crie um novo evento para começar.</p>
-            <button mat-raised-button color="primary" (click)="openEventForm()">
-              <mat-icon>add</mat-icon>
-              Novo Evento
-            </button>
-          </div>
-        </ng-template>
-      </mat-card-content>
-    </mat-card>
-  } <!-- Fim do @else -->
+    @if (!petId && totalItems > pageSize) {
+      <mat-paginator
+        [length]="totalItems"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="[5, 10, 20]"
+        [pageIndex]="currentPage"
+        (page)="onPageChange($event)"
+        showFirstLastButtons>
+      </mat-paginator>
+    }
+  } @else {
+    <rp-empty-state icon="event_available" title="Por aqui está tranquilo"
+                    message="Nenhum cuidado agendado. Adicione vacinas, remédios ou serviços e a gente lembra você.">
+      <button mat-flat-button (click)="openEventForm()">
+        <mat-icon>add</mat-icon>
+        Adicionar cuidado
+      </button>
+    </rp-empty-state>
+  }
 </div>

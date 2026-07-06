@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatDividerModule } from '@angular/material/divider';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { PetAvatarComponent } from '../../shared/components/ui/pet-avatar.component';
+import { EmptyStateComponent } from '../../shared/components/ui/empty-state.component';
+import { SkeletonComponent } from '../../shared/components/ui/skeleton.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { PetService } from '../../core/services/pet.service';
 import { EventService } from '../../core/services/event.service';
@@ -20,12 +20,12 @@ import { PetFormComponent } from './pet-form.component';
   standalone: true,
   imports: [
     CommonModule,
-    MatCardModule,
     MatButtonModule,
     MatIconModule,
-    MatChipsModule,
-    MatDividerModule,
-    MatDialogModule
+    MatDialogModule,
+    PetAvatarComponent,
+    EmptyStateComponent,
+    SkeletonComponent
   ],
   templateUrl: './pet-detail.component.html',
   styleUrls: ['./pet-detail.component.css']

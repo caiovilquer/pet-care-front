@@ -1,289 +1,73 @@
-/* Pet Form Styles */
+h2[mat-dialog-title] {
+  font-family: var(--q-font-display);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  padding-top: var(--q-space-4);
+}
+
+mat-dialog-content form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--q-space-1);
+  padding-top: var(--q-space-2);
+}
+
 .full-width {
   width: 100%;
-  margin-bottom: var(--spacing-md);
 }
 
-.form-section {
-  margin-bottom: var(--spacing-lg);
-  padding: var(--spacing-md);
-  background: var(--bg-hover);
-  border-radius: var(--radius-md);
-  border-left: 4px solid var(--primary-color);
-}
-
-.form-section-title {
-  color: var(--text-primary);
-  font-weight: 600;
-  font-size: 1.1rem;
-  margin-bottom: var(--spacing-sm);
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-}
-
-.form-section-title mat-icon {
-  color: var(--primary-color);
-  font-size: 20px;
-}
-
-.form-row {
-  display: flex;
-  gap: var(--spacing-sm);
-}
-
-.half-width {
-  flex: 1;
-}
-
-/* Dialog styling */
-::ng-deep .pet-form-dialog .mat-mdc-dialog-container {
-  border-radius: var(--radius-xl) !important;
-  overflow: hidden;
-}
-
-::ng-deep .pet-form-dialog .mat-mdc-dialog-surface {
-  border-radius: var(--radius-xl) !important;
-}
-
-mat-dialog-content {
-  max-height: 600px;
-  overflow-y: auto;
-  padding: var(--spacing-lg) !important;
-}
-
-mat-dialog-actions {
-  margin-top: var(--spacing-md);
-  padding: var(--spacing-md) var(--spacing-lg) !important;
-  background: var(--bg-hover);
-  border-top: 1px solid var(--border-light);
-  gap: var(--spacing-sm) !important;
-}
-
-/* Enhanced form field styling */
-::ng-deep .pet-form-dialog .mat-mdc-form-field {
-  width: 100%;
-}
-
-::ng-deep .pet-form-dialog .mat-mdc-text-field-wrapper {
-  background-color: var(--bg-input) !important;
-  border-radius: var(--radius-md) !important;
-  transition: all 0.3s ease !important;
-  border: 1px solid var(--border-light) !important;
-}
-
-::ng-deep .pet-form-dialog .mat-mdc-form-field:hover .mat-mdc-text-field-wrapper {
-  background-color: var(--bg-surface) !important;
-  border-color: var(--border-medium) !important;
-  box-shadow: var(--shadow-soft) !important;
-}
-
-::ng-deep .pet-form-dialog .mat-mdc-form-field.mat-focused .mat-mdc-text-field-wrapper {
-  border-color: var(--primary-color) !important;
-  box-shadow: 0 0 0 2px rgba(251, 146, 60, 0.1) !important;
-}
-
-::ng-deep .pet-form-dialog .mat-mdc-form-field .mdc-notched-outline {
-  border-color: transparent !important;
-}
-
-/* Select and other input types */
-::ng-deep .pet-form-dialog .mat-mdc-select-trigger {
-  border-radius: var(--radius-md) !important;
-}
-
-::ng-deep .pet-form-dialog .mat-mdc-select-panel {
-  border-radius: var(--radius-md) !important;
-  box-shadow: var(--shadow-hover) !important;
-}
-
-/* Date picker styling */
-::ng-deep .pet-form-dialog .mat-datepicker-toggle-default-icon {
-  color: var(--primary-color) !important;
-}
-
-/* File upload area */
-.file-upload-area {
-  border: 2px dashed var(--border-medium);
-  border-radius: var(--radius-md);
-  padding: var(--spacing-lg);
-  text-align: center;
-  background: var(--bg-hover);
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-.file-upload-area:hover {
-  border-color: var(--primary-color);
-  background: var(--bg-surface);
-  transform: translateY(-2px);
-}
-
-.file-upload-area.drag-over {
-  border-color: var(--primary-color);
-  background: rgba(251, 146, 60, 0.1);
-}
-
-.upload-icon {
-  color: var(--primary-color);
-  font-size: 48px;
-  margin-bottom: var(--spacing-sm);
-}
-
-.upload-text {
-  color: var(--text-secondary);
-  font-weight: 500;
-}
-
-/* Pet type selection */
-.pet-type-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: var(--spacing-sm);
-  margin: var(--spacing-sm) 0;
-}
-
-.pet-type-option {
-  aspect-ratio: 1;
-  border: 2px solid var(--border-light);
-  border-radius: var(--radius-md);
-  background: var(--bg-surface);
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: var(--spacing-xs) !important;
-  transition: all 0.3s ease !important;
-  cursor: pointer;
-}
-
-.pet-type-option:hover {
-  border-color: var(--primary-color);
-  background: var(--bg-hover);
-  transform: translateY(-2px);
-}
-
-.pet-type-option.selected {
-  border-color: var(--primary-color);
-  background: rgba(251, 146, 60, 0.1);
-  color: var(--primary-color);
-}
-
-.pet-type-option mat-icon {
-  font-size: 32px !important;
-  width: 32px !important;
-  height: 32px !important;
-}
-
-.pet-type-option.dog mat-icon { color: var(--dog-color); }
-.pet-type-option.cat mat-icon { color: var(--cat-color); }
-.pet-type-option.bird mat-icon { color: var(--bird-color); }
-.pet-type-option.other mat-icon { color: var(--other-color); }
-
-/* Photo Section Styles */
 .photo-section {
-  margin-bottom: var(--spacing-md);
-  padding: var(--spacing-md);
-  background: var(--bg-hover);
-  border-radius: var(--radius-md);
-  border-left: 4px solid var(--primary-color);
+  display: flex;
+  flex-direction: column;
+  gap: var(--q-space-2);
 }
 
 .photo-preview {
-  margin-top: var(--spacing-md);
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--q-space-2);
+  padding-bottom: var(--q-space-2);
 }
 
 .preview-container {
   position: relative;
-  display: inline-block;
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  box-shadow: var(--shadow-card);
+  width: 112px;
+  height: 112px;
 }
 
 .preview-image {
-  width: 160px;
-  height: 160px;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  border-radius: var(--radius-md);
-  transition: all 0.3s ease;
-}
-
-.preview-image:hover {
-  transform: scale(1.05);
+  border-radius: var(--q-organic-1);
+  border: 2px solid var(--q-border);
 }
 
 .remove-photo-btn {
   position: absolute;
-  top: 4px;
-  right: 4px;
-  background: rgba(239, 68, 68, 0.9) !important;
-  color: white !important;
-  width: 28px !important;
-  height: 28px !important;
-  min-width: 28px !important;
-  border-radius: 50% !important;
-  backdrop-filter: blur(10px);
-  transition: all 0.3s ease !important;
-}
-
-.remove-photo-btn:hover {
-  background: rgba(239, 68, 68, 1) !important;
-  transform: scale(1.1) !important;
+  top: -10px;
+  right: -10px;
+  background: var(--q-surface) !important;
+  border: 1px solid var(--q-border) !important;
+  width: 32px !important;
+  height: 32px !important;
 }
 
 .remove-photo-btn mat-icon {
-  font-size: 16px !important;
-  width: 16px !important;
-  height: 16px !important;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: var(--q-error);
 }
 
 .preview-label {
-  margin-top: var(--spacing-xs);
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-  font-weight: 500;
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--q-text-3);
 }
 
-/* Photo URL field styling */
-::ng-deep .photo-section .mat-mdc-form-field .mat-mdc-text-field-wrapper {
-  background: var(--bg-surface) !important;
-}
-
-::ng-deep .photo-section .mat-mdc-form-field-hint {
-  color: var(--text-muted) !important;
-  font-size: 0.8rem !important;
-}
-
-::ng-deep .photo-section .mat-mdc-form-field .mat-mdc-form-field-icon-suffix {
-  color: var(--primary-color) !important;
-}
-
-/* Mobile responsive */
-@media (max-width: 768px) {
-  .form-row {
-    flex-direction: column;
-  }
-  
-  .pet-type-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  mat-dialog-content {
-    padding: var(--spacing-sm) !important;
-  }
-  
-  mat-dialog-actions {
-    padding: var(--spacing-sm) !important;
-  }
-  
-  .preview-image {
-    width: 120px;
-    height: 120px;
-  }
-  
-  .photo-section {
-    padding: var(--spacing-sm);
-  }
+mat-dialog-actions {
+  padding: var(--q-space-3) var(--q-space-5) var(--q-space-4);
+  gap: var(--q-space-2);
 }

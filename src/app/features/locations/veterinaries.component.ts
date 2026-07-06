@@ -171,7 +171,7 @@ import {
   styles: [`
     .veterinaries-container {
       min-height: 100vh;
-      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+      background: linear-gradient(135deg, var(--q-bg) 0%, var(--q-surface-2) 100%);
     }
 
     .veterinaries-header {
@@ -183,8 +183,8 @@ import {
       background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(20px);
       border-radius: 16px;
-      box-shadow: var(--shadow-card);
-      border: 1px solid var(--border-light);
+      box-shadow: var(--q-shadow-md);
+      border: 1px solid var(--q-border);
       position: relative;
       overflow: hidden;
       animation: fadeInUp 0.6s ease-out;
@@ -281,7 +281,7 @@ import {
 
     .results-count {
       font-size: 0.9rem;
-      color: var(--text-secondary);
+      color: var(--q-text-2);
       font-weight: 500;
     }
 
@@ -341,13 +341,13 @@ import {
       background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(20px);
       border-radius: 16px;
-      box-shadow: var(--shadow-card);
-      border: 1px solid var(--border-light);
+      box-shadow: var(--q-shadow-md);
+      border: 1px solid var(--q-border);
     }
 
     .results-header h2 {
       margin: 0;
-      color: var(--text-primary);
+      color: var(--q-ink);
       font-weight: 600;
     }
 
@@ -355,7 +355,7 @@ import {
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      color: var(--text-secondary);
+      color: var(--q-text-2);
       font-size: 0.9rem;
     }
 
@@ -363,7 +363,7 @@ import {
       font-size: 18px;
       height: 18px;
       width: 18px;
-      color: var(--primary-color);
+      color: var(--q-green-600);
     }
 
     .loading-container {
@@ -374,13 +374,13 @@ import {
       background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(20px);
       border-radius: 16px;
-      box-shadow: var(--shadow-card);
-      border: 1px solid var(--border-light);
+      box-shadow: var(--q-shadow-md);
+      border: 1px solid var(--q-border);
     }
 
     .loading-container p {
       margin-top: 1rem;
-      color: var(--text-secondary);
+      color: var(--q-text-2);
     }
 
     .no-results {
@@ -395,8 +395,8 @@ import {
       backdrop-filter: blur(20px);
       padding: 3rem;
       border-radius: 16px;
-      box-shadow: var(--shadow-card);
-      border: 1px solid var(--border-light);
+      box-shadow: var(--q-shadow-md);
+      border: 1px solid var(--q-border);
       max-width: 400px;
     }
 
@@ -404,17 +404,17 @@ import {
       font-size: 64px;
       height: 64px;
       width: 64px;
-      color: var(--text-muted);
+      color: var(--q-text-3);
       margin-bottom: 1rem;
     }
 
     .no-results-content h3 {
       margin: 0 0 1rem 0;
-      color: var(--text-primary);
+      color: var(--q-ink);
     }
 
     .no-results-content p {
-      color: var(--text-secondary);
+      color: var(--q-text-2);
       margin-bottom: 1rem;
       line-height: 1.5;
     }
@@ -437,8 +437,8 @@ import {
       backdrop-filter: blur(20px);
       padding: 3rem;
       border-radius: 16px;
-      box-shadow: var(--shadow-card);
-      border: 1px solid var(--border-light);
+      box-shadow: var(--q-shadow-md);
+      border: 1px solid var(--q-border);
       max-width: 800px;
     }
 
@@ -446,18 +446,18 @@ import {
       font-size: 80px;
       height: 80px;
       width: 80px;
-      color: var(--primary-color);
+      color: var(--q-green-600);
       margin-bottom: 1.5rem;
     }
 
     .welcome-content h2 {
       margin: 0 0 1rem 0;
-      color: var(--text-primary);
+      color: var(--q-ink);
       font-weight: 600;
     }
 
     .welcome-content > p {
-      color: var(--text-secondary);
+      color: var(--q-text-2);
       margin-bottom: 2rem;
       line-height: 1.6;
     }
@@ -474,23 +474,23 @@ import {
       border-radius: 12px;
       text-align: center;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      background: var(--bg-surface);
-      border: 1px solid var(--border-light);
+      background: var(--q-surface);
+      border: 1px solid var(--q-border);
     }
 
     .info-card:hover {
       transform: translateY(-4px);
-      box-shadow: var(--shadow-hover);
+      box-shadow: var(--q-shadow-md);
     }
 
     .info-card.emergency {
-      background: linear-gradient(135deg, var(--bg-surface) 0%, rgba(255, 235, 238, 0.8) 100%);
-      border: 1px solid var(--accent-color);
+      background: linear-gradient(135deg, var(--q-surface) 0%, rgba(255, 235, 238, 0.8) 100%);
+      border: 1px solid var(--q-ipe-500);
     }
 
     .info-card.surgery {
-      background: linear-gradient(135deg, var(--bg-surface) 0%, rgba(232, 245, 233, 0.8) 100%);
-      border: 1px solid var(--primary-color);
+      background: linear-gradient(135deg, var(--q-surface) 0%, rgba(232, 245, 233, 0.8) 100%);
+      border: 1px solid var(--q-green-600);
     }
 
     .info-card.laboratory {
@@ -499,13 +499,13 @@ import {
     }
 
     .info-card.laboratory {
-      background: linear-gradient(135deg, var(--bg-surface) 0%, rgba(227, 242, 253, 0.8) 100%);
-      border: 1px solid var(--secondary-color);
+      background: linear-gradient(135deg, var(--q-surface) 0%, rgba(227, 242, 253, 0.8) 100%);
+      border: 1px solid var(--q-info);
     }
 
     .info-card.specialty {
-      background: linear-gradient(135deg, var(--bg-surface) 0%, rgba(243, 229, 245, 0.8) 100%);
-      border: 1px solid var(--accent-dark);
+      background: linear-gradient(135deg, var(--q-surface) 0%, rgba(243, 229, 245, 0.8) 100%);
+      border: 1px solid var(--q-ipe-600);
     }
 
     .info-card mat-icon {
@@ -515,20 +515,20 @@ import {
       margin-bottom: 1rem;
     }
 
-    .info-card.emergency mat-icon { color: var(--accent-color); }
-    .info-card.surgery mat-icon { color: var(--primary-color); }
-    .info-card.laboratory mat-icon { color: var(--secondary-color); }
-    .info-card.specialty mat-icon { color: var(--accent-dark); }
+    .info-card.emergency mat-icon { color: var(--q-ipe-500); }
+    .info-card.surgery mat-icon { color: var(--q-green-600); }
+    .info-card.laboratory mat-icon { color: var(--q-info); }
+    .info-card.specialty mat-icon { color: var(--q-ipe-600); }
 
     .info-card h4 {
       margin: 0 0 0.5rem 0;
-      color: var(--text-primary);
+      color: var(--q-ink);
       font-weight: 600;
     }
 
     .info-card p {
       margin: 0;
-      color: var(--text-secondary);
+      color: var(--q-text-2);
       font-size: 0.9rem;
       line-height: 1.4;
     }
@@ -538,14 +538,14 @@ import {
       gap: 1rem;
       padding: 1.5rem;
       background: rgba(255, 249, 196, 0.8);
-      border: 1px solid var(--warning-color);
+      border: 1px solid var(--q-warning);
       border-radius: 12px;
       text-align: left;
       backdrop-filter: blur(10px);
     }
 
     .emergency-notice mat-icon {
-      color: var(--warning-color);
+      color: var(--q-warning);
       flex-shrink: 0;
       margin-top: 0.25rem;
     }
@@ -556,7 +556,7 @@ import {
 
     .emergency-notice p {
       margin: 0.5rem 0 0 0;
-      color: var(--text-secondary);
+      color: var(--q-text-2);
       font-size: 0.9rem;
       line-height: 1.4;
     }

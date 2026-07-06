@@ -1,17 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { map } from 'rxjs/operators';
+import { PageHeaderComponent } from '../../shared/components/ui/page-header.component';
+import { EmptyStateComponent } from '../../shared/components/ui/empty-state.component';
+import { SkeletonComponent } from '../../shared/components/ui/skeleton.component';
+import { ConfirmDialogComponent } from '../../shared/components/ui/confirm-dialog.component';
 import { EventService } from '../../core/services/event.service';
 import { EventStateService } from '../../core/services/event-state.service';
 import { DateTimeService } from '../../core/services/datetime.service';
@@ -24,25 +24,24 @@ import { EventFormComponent } from './event-form.component';
   standalone: true,
   imports: [
     CommonModule,
-    MatCardModule,
     MatButtonModule,
     MatIconModule,
-    MatTableModule,
     MatPaginatorModule,
     MatDialogModule,
-    MatChipsModule,
     MatTooltipModule,
-    MatProgressSpinnerModule
+    PageHeaderComponent,
+    EmptyStateComponent,
+    SkeletonComponent
   ],
   templateUrl: './events.component.html',
   styleUrls: ['./events.component.css']
 })
 export class EventsComponent implements OnInit {
   events: EventSummary[] = [];
+  eventGroups: { label: string; isToday: boolean; events: EventSummary[] }[] = [];
   totalItems = 0;
   currentPage = 0;
   pageSize = 10;
-  displayedColumns: string[] = ['type', 'description', 'dateStart', 'status', 'actions'];
   petId: number | null = null;
   petName: string = '';
   petNamesMap: { [key: number]: string } = {};
@@ -65,12 +64,10 @@ export class EventsComponent implements OnInit {
       const id = params.get('petId');
       if (id) {
         this.petId = +id;
-        this.displayedColumns = ['type', 'description', 'dateStart', 'status', 'actions'];
         this.loadPetName();
         this.loadEventsByPet();
       } else {
         this.petName = '';
-        this.displayedColumns = ['type', 'pet', 'description', 'dateStart', 'status', 'actions'];
         this.loadPetsMap();
         this.loadAllEvents();
       }
@@ -115,6 +112,7 @@ export class EventsComponent implements OnInit {
     this.eventService.getAll(this.currentPage, this.pageSize).subscribe({
       next: (page: EventsPage) => {
         this.events = this.sortEventsByDate(page.items);
+        this.buildGroups();
         this.totalItems = page.total;
         this.isLoading = false;
       },
@@ -148,6 +146,7 @@ export class EventsComponent implements OnInit {
       ).subscribe({
         next: (summaries: EventSummary[]) => {
           this.events = this.sortEventsByDate(summaries);
+          this.buildGroups();
           this.totalItems = summaries.length;
           this.isLoading = false;
         },
@@ -209,24 +208,34 @@ export class EventsComponent implements OnInit {
   }
 
   deleteEvent(event: EventSummary): void {
-    if (confirm(`Tem certeza que deseja excluir este evento?`)) {
+    const confirmRef = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Remover este cuidado?',
+        message: `"${event.description || this.getEventTypeName(event.type)}" sai da agenda. Essa ação não pode ser desfeita.`,
+        confirmLabel: 'Remover',
+        danger: true
+      }
+    });
+
+    confirmRef.afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
       this.eventService.delete(event.id).subscribe({
         next: () => {
           this.eventStateService.notifyEventUpdated();
-          this.snackBar.open('Evento excluído com sucesso!', 'Fechar', { 
+          this.snackBar.open('Cuidado removido da agenda.', 'Fechar', {
             duration: 3000,
             panelClass: ['success-snackbar']
           });
           this.petId ? this.loadEventsByPet() : this.loadAllEvents();
         },
-        error: (err) => {
-          this.snackBar.open('Erro ao excluir evento.', 'Fechar', { 
+        error: () => {
+          this.snackBar.open('Erro ao remover o cuidado.', 'Fechar', {
             duration: 3000,
             panelClass: ['error-snackbar']
           });
         }
       });
-    }
+    });
   }
 
   toggleEventStatus(event: EventSummary): void {
@@ -296,13 +305,51 @@ export class EventsComponent implements OnInit {
     return icons[type] || 'event';
   }
 
-  getEventChipClass(type: EventType): string {
-    return `event-chip-${type.toLowerCase()}`;
-  }
-
   formatDate(dateString: string): string {
     if (!dateString) return 'N/A';
     return this.dateTimeService.formatDateTimeForDisplay(dateString); // FIX: usar serviço centralizado
+  }
+
+  formatTime(dateString: string): string {
+    const date = this.dateTimeService.parseAPIDate(dateString);
+    if (!date) return 'N/A';
+    return date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  /** Agrupa os eventos (já ordenados) por dia, com rótulos relativos. */
+  private buildGroups(): void {
+    const groups: { label: string; isToday: boolean; events: EventSummary[] }[] = [];
+    let lastLabel = '';
+
+    for (const event of this.events) {
+      const { label, isToday } = this.dayLabel(event.dateStart);
+      if (label !== lastLabel) {
+        groups.push({ label, isToday, events: [] });
+        lastLabel = label;
+      }
+      groups[groups.length - 1].events.push(event);
+    }
+
+    this.eventGroups = groups;
+  }
+
+  private dayLabel(dateString: string): { label: string; isToday: boolean } {
+    const date = this.dateTimeService.parseAPIDate(dateString) || new Date(dateString);
+    const now = new Date();
+    const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const diffDays = Math.round(
+      (startOfDay(date).getTime() - startOfDay(now).getTime()) / 86400000
+    );
+
+    if (diffDays === 0) return { label: 'Hoje', isToday: true };
+    if (diffDays === 1) return { label: 'Amanhã', isToday: false };
+    if (diffDays === -1) return { label: 'Ontem', isToday: false };
+
+    const label = date.toLocaleDateString('pt-BR', {
+      weekday: 'long', day: '2-digit', month: 'short',
+      year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
+    });
+    return { label: label.charAt(0).toUpperCase() + label.slice(1), isToday: false };
   }
 
   getEventStatus(dateStart: string, status: string): string {

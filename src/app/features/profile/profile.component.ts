@@ -235,9 +235,9 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
       height: 32px;
     }
 
-    .pets-icon { color: var(--primary-color); }
-    .events-icon { color: var(--secondary-color); }
-    .calendar-icon { color: var(--accent-color); }
+    .pets-icon { color: var(--q-green-600); }
+    .events-icon { color: var(--q-info); }
+    .calendar-icon { color: var(--q-ipe-500); }
 
     .stat-info {
       display: flex;
