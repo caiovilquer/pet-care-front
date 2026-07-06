@@ -50,7 +50,7 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
     { label: 'Serviços', type: 'service', span: 2 },
     { label: '', type: 'empty', span: 2 },
     { label: 'Lembretes', type: 'vaccine', span: 1 },
-    { label: 'Diário', type: 'diary', span: 1 }
+    { label: 'Banho', type: 'service', span: 1 }
   ];
 
   readonly lifePoints: LifePoint[] = [
