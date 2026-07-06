@@ -176,6 +176,15 @@ img { max-width: 100%; }
   background: var(--q-green-100);
 }
 
+/* Autofill do Chrome sem o fundo azul padrão */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px var(--q-surface) inset;
+  -webkit-text-fill-color: var(--q-ink);
+  caret-color: var(--q-ink);
+}
+
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {

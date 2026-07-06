@@ -755,7 +755,7 @@ import { of } from 'rxjs';
     }
 
     .day-hours.open .day-time {
-      color: var(--success-color);
+      color: var(--q-success);
     }
 
     .day-hours.closed .day-time {

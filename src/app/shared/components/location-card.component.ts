@@ -44,7 +44,7 @@ import { LocationService } from '../../core/services/location.service';
         </div>
         
         <div class="location-info">
-          <h3 class="location-name">{{ location.name }}</h3>
+          <h3 class="location-name" [title]="location.name">{{ location.name }}</h3>
           <div class="location-type">
             <mat-icon>{{ getTypeIcon() }}</mat-icon>
             {{ getTypeLabel() }}
@@ -68,7 +68,7 @@ import { LocationService } from '../../core/services/location.service';
       <mat-card-content>
         <div class="address">
           <mat-icon>location_on</mat-icon>
-          <span>{{ location.address }}, {{ location.neighborhood }}</span>
+          <span>{{ location.address }}</span>
         </div>
 
         <div class="contact-info" *ngIf="location.phone">
@@ -91,7 +91,7 @@ import { LocationService } from '../../core/services/location.service';
         </div>
 
         <!-- Serviços específicos para Petshop -->
-        <div class="features" *ngIf="isPetshop(location)">
+        <div class="features" *ngIf="isPetshop(location) && hasPetshopFeatures(location)">
           <h4>Recursos:</h4>
           <div class="feature-list">
             <span class="feature" *ngIf="location.hasGrooming">
@@ -110,7 +110,7 @@ import { LocationService } from '../../core/services/location.service';
         </div>
 
         <!-- Serviços específicos para Veterinário -->
-        <div class="features" *ngIf="isVeterinary(location)">
+        <div class="features" *ngIf="isVeterinary(location) && hasVeterinaryFeatures(location)">
           <h4>Recursos:</h4>
           <div class="feature-list">
             <span class="feature" *ngIf="location.hasEmergency">
@@ -123,7 +123,7 @@ import { LocationService } from '../../core/services/location.service';
               <mat-icon>local_hospital</mat-icon> Cirurgia
             </span>
             <span class="feature" *ngIf="location.hasRadiology">
-              <mat-icon>X-ray</mat-icon> Radiologia
+              <mat-icon>healing</mat-icon> Radiologia
             </span>
           </div>
         </div>
@@ -160,25 +160,29 @@ import { LocationService } from '../../core/services/location.service';
     </mat-card>
   `,
   styles: [`
+    :host {
+      display: block;
+      height: 100%;
+    }
+
     .location-card {
-      margin-bottom: 1.5rem;
-      transition: all 0.3s ease;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      transition: box-shadow 0.15s ease;
       border-radius: var(--q-radius-md);
       overflow: hidden;
     }
 
+    .location-card mat-card-content {
+      flex: 1;
+    }
+
     .location-card:hover {
-      transform: translateY(-2px);
       box-shadow: var(--q-shadow-md);
     }
 
-    .location-card.open {
-      border-left: 4px solid var(--success-color);
-    }
 
-    .location-card.closed {
-      border-left: 4px solid #B3402F;
-    }
 
     .card-header {
       display: flex;
@@ -211,13 +215,12 @@ import { LocationService } from '../../core/services/location.service';
     .placeholder-image {
       width: 100%;
       height: 100%;
-      background: linear-gradient(135deg, #FBF8F0 0%, var(--q-border) 100%);
+      background: var(--q-surface-3);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       color: var(--q-text-2);
-      border: 2px dashed #ccc;
     }
 
     .placeholder-image mat-icon {
@@ -250,11 +253,11 @@ import { LocationService } from '../../core/services/location.service';
     }
 
     .status-badge.open {
-      background: rgba(76, 175, 80, 0.9);
+      background: rgba(46, 125, 82, 0.92);
     }
 
     .status-badge.closed {
-      background: rgba(244, 67, 54, 0.9);
+      background: rgba(179, 64, 47, 0.92);
     }
 
     .status-badge mat-icon {
@@ -270,8 +273,13 @@ import { LocationService } from '../../core/services/location.service';
     .location-name {
       margin: 0 0 0.5rem 0;
       color: var(--q-ink);
-      font-size: 1.25rem;
+      font-size: 1.15rem;
       font-weight: 600;
+      line-height: 1.3;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
 
     .location-type {
@@ -410,19 +418,19 @@ import { LocationService } from '../../core/services/location.service';
       padding: 0.75rem;
       background: var(--q-surface-2);
       border-radius: var(--q-radius-sm);
-      border-left: 4px solid #ddd;
+      border-left: 4px solid var(--q-border-2);
     }
 
     .today-hours.open {
-      background: var(--success-bg);
-      border-left-color: var(--success-color);
-      color: var(--success-color);
+      background: var(--q-success-bg);
+      border-left-color: var(--q-success);
+      color: var(--q-success);
     }
 
     .today-hours.closed {
-      background: var(--q-ev-breed-bg);
-      border-left-color: #B3402F;
-      color: #8F3326;
+      background: var(--q-error-bg);
+      border-left-color: var(--q-error);
+      color: var(--q-error);
     }
 
     .hours-info {
@@ -459,6 +467,7 @@ import { LocationService } from '../../core/services/location.service';
     }
 
     mat-card-actions {
+      margin-top: auto;
       padding: 1rem;
       display: flex;
       gap: 0.5rem;
@@ -515,6 +524,16 @@ export class LocationCardComponent {
 
   isPetshop(location: Location): location is Petshop {
     return location.type === 'petshop';
+  }
+
+  hasPetshopFeatures(location: Petshop): boolean {
+    return !!(location.hasGrooming || location.hasDaycare
+      || location.hasHotel || location.hasVaccination);
+  }
+
+  hasVeterinaryFeatures(location: Veterinary): boolean {
+    return !!(location.hasEmergency || location.hasLaboratory
+      || location.hasSurgery || location.hasRadiology);
   }
 
   isVeterinary(location: Location): location is Veterinary {
