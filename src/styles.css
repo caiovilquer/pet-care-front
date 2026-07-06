@@ -327,6 +327,57 @@ input:-webkit-autofill:focus {
   width: 100%;
 }
 
+/* Campos de formulário — cantos e foco na linguagem Quintal */
+.mat-mdc-form-field .mdc-notched-outline__leading {
+  border-radius: var(--q-radius-sm) 0 0 var(--q-radius-sm);
+}
+
+.mat-mdc-form-field .mdc-notched-outline__trailing {
+  border-radius: 0 var(--q-radius-sm) var(--q-radius-sm) 0;
+}
+
+.mat-mdc-form-field-icon-prefix,
+.mat-mdc-form-field-icon-suffix {
+  color: var(--q-text-3);
+}
+
+.mat-mdc-form-field-hint {
+  color: var(--q-text-3);
+}
+
+/* Painéis flutuantes (select, autocomplete) — mesma linguagem dos menus */
+.mat-mdc-select-panel,
+.mat-mdc-autocomplete-panel {
+  border-radius: var(--q-radius-md) !important;
+  border: 1px solid var(--q-border);
+  box-shadow: var(--q-shadow-lg) !important;
+}
+
+.mat-mdc-option.mdc-list-item--selected:not(.mdc-list-item--disabled) {
+  color: var(--q-green-600) !important;
+}
+
+/* Datepicker */
+.mat-datepicker-content {
+  border-radius: var(--q-radius-md) !important;
+  border: 1px solid var(--q-border);
+  box-shadow: var(--q-shadow-lg) !important;
+}
+
+.mat-calendar-body-selected {
+  background-color: var(--q-green-600) !important;
+  color: var(--q-surface) !important;
+}
+
+.mat-calendar-body-today:not(.mat-calendar-body-selected) {
+  border-color: var(--q-green-600) !important;
+}
+
+/* Checkbox */
+.mdc-checkbox__background {
+  border-radius: 4px !important;
+}
+
 /* Paginator discreto */
 .mat-mdc-paginator {
   background: transparent;

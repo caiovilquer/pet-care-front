@@ -74,8 +74,8 @@
 
 <mat-dialog-actions align="end">
   <button mat-button (click)="onCancel()">Cancelar</button>
-  <button mat-raised-button color="primary" 
-          [disabled]="petForm.invalid || isLoading" 
+  <button mat-flat-button
+          [disabled]="petForm.invalid || isLoading"
           (click)="onSubmit()">
     {{isLoading ? 'Salvando...' : (isEdit ? 'Salvar' : 'Adicionar')}}
   </button>

@@ -90,8 +90,8 @@
 
 <mat-dialog-actions align="end">
   <button mat-button (click)="onCancel()">Cancelar</button>
-  <button mat-raised-button color="primary" 
-          [disabled]="eventForm.invalid || isLoading" 
+  <button mat-flat-button
+          [disabled]="eventForm.invalid || isLoading"
           (click)="onSubmit()">
     {{isLoading ? 'Salvando...' : (isEdit ? 'Salvar' : 'Adicionar')}}
   </button>

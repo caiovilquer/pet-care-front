@@ -53,7 +53,7 @@ import { PasswordResetService } from '../../core/services/password-reset.service
             <div *ngIf="invalidToken" class="error-container">
               <mat-icon class="error-icon">error_outline</mat-icon>
               <p>O link de redefinição de senha é inválido ou já expirou.</p>
-              <button mat-raised-button color="primary" routerLink="/auth/forgot-password">
+              <button mat-flat-button routerLink="/auth/forgot-password">
                 Solicitar novo link
               </button>
             </div>
@@ -119,8 +119,7 @@ import { PasswordResetService } from '../../core/services/password-reset.service
               </mat-form-field>
 
               <button
-                mat-raised-button
-                color="primary"
+                mat-flat-button
                 type="submit"
                 class="auth-button full-width"
                 [disabled]="resetForm.invalid || isLoading"

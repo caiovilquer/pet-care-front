@@ -62,8 +62,7 @@ import { PasswordResetService } from '../../core/services/password-reset.service
               
 
               <button
-                mat-raised-button
-                color="primary"
+                mat-flat-button
                 type="submit"
                 class="auth-button full-width"
                 [disabled]="forgotForm.invalid || isLoading"
