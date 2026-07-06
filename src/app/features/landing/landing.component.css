@@ -2,7 +2,6 @@
 
 :host {
   display: block;
-  overflow-x: hidden;
   background: var(--q-bg);
   /* "registro noturno" — usado só em E5/E8, deliberadamente fixo (não inverte com o tema) */
   --landing-night: #14231D;
@@ -12,13 +11,129 @@
 
 .landing {
   position: relative;
+  /* clip corta overflow horizontal sem criar scroll container (hidden força overflow-y: auto) */
+  overflow-x: clip;
+}
+
+/* ---------- topbar fixa — tema + entrar sempre acessíveis ---------- */
+.landing-topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  padding: calc(env(safe-area-inset-top, 0px) + var(--q-space-3)) var(--q-space-6) var(--q-space-3);
+  pointer-events: none;
+  transition: background 0.25s ease, box-shadow 0.25s ease, backdrop-filter 0.25s ease;
+}
+
+.landing-topbar.is-scrolled {
+  background: color-mix(in srgb, var(--q-bg) 82%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 1px 0 var(--q-border);
+}
+
+.topbar-nav {
+  pointer-events: auto;
+  max-width: 1240px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--q-space-4);
+}
+
+.topbar-enter {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--q-text-2);
+  text-decoration: none;
+  padding: 8px 4px;
+  border-radius: var(--q-radius-sm);
+  transition: color 0.15s ease;
+}
+
+.topbar-enter:hover { color: var(--q-green-600); }
+
+.topbar-enter:focus-visible {
+  outline: 2px solid var(--q-green-600);
+  outline-offset: 2px;
+}
+
+.theme-segment {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 3px;
+  border-radius: var(--q-radius-pill);
+  background: color-mix(in srgb, var(--q-surface) 88%, transparent);
+  border: 1px solid var(--q-border);
+  box-shadow: var(--q-shadow-sm);
+}
+
+.landing-topbar.is-scrolled .theme-segment {
+  background: var(--q-surface);
+}
+
+.theme-segment-btn {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border: none;
+  background: transparent;
+  border-radius: var(--q-radius-pill);
+  font-family: var(--q-font-body);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--q-text-3);
+  cursor: pointer;
+  transition: color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.theme-segment-btn:hover:not(.active) { color: var(--q-text-2); }
+
+.theme-segment-btn.active {
+  color: var(--q-ink);
+}
+
+.theme-segment-btn:focus-visible {
+  outline: 2px solid var(--q-green-600);
+  outline-offset: 2px;
+}
+
+.theme-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.theme-segment-indicator {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: calc(50% - 3px);
+  height: calc(100% - 6px);
+  border-radius: var(--q-radius-pill);
+  background: var(--q-surface-2);
+  box-shadow: var(--q-shadow-sm);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+.theme-segment-indicator.dark {
+  transform: translateX(100%);
 }
 
 /* ---------- reveal on scroll ---------- */
 .u-reveal {
   opacity: 0;
   transform: translateY(18px);
-  transition: opacity 0.9s ease, transform 0.9s ease;
+  transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
 .u-reveal.is-visible {
@@ -26,15 +141,20 @@
   transform: none;
 }
 
-/* ---------- logo theme swap (E1 sits on the light --q-bg surface) ---------- */
+/* ---------- logo theme swap (E1 sits on the light --q-bg surface) ----------
+   :root vive fora do template do componente — o Angular anexa o atributo de
+   encapsulamento ([_ngcontent-xxx]) exigindo que o MESMO elemento seja :root
+   E tenha esse atributo, o que <html> nunca tem. Isso silenciosamente nunca
+   batia. :host-context() é o mecanismo correto para checar um atributo num
+   ancestral fora do componente. */
 .logo-dark { display: none; }
 
-:root[data-theme="dark"] .logo-light { display: none; }
-:root[data-theme="dark"] .logo-dark { display: block; }
+:host-context([data-theme="dark"]) .logo-light { display: none; }
+:host-context([data-theme="dark"]) .logo-dark { display: block; }
 
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .logo-light { display: none; }
-  :root:not([data-theme="light"]) .logo-dark { display: block; }
+  :host-context(html:not([data-theme="light"])) .logo-light { display: none; }
+  :host-context(html:not([data-theme="light"])) .logo-dark { display: block; }
 }
 
 /* ---------- organic mask variants (brand signature, same as rp-pet-avatar) ---------- */
@@ -73,22 +193,10 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: var(--q-space-8) var(--q-space-6);
+  padding: calc(env(safe-area-inset-top, 0px) + var(--q-space-8)) var(--q-space-6) var(--q-space-8);
   max-width: 1240px;
   margin: 0 auto;
 }
-
-.enter-link {
-  position: absolute;
-  top: var(--q-space-6);
-  right: var(--q-space-6);
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--q-text-2);
-  text-decoration: none;
-}
-
-.enter-link:hover { color: var(--q-green-600); }
 
 .e1-logo {
   width: min(46vw, 360px);
@@ -532,6 +640,11 @@
    Responsivo — mobile
    ============================================================ */
 @media (max-width: 960px) {
+  .landing-topbar {
+    padding-left: var(--q-space-4);
+    padding-right: var(--q-space-4);
+  }
+
   .e2,
   .e7 {
     grid-template-columns: 1fr;
@@ -563,6 +676,22 @@
 }
 
 @media (max-width: 640px) {
+  .theme-label { display: none; }
+
+  .theme-segment-btn {
+    padding: 8px 10px;
+  }
+
+  .topbar-nav { gap: var(--q-space-3); }
+
   .azulejos { grid-template-columns: repeat(3, 1fr); grid-auto-rows: 76px; }
   .azulejo.span-2 { grid-column: span 2; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-topbar,
+  .theme-segment-indicator,
+  .theme-segment-btn {
+    transition: none;
+  }
 }

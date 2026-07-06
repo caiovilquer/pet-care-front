@@ -2,6 +2,7 @@ import {
   AfterViewInit,
   Component,
   ElementRef,
+  HostListener,
   OnDestroy,
   OnInit,
   QueryList,
@@ -34,6 +35,7 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChildren('revealEl') private revealEls!: QueryList<ElementRef<HTMLElement>>;
 
   isDark = false;
+  topbarScrolled = false;
   currentYear = new Date().getFullYear();
 
   readonly tiles: Tile[] = [
@@ -59,6 +61,7 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit(): void {
     this.isDark = this.resolveIsDark();
+    this.topbarScrolled = typeof window !== 'undefined' && window.scrollY > 12;
   }
 
   ngAfterViewInit(): void {
@@ -86,15 +89,25 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.observer?.disconnect();
   }
 
-  toggleTheme(): void {
-    const next = this.isDark ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', next);
+  @HostListener('window:scroll')
+  onWindowScroll(): void {
+    this.topbarScrolled = window.scrollY > 12;
+  }
+
+  setTheme(mode: 'light' | 'dark'): void {
+    if ((mode === 'dark') === this.isDark) return;
+
+    document.documentElement.setAttribute('data-theme', mode);
     try {
-      localStorage.setItem('rp-theme', next);
+      localStorage.setItem('rp-theme', mode);
     } catch {
       /* localStorage indisponível */
     }
-    this.isDark = next === 'dark';
+    this.isDark = mode === 'dark';
+  }
+
+  toggleTheme(): void {
+    this.setTheme(this.isDark ? 'light' : 'dark');
   }
 
   private resolveIsDark(): boolean {

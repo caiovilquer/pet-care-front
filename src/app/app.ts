@@ -8,7 +8,7 @@ import { RouterOutlet } from '@angular/router';
   styles: [`
     :host {
       display: block;
-      height: 100vh;
+      min-height: 100vh;
     }
   `]
 })
