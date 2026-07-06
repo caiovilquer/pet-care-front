@@ -109,10 +109,15 @@ mat-paginator {
   }
 
   .ev-tx {
-    flex-basis: 60%;
+    flex: 1 1 auto;
+    min-width: 0;
   }
 
   .ev-actions {
-    margin-left: auto;
+    flex: 1 1 100%;
+    justify-content: flex-end;
+    margin-left: 0;
+    padding-top: var(--q-space-2);
+    border-top: 1px solid var(--q-border);
   }
 }
