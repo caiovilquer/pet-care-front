@@ -318,6 +318,7 @@
 
 .momento-right { align-self: flex-start; text-align: left; }
 .momento-left { align-self: flex-end; text-align: right; }
+.momento .q-ev-chip { align-self: flex-start; }
 .momento-left .q-ev-chip { align-self: flex-end; }
 
 .momento-frase {
@@ -701,7 +702,7 @@
     text-align: center;
     max-width: 36ch;
   }
-  .momento-left .q-ev-chip { align-self: center; }
+  .momento .q-ev-chip { align-self: center; }
 
   .timeline-line { left: 20px; }
   .timeline-point { width: 100%; max-width: none; padding-left: 44px; text-align: left !important; }
