@@ -66,7 +66,7 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
     },
     {
       age: 'anos grisalhos',
-      text: 'Anos de cuidado, num só lugar — pronto para mostrar ao veterinário.',
+      text: 'Anos de cuidado, num só lugar, pronto para mostrar ao veterinário.',
       side: 'right',
       image: 'images/idosa.webp',
       imageAlt: 'Cachorra idosa com óculos, pronta para a consulta',
