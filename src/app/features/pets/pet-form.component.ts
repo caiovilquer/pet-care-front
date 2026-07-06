@@ -8,7 +8,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { ToastService } from '../../core/services/toast.service';
 import { CommonModule } from '@angular/common';
 import { PetService } from '../../core/services/pet.service';
 import { DateTimeService } from '../../core/services/datetime.service';
@@ -42,7 +42,7 @@ export class PetFormComponent implements OnInit {
     private fb: FormBuilder,
     private petService: PetService,
     private dateTimeService: DateTimeService,
-    private snackBar: MatSnackBar,
+    private toast: ToastService,
     public dialogRef: MatDialogRef<PetFormComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
@@ -125,12 +125,12 @@ export class PetFormComponent implements OnInit {
   }
 
   private handleSuccess(message: string): void {
-    this.snackBar.open(message, 'Fechar', { duration: 3000 });
+    this.toast.success(message);
     this.dialogRef.close(true);
   }
 
   private handleError(error: any, message: string): void {
-    this.snackBar.open(message, 'Fechar', { duration: 3000 });
+    this.toast.error(message);
   
   }
 
@@ -160,9 +160,7 @@ export class PetFormComponent implements OnInit {
 
   onPhotoError(): void {
     this.photoPreviewUrl = null;
-    this.snackBar.open('Não foi possível carregar a imagem. Verifique a URL.', 'Fechar', { 
-      duration: 3000 
-    });
+    this.toast.warning('Não foi possível carregar a imagem. Verifique a URL.');
   }
 
   removePhoto(): void {

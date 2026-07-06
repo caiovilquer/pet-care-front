@@ -6,7 +6,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { ToastService } from '../../core/services/toast.service';
 import { CommonModule } from '@angular/common';
 import { EventService } from '../../core/services/event.service';
 import { PetService } from '../../core/services/pet.service';
@@ -50,7 +50,7 @@ export class EventFormComponent implements OnInit {
     private petService: PetService,
     private eventStateService: EventStateService,
     private dateTimeService: DateTimeService,
-    private snackBar: MatSnackBar,
+    private toast: ToastService,
     public dialogRef: MatDialogRef<EventFormComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
@@ -151,7 +151,7 @@ export class EventFormComponent implements OnInit {
     // Garantir que temos uma data válida
     if (!formValue.dateStart) {
       console.error('Data não fornecida');
-      this.snackBar.open('Data é obrigatória', 'Fechar', { duration: 3000 });
+      this.toast.warning('Data é obrigatória');
       this.isLoading = false;
       return;
     }
@@ -166,7 +166,7 @@ export class EventFormComponent implements OnInit {
     // Verificar se a data é válida
     if (isNaN(dateStart.getTime())) {
       console.error('Data inválida:', formValue.dateStart);
-      this.snackBar.open('Data inválida', 'Fechar', { duration: 3000 });
+      this.toast.warning('Data inválida');
       this.isLoading = false;
       return;
     }
@@ -179,7 +179,7 @@ export class EventFormComponent implements OnInit {
       
       if (isNaN(hoursNum) || isNaN(minutesNum)) {
         console.error('Hora inválida:', formValue.timeStart);
-        this.snackBar.open('Hora inválida', 'Fechar', { duration: 3000 });
+        this.toast.warning('Hora inválida');
         this.isLoading = false;
         return;
       }
@@ -239,7 +239,7 @@ export class EventFormComponent implements OnInit {
   }
 
   private handleSuccess(message: string): void {
-    this.snackBar.open(message, 'Fechar', { duration: 3000 });
+    this.toast.success(message);
     this.dialogRef.close(true);
   }
 
@@ -252,7 +252,7 @@ export class EventFormComponent implements OnInit {
       message: error.message,
       error: error.error
     });
-    this.snackBar.open(message, 'Fechar', { duration: 3000 });
+    this.toast.error(message);
   
   }
 

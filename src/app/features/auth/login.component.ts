@@ -7,7 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-login',
@@ -19,8 +19,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatIconModule,
-    MatSnackBarModule
+    MatIconModule
   ],
   templateUrl: './login.component.html',
   styleUrls: ['./auth-shared.css']
@@ -34,7 +33,7 @@ export class LoginComponent {
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router,
-    private snackBar: MatSnackBar
+    private toast: ToastService
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -52,10 +51,7 @@ export class LoginComponent {
 
     this.authService.login({ email, password }).subscribe({
       next: () => {
-        this.snackBar.open('✅ Login realizado com sucesso!', 'Fechar', { 
-          duration: 3000,
-          panelClass: ['success-snackbar']
-        });
+        this.toast.success('Login realizado com sucesso!');
         this.router.navigate(['/dashboard']);
       },
       error: (error) => {
@@ -72,10 +68,7 @@ export class LoginComponent {
           errorMessage = error.error.message;
         }
         
-        this.snackBar.open(`❌ ${errorMessage}`, 'Fechar', { 
-          duration: 4000,
-          panelClass: ['error-snackbar']
-        });
+        this.toast.error(errorMessage);
       },
       complete: () => {
         this.isLoading = false;

@@ -7,7 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { ToastService } from '../../core/services/toast.service';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { PasswordResetService } from '../../core/services/password-reset.service';
 
@@ -23,7 +23,6 @@ import { PasswordResetService } from '../../core/services/password-reset.service
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatSnackBarModule,
     MatProgressSpinnerModule
   ],
   template: `
@@ -157,7 +156,7 @@ export class ResetPasswordComponent implements OnInit {
     private passwordResetService: PasswordResetService,
     private route: ActivatedRoute,
     private router: Router,
-    private snackBar: MatSnackBar
+    private toast: ToastService
   ) {
     this.resetForm = this.fb.group({
       password: ['', [Validators.required, Validators.minLength(6)]],
@@ -207,14 +206,7 @@ export class ResetPasswordComponent implements OnInit {
     this.passwordResetService.resetPassword(this.token, password).subscribe({
       next: () => {
         this.isLoading = false;
-        this.snackBar.open(
-          'Senha redefinida com sucesso! Redirecionando para o login...',
-          'Fechar',
-          {
-            duration: 4000,
-            panelClass: ['success-snackbar']
-          }
-        );
+        this.toast.success('Senha redefinida com sucesso! Redirecionando para o login...');
         
         setTimeout(() => {
           this.router.navigate(['/auth/login']);
@@ -225,24 +217,13 @@ export class ResetPasswordComponent implements OnInit {
         console.error('Erro ao redefinir senha:', error);
         
         if (error.status === 400) {
-          this.snackBar.open(
+          this.toast.error(
             'Token inválido ou expirado. Solicite um novo link de redefinição.',
-            'Fechar',
-            {
-              duration: 5000,
-              panelClass: ['error-snackbar']
-            }
+            5000
           );
           this.invalidToken = true;
         } else {
-          this.snackBar.open(
-            'Erro ao redefinir senha. Tente novamente.',
-            'Fechar',
-            {
-              duration: 4000,
-              panelClass: ['error-snackbar']
-            }
-          );
+          this.toast.error('Erro ao redefinir senha. Tente novamente.');
         }
       }
     });

@@ -6,7 +6,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { ToastService } from '../../core/services/toast.service';
 import { forkJoin, Subscription } from 'rxjs';
 import { TutorService } from '../../core/services/tutor.service';
 import { EventService } from '../../core/services/event.service';
@@ -29,7 +29,6 @@ import { PetAvatarComponent } from '../../shared/components/ui/pet-avatar.compon
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatSnackBarModule,
     PageHeaderComponent,
     StatCardComponent,
     PetAvatarComponent
@@ -295,7 +294,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     private eventService: EventService,
     private eventStateService: EventStateService,
     private userStateService: UserStateService,
-    private snackBar: MatSnackBar
+    private toast: ToastService
   ) {
     this.profileForm = this.fb.group({
       firstName: ['', [Validators.required]],
@@ -351,7 +350,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
         }
       },
       error: () => {
-        this.snackBar.open('Erro ao carregar perfil', 'Fechar', { duration: 3000 });
+        this.toast.error('Erro ao carregar perfil');
       }
     });
   }
@@ -413,14 +412,14 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.tutorService.updateProfile(this.currentUser.id, this.profileForm.value).subscribe({
         next: (updatedUser) => {
           this.currentUser = updatedUser;
-          this.snackBar.open('Perfil atualizado com sucesso!', 'Fechar', { duration: 3000 });
+          this.toast.success('Perfil atualizado com sucesso!');
           this.isUpdating = false;
 
           // Notificar outros componentes sobre a atualização do perfil
           this.userStateService.notifyUserUpdated();
         },
         error: () => {
-          this.snackBar.open('Erro ao atualizar perfil', 'Fechar', { duration: 3000 });
+          this.toast.error('Erro ao atualizar perfil');
           this.isUpdating = false;
         }
       });

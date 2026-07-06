@@ -1,7 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
+import { ToastService } from '../../core/services/toast.service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -28,7 +28,6 @@ import {
   imports: [
     CommonModule,
     MatProgressSpinnerModule,
-    MatSnackBarModule,
     MatButtonModule,
     MatIconModule,
     MatToolbarModule,
@@ -387,7 +386,7 @@ export class VeterinariesComponent implements OnInit {
 
   constructor(
     private locationService: LocationService,
-    private snackBar: MatSnackBar,
+    private toast: ToastService,
     private dialog: MatDialog
   ) {}
 
@@ -415,23 +414,17 @@ export class VeterinariesComponent implements OnInit {
           this.searchResults.set(response);
           this.updateEmergencyCount();
           if (response.locations.length === 0) {
-            this.snackBar.open('Nenhum veterinário encontrado na região especificada', 'Fechar', {
-              duration: 5000
-            });
+            this.toast.info('Nenhum veterinário encontrado na região especificada', 5000);
           } else {
             const emergencyCount = this.emergencyCount();
             if (emergencyCount > 0) {
-              this.snackBar.open(`${emergencyCount} veterinários com emergência 24h encontrados`, 'Fechar', {
-                duration: 5000
-              });
+              this.toast.info(`${emergencyCount} veterinários com emergência 24h encontrados`, 5000);
             }
           }
         },
         error: (error: any) => {
           
-          this.snackBar.open('Erro ao buscar veterinários. Tente novamente.', 'Fechar', {
-            duration: 5000
-          });
+          this.toast.error('Erro ao buscar veterinários. Tente novamente.', 5000);
         }
       });
   }
@@ -448,9 +441,7 @@ export class VeterinariesComponent implements OnInit {
       total: emergencyOnly.length
     });
 
-    this.snackBar.open('Mostrando apenas veterinários com emergência 24h', 'Fechar', {
-      duration: 3000
-    });
+    this.toast.info('Mostrando apenas veterinários com emergência 24h');
   }
 
   onExpandSearch() {

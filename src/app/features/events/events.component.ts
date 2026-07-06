@@ -5,7 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { ToastService } from '../../core/services/toast.service';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { map } from 'rxjs/operators';
 import { PageHeaderComponent } from '../../shared/components/ui/page-header.component';
@@ -54,7 +54,7 @@ export class EventsComponent implements OnInit {
     private dateTimeService: DateTimeService,
     private petService: PetService,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar,
+    private toast: ToastService,
     private route: ActivatedRoute,
     private router: Router
   ) { }
@@ -121,10 +121,7 @@ export class EventsComponent implements OnInit {
         // Definir dados padrão em caso de erro
         this.events = [];
         this.totalItems = 0;
-        this.snackBar.open('Erro ao carregar eventos. Tente novamente mais tarde.', 'Fechar', { 
-          duration: 3000,
-          panelClass: ['error-snackbar']
-        });
+        this.toast.error('Erro ao carregar eventos. Tente novamente mais tarde.');
         this.isLoading = false;
       }
     });
@@ -155,10 +152,7 @@ export class EventsComponent implements OnInit {
           // Definir dados padrão em caso de erro
           this.events = [];
           this.totalItems = 0;
-          this.snackBar.open(`Erro ao carregar eventos do pet. Tente novamente mais tarde.`, 'Fechar', { 
-            duration: 3000,
-            panelClass: ['error-snackbar']
-          });
+          this.toast.error('Erro ao carregar eventos do pet. Tente novamente mais tarde.');
           this.isLoading = false;
         }
       });
@@ -222,17 +216,11 @@ export class EventsComponent implements OnInit {
       this.eventService.delete(event.id).subscribe({
         next: () => {
           this.eventStateService.notifyEventUpdated();
-          this.snackBar.open('Cuidado removido da agenda.', 'Fechar', {
-            duration: 3000,
-            panelClass: ['success-snackbar']
-          });
+          this.toast.success('Cuidado removido da agenda.');
           this.petId ? this.loadEventsByPet() : this.loadAllEvents();
         },
         error: () => {
-          this.snackBar.open('Erro ao remover o cuidado.', 'Fechar', {
-            duration: 3000,
-            panelClass: ['error-snackbar']
-          });
+          this.toast.error('Erro ao remover o cuidado.');
         }
       });
     });
@@ -245,13 +233,8 @@ export class EventsComponent implements OnInit {
     
     this.eventService.toggleDone(event.id).subscribe({
       next: (response) => {
-        this.snackBar.open(
-          `Evento ${event.status === 'DONE' ? 'concluído' : 'reativado'} com sucesso!`, 
-          'Fechar', 
-          { 
-            duration: 3000,
-            panelClass: ['success-snackbar']
-          }
+        this.toast.success(
+          `Evento ${event.status === 'DONE' ? 'concluído' : 'reativado'} com sucesso!`
         );
         
         // Recarregar os dados para garantir sincronização
@@ -270,10 +253,7 @@ export class EventsComponent implements OnInit {
         // Reverter o estado em caso de erro
         event.status = originalState;
         
-        this.snackBar.open('Erro ao atualizar status do evento.', 'Fechar', { 
-          duration: 3000,
-          panelClass: ['error-snackbar']
-        });
+        this.toast.error('Erro ao atualizar status do evento.');
       }
     });
   }

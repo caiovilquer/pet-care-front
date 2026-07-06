@@ -6,7 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { ToastService } from '../../core/services/toast.service';
 import { PetService } from '../../core/services/pet.service';
 import { PetSummary, PetsPage } from '../../core/models/pet.model';
 import { PetFormComponent } from './pet-form.component';
@@ -45,7 +45,7 @@ export class PetsComponent implements OnInit {
   constructor(
     private petService: PetService,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar
+    private toast: ToastService
   ) { }
 
   ngOnInit(): void {
@@ -64,10 +64,7 @@ export class PetsComponent implements OnInit {
         console.error('Erro ao carregar pets:', err);
         this.pets = [];
         this.totalItems = 0;
-        this.snackBar.open('Erro ao carregar pets. Tente novamente mais tarde.', 'Fechar', {
-          duration: 3000,
-          panelClass: ['error-snackbar']
-        });
+        this.toast.error('Erro ao carregar pets. Tente novamente mais tarde.');
         this.isLoading = false;
       }
     });
@@ -118,17 +115,11 @@ export class PetsComponent implements OnInit {
       if (!confirmed) return;
       this.petService.delete(pet.id).subscribe({
         next: () => {
-          this.snackBar.open(`${pet.name} foi removido.`, 'Fechar', {
-            duration: 3000,
-            panelClass: ['success-snackbar']
-          });
+          this.toast.success(`${pet.name} foi removido.`);
           this.loadPets();
         },
         error: () => {
-          this.snackBar.open('Erro ao remover pet.', 'Fechar', {
-            duration: 3000,
-            panelClass: ['error-snackbar']
-          });
+          this.toast.error('Erro ao remover pet.');
         }
       });
     });

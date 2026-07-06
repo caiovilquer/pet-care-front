@@ -7,7 +7,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
-import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
+import { ToastService } from '../../core/services/toast.service';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Inject } from '@angular/core';
 import { Location, Petshop, Veterinary } from '../../core/models/location.model';
@@ -29,7 +29,6 @@ import { of } from 'rxjs';
     MatTabsModule,
     MatCardModule,
     MatDividerModule,
-    MatSnackBarModule,
     MatProgressSpinnerModule
   ],
   template: `
@@ -1097,7 +1096,7 @@ export class LocationDetailComponent implements OnInit, OnDestroy {
     private dialogRef: MatDialogRef<LocationDetailComponent>,
     private locationService: LocationService,
     private googleMapsService: GoogleMapsService,
-    private snackBar: MatSnackBar
+    private toast: ToastService
   ) {
     this.location = data.location;
   }
@@ -1145,9 +1144,7 @@ export class LocationDetailComponent implements OnInit, OnDestroy {
             businessStatus: '',
             openingHours: null
           };
-          this.snackBar.open('Algumas informações não estão disponíveis', 'Fechar', {
-            duration: 3000
-          });
+          this.toast.warning('Algumas informações não estão disponíveis');
         }
       },
       error: (error) => {
@@ -1168,9 +1165,7 @@ export class LocationDetailComponent implements OnInit, OnDestroy {
           businessStatus: '',
           openingHours: null
         };
-        this.snackBar.open('Erro ao carregar detalhes do estabelecimento', 'Fechar', {
-          duration: 3000
-        });
+        this.toast.error('Erro ao carregar detalhes do estabelecimento');
       }
     });
   }
@@ -1192,9 +1187,7 @@ export class LocationDetailComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Erro ao carregar reviews:', error);
-        this.snackBar.open('Erro ao carregar avaliações', 'Fechar', {
-          duration: 3000
-        });
+        this.toast.error('Erro ao carregar avaliações');
       }
     });
   }
@@ -1376,9 +1369,7 @@ export class LocationDetailComponent implements OnInit, OnDestroy {
       // Fallback: copiar para área de transferência
       const shareText = `${this.location.name}\n${this.location.address}\n${window.location.href}`;
       navigator.clipboard.writeText(shareText).then(() => {
-        this.snackBar.open('Informações copiadas para área de transferência', 'Fechar', {
-          duration: 3000
-        });
+        this.toast.success('Informações copiadas para área de transferência');
       });
     }
   }

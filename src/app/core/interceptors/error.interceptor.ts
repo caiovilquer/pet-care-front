@@ -1,11 +1,11 @@
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { ToastService } from '../services/toast.service';
 import { Router } from '@angular/router';
 
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
-  const snackBar = inject(MatSnackBar);
+  const toast = inject(ToastService);
   const router = inject(Router);
 
   return next(req).pipe(
@@ -44,10 +44,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 
       // Exibir erro apenas se não for uma requisição de autenticação
       if (!req.url.includes('/auth/login') && !req.url.includes('/auth/signup')) {
-        snackBar.open(errorMessage, 'Fechar', {
-          duration: 5000,
-          panelClass: ['error-snackbar']
-        });
+        toast.error(errorMessage, 5000);
       }
 
       return throwError(() => error);

@@ -1,7 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
+import { ToastService } from '../../core/services/toast.service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -27,7 +27,6 @@ import {
   imports: [
     CommonModule,
     MatProgressSpinnerModule,
-    MatSnackBarModule,
     MatButtonModule,
     MatIconModule,
     MatToolbarModule,
@@ -285,7 +284,7 @@ export class PetshopsComponent implements OnInit {
 
   constructor(
     private locationService: LocationService,
-    private snackBar: MatSnackBar,
+    private toast: ToastService,
     private dialog: MatDialog
   ) {}
 
@@ -305,16 +304,12 @@ export class PetshopsComponent implements OnInit {
         next: (response) => {
           this.searchResults.set(response);
           if (response.locations.length === 0) {
-            this.snackBar.open('Nenhum petshop encontrado na região especificada', 'Fechar', {
-              duration: 5000
-            });
+            this.toast.info('Nenhum petshop encontrado na região especificada', 5000);
           }
         },
         error: (error) => {
           
-          this.snackBar.open('Erro ao buscar petshops. Tente novamente.', 'Fechar', {
-            duration: 5000
-          });
+          this.toast.error('Erro ao buscar petshops. Tente novamente.', 5000);
         }
       });
   }

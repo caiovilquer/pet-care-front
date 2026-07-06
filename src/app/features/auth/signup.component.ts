@@ -7,7 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-signup',
@@ -19,8 +19,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatIconModule,
-    MatSnackBarModule
+    MatIconModule
   ],
   template: `
     <div class="auth-container">
@@ -142,7 +141,7 @@ export class SignupComponent {
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router,
-    private snackBar: MatSnackBar
+    private toast: ToastService
   ) {
     this.signupForm = this.fb.group({
       firstName: ['', [Validators.required]],
@@ -172,10 +171,7 @@ export class SignupComponent {
 
       this.authService.signup(formData).subscribe({
         next: () => {
-          this.snackBar.open('✅ Conta criada com sucesso! Faça login para continuar.', 'Fechar', {
-            duration: 5000,
-            panelClass: ['success-snackbar']
-          });
+          this.toast.success('Conta criada com sucesso! Faça login para continuar.', 5000);
           this.router.navigate(['/auth/login']);
         },
         error: (error) => {
@@ -200,10 +196,7 @@ export class SignupComponent {
             errorMessage = 'Erro interno do servidor. Tente novamente em alguns minutos.';
           }
           
-          this.snackBar.open(`❌ ${errorMessage}`, 'Fechar', {
-            duration: 6000,
-            panelClass: ['error-snackbar']
-          });
+          this.toast.error(errorMessage, 6000);
           this.isLoading = false;
         },
         complete: () => {

@@ -389,33 +389,36 @@ input:-webkit-autofill:focus {
   font-family: var(--q-font-body);
 }
 
-/* Snackbars — mantêm as classes usadas pelos services */
-.mat-mdc-snack-bar-container {
-  --mdc-snackbar-container-shape: var(--q-radius-md);
+/* Toasts (rp-toast-panel) */
+.rp-toast-panel.mat-mdc-snack-bar-container {
+  --mdc-snackbar-container-color: transparent;
+  --mdc-snackbar-supporting-text-color: inherit;
+  --mat-snack-bar-button-color: inherit;
+  margin-bottom: calc(16px + env(safe-area-inset-bottom));
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
-.success-snackbar {
-  --mdc-snackbar-container-color: #2E7D52;
-  --mdc-snackbar-supporting-text-color: #FFFFFF;
-  --mat-snack-bar-button-color: #D9F0E2;
+@media (max-width: 959px) {
+  .rp-toast-panel.mat-mdc-snack-bar-container {
+    margin-bottom: calc(88px + env(safe-area-inset-bottom));
+  }
 }
 
-.error-snackbar {
-  --mdc-snackbar-container-color: #B3402F;
-  --mdc-snackbar-supporting-text-color: #FFFFFF;
-  --mat-snack-bar-button-color: #FBDCD6;
+.rp-toast-panel .mdc-snackbar__surface {
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  min-width: 0;
 }
 
-.warning-snackbar {
-  --mdc-snackbar-container-color: #9A6B10;
-  --mdc-snackbar-supporting-text-color: #FFFFFF;
-  --mat-snack-bar-button-color: #F8EFD8;
+.rp-toast-panel .mat-mdc-snack-bar-label {
+  padding: 0;
 }
 
-.info-snackbar {
-  --mdc-snackbar-container-color: #38709B;
-  --mdc-snackbar-supporting-text-color: #FFFFFF;
-  --mat-snack-bar-button-color: #E3EDF5;
+.rp-toast-panel .mat-mdc-snack-bar-actions {
+  display: none;
 }
 
 /* Dialog fullscreen em telas pequenas (detalhe de localização) */

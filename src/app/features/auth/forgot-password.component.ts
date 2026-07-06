@@ -7,7 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { ToastService } from '../../core/services/toast.service';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { PasswordResetService } from '../../core/services/password-reset.service';
 
@@ -23,7 +23,6 @@ import { PasswordResetService } from '../../core/services/password-reset.service
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatSnackBarModule,
     MatProgressSpinnerModule
   ],
   template: `
@@ -93,7 +92,7 @@ export class ForgotPasswordComponent {
     private fb: FormBuilder,
     private passwordResetService: PasswordResetService,
     private router: Router,
-    private snackBar: MatSnackBar
+    private toast: ToastService
   ) {
     this.forgotForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]]
@@ -112,13 +111,9 @@ export class ForgotPasswordComponent {
     this.passwordResetService.requestPasswordReset(email).subscribe({
       next: () => {
         this.isLoading = false;
-        this.snackBar.open(
+        this.toast.success(
           'Se este email estiver cadastrado, você receberá instruções para redefinir sua senha.',
-          'Fechar',
-          {
-            duration: 6000,
-            panelClass: ['success-snackbar']
-          }
+          6000
         );
         // Redireciona para login após 3 segundos
         setTimeout(() => {
@@ -128,13 +123,9 @@ export class ForgotPasswordComponent {
       error: (error) => {
         this.isLoading = false;
         console.error('Erro ao solicitar reset de senha:', error);
-        this.snackBar.open(
+        this.toast.success(
           'Se este email estiver cadastrado, você receberá instruções para redefinir sua senha.',
-          'Fechar',
-          {
-            duration: 6000,
-            panelClass: ['success-snackbar']
-          }
+          6000
         );
         // Por segurança, mostramos a mesma mensagem mesmo em caso de erro
       }

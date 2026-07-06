@@ -7,7 +7,7 @@ import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { PetAvatarComponent } from '../../shared/components/ui/pet-avatar.component';
 import { EmptyStateComponent } from '../../shared/components/ui/empty-state.component';
 import { SkeletonComponent } from '../../shared/components/ui/skeleton.component';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { ToastService } from '../../core/services/toast.service';
 import { PetService } from '../../core/services/pet.service';
 import { EventService } from '../../core/services/event.service';
 import { DateTimeService } from '../../core/services/datetime.service';
@@ -43,7 +43,7 @@ export class PetDetailComponent implements OnInit {
     private eventService: EventService,
     private dateTimeService: DateTimeService,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar
+    private toast: ToastService
   ) { }
 
   ngOnInit(): void {
@@ -115,7 +115,7 @@ export class PetDetailComponent implements OnInit {
         if (result) {
           // Recarregar os dados do pet após edição
           this.loadPetDetails();
-          this.snackBar.open('Pet atualizado com sucesso!', 'Fechar', { duration: 3000 });
+          this.toast.success('Pet atualizado com sucesso!');
         }
       });
     }
