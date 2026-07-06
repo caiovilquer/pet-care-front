@@ -4,8 +4,8 @@
 @use '@angular/material' as mat;
 
 html {
-  // light-dark() resolve conforme o color-scheme ativo
-  color-scheme: light dark;
+  // Padrão claro; escuro só com data-theme="dark" (persistido em localStorage)
+  color-scheme: light;
 
   @include mat.theme((
     color: (

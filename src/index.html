@@ -18,7 +18,7 @@
         var t = localStorage.getItem('rp-theme');
         if (t === 'light' || t === 'dark') {
           document.documentElement.setAttribute('data-theme', t);
-        } else if (location.pathname === '/' || location.pathname === '') {
+        } else {
           document.documentElement.setAttribute('data-theme', 'light');
         }
       } catch (e) { /* localStorage indisponível */ }

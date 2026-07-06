@@ -152,11 +152,6 @@
 :host-context([data-theme="dark"]) .logo-light { display: none; }
 :host-context([data-theme="dark"]) .logo-dark { display: block; }
 
-@media (prefers-color-scheme: dark) {
-  :host-context(html:not([data-theme="light"])) .logo-light { display: none; }
-  :host-context(html:not([data-theme="light"])) .logo-dark { display: block; }
-}
-
 /* ---------- organic mask variants (brand signature, same as rp-pet-avatar) ---------- */
 .organic-1 { border-radius: var(--q-organic-1); }
 .organic-2 { border-radius: var(--q-organic-2); }
