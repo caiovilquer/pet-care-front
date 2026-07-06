@@ -1,5 +1,8 @@
-<h2 mat-dialog-title>{{isEdit ? 'Editar cuidado' : 'Adicionar cuidado'}}</h2>
-    
+<div class="form-header">
+  <p class="q-overline">Rotina de cuidados</p>
+  <h2 mat-dialog-title>{{isEdit ? 'Editar cuidado' : 'Adicionar cuidado'}}</h2>
+</div>
+
 <mat-dialog-content>
   <form [formGroup]="eventForm">
     <mat-form-field appearance="outline" class="full-width">
@@ -14,19 +17,20 @@
       </mat-error>
     </mat-form-field>
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Tipo de cuidado</mat-label>
-      <mat-select formControlName="type" required>
-        <mat-option value="VACCINE">Vacina</mat-option>
-        <mat-option value="MEDICINE">Medicamento</mat-option>
-        <mat-option value="DIARY">Diário</mat-option>
-        <mat-option value="BREED">Reprodução</mat-option>
-        <mat-option value="SERVICE">Serviço</mat-option>
-      </mat-select>
-      <mat-error *ngIf="eventForm.get('type')?.hasError('required')">
-        Tipo é obrigatório
-      </mat-error>
-    </mat-form-field>
+    <div class="type-field">
+      <label class="type-label">Tipo de cuidado</label>
+      <div class="type-picker">
+        @for (t of eventTypes; track t.value) {
+          <button type="button"
+                  class="type-chip tc-{{t.value.toLowerCase()}}"
+                  [class.selected]="eventForm.get('type')?.value === t.value"
+                  (click)="selectType(t.value)">
+            <mat-icon>{{t.icon}}</mat-icon>
+            {{t.label}}
+          </button>
+        }
+      </div>
+    </div>
 
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Descrição</mat-label>

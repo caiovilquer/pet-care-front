@@ -1,14 +1,25 @@
-<h2 mat-dialog-title>{{isEdit ? 'Editar Pet' : 'Adicionar Pet'}}</h2>
-    
+<div class="form-header">
+  <p class="q-overline">{{isEdit ? 'Editar cadastro' : 'Novo cadastro'}}</p>
+  <h2 mat-dialog-title>{{isEdit ? 'Editar pet' : 'Adicionar pet'}}</h2>
+</div>
+
 <mat-dialog-content>
   <form [formGroup]="petForm">
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Nome do Pet</mat-label>
-      <input matInput formControlName="name" required>
-      <mat-error *ngIf="petForm.get('name')?.hasError('required')">
-        Nome é obrigatório
-      </mat-error>
-    </mat-form-field>
+    <div class="identity-row">
+      <rp-pet-avatar [name]="petForm.get('name')?.value"
+                     [species]="petForm.get('species')?.value"
+                     [photoUrl]="photoPreviewUrl"
+                     size="lg">
+      </rp-pet-avatar>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Nome do pet</mat-label>
+        <input matInput formControlName="name" required>
+        <mat-error *ngIf="petForm.get('name')?.hasError('required')">
+          Nome é obrigatório
+        </mat-error>
+      </mat-form-field>
+    </div>
 
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Espécie</mat-label>
@@ -33,42 +44,27 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Data de Nascimento</mat-label>
+      <mat-label>Data de nascimento</mat-label>
       <input matInput [matDatepicker]="picker" formControlName="birthdate">
       <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
       <mat-datepicker #picker></mat-datepicker>
     </mat-form-field>
 
-    <div class="photo-section">
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>URL da Foto</mat-label>
-        <input matInput 
-               formControlName="photoUrl" 
-               placeholder="https://exemplo.com/foto-do-pet.jpg"
-               type="url">
-        <mat-icon matSuffix>photo_camera</mat-icon>
-        <mat-hint>Cole a URL de uma foto do seu pet</mat-hint>
-      </mat-form-field>
-
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>URL da foto</mat-label>
+      <input matInput
+             formControlName="photoUrl"
+             placeholder="https://exemplo.com/foto-do-pet.jpg"
+             type="url">
+      <mat-icon matSuffix>photo_camera</mat-icon>
       @if (photoPreviewUrl) {
-        <div class="photo-preview">
-          <div class="preview-container">
-            <img [src]="photoPreviewUrl" 
-                 (error)="onPhotoError()"
-                 class="preview-image"
-                 alt="Preview da foto do pet">
-            <button mat-icon-button 
-                    type="button"
-                    class="remove-photo-btn"
-                    (click)="removePhoto()"
-                    matTooltip="Remover foto">
-              <mat-icon>close</mat-icon>
-            </button>
-          </div>
-          <p class="preview-label">Preview da foto</p>
-        </div>
+        <button mat-icon-button matSuffix type="button"
+                (click)="removePhoto()" matTooltip="Remover foto">
+          <mat-icon>close</mat-icon>
+        </button>
       }
-    </div>
+      <mat-hint>Cole a URL de uma foto do seu pet — o preview aparece ao lado do nome</mat-hint>
+    </mat-form-field>
   </form>
 </mat-dialog-content>
 

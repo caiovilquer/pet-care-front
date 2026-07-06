@@ -1,8 +1,17 @@
+.form-header {
+  padding: var(--q-space-4) var(--q-space-5) 0;
+}
+
+.form-header .q-overline {
+  margin-bottom: var(--q-space-1);
+}
+
 h2[mat-dialog-title] {
   font-family: var(--q-font-display);
   font-weight: 600;
   letter-spacing: -0.01em;
-  padding-top: var(--q-space-4);
+  padding: 0;
+  margin: 0;
 }
 
 mat-dialog-content form {
@@ -16,55 +25,15 @@ mat-dialog-content form {
   width: 100%;
 }
 
-.photo-section {
+.identity-row {
   display: flex;
-  flex-direction: column;
-  gap: var(--q-space-2);
-}
-
-.photo-preview {
-  display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: var(--q-space-2);
-  padding-bottom: var(--q-space-2);
+  gap: var(--q-space-4);
+  margin-bottom: var(--q-space-2);
 }
 
-.preview-container {
-  position: relative;
-  width: 112px;
-  height: 112px;
-}
-
-.preview-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: var(--q-organic-1);
-  border: 2px solid var(--q-border);
-}
-
-.remove-photo-btn {
-  position: absolute;
-  top: -10px;
-  right: -10px;
-  background: var(--q-surface) !important;
-  border: 1px solid var(--q-border) !important;
-  width: 32px !important;
-  height: 32px !important;
-}
-
-.remove-photo-btn mat-icon {
-  font-size: 18px;
-  width: 18px;
-  height: 18px;
-  color: var(--q-error);
-}
-
-.preview-label {
-  margin: 0;
-  font-size: 0.75rem;
-  color: var(--q-text-3);
+.identity-row rp-pet-avatar {
+  flex-shrink: 0;
 }
 
 mat-dialog-actions {

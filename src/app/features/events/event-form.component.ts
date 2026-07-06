@@ -6,13 +6,14 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatIconModule } from '@angular/material/icon';
 import { ToastService } from '../../core/services/toast.service';
 import { CommonModule } from '@angular/common';
 import { EventService } from '../../core/services/event.service';
 import { PetService } from '../../core/services/pet.service';
 import { EventStateService } from '../../core/services/event-state.service';
 import { DateTimeService } from '../../core/services/datetime.service';
-import { EventCreateRequest, EventUpdateRequest, RecurrenceFrequency } from '../../core/models/event.model';
+import { EventCreateRequest, EventUpdateRequest, EventType, RecurrenceFrequency } from '../../core/models/event.model';
 import { PetSummary } from '../../core/models/pet.model';
 
 @Component({
@@ -26,7 +27,8 @@ import { PetSummary } from '../../core/models/pet.model';
     MatInputModule,
     MatButtonModule,
     MatSelectModule,
-    MatDatepickerModule
+    MatDatepickerModule,
+    MatIconModule
   ],
   templateUrl: './event-form.component.html',
   styleUrls: ['./event-form.component.css']
@@ -42,6 +44,14 @@ export class EventFormComponent implements OnInit {
     { value: 'WEEKLY', viewValue: 'Semanalmente' },
     { value: 'MONTHLY', viewValue: 'Mensalmente' },
     { value: 'YEARLY', viewValue: 'Anualmente' }
+  ];
+
+  eventTypes: { value: EventType; label: string; icon: string }[] = [
+    { value: 'VACCINE', label: 'Vacina', icon: 'vaccines' },
+    { value: 'MEDICINE', label: 'Remédio', icon: 'medication' },
+    { value: 'DIARY', label: 'Diário', icon: 'book' },
+    { value: 'BREED', label: 'Reprodução', icon: 'favorite' },
+    { value: 'SERVICE', label: 'Serviço', icon: 'content_cut' }
   ];
 
   constructor(
@@ -258,5 +268,11 @@ export class EventFormComponent implements OnInit {
 
   onCancel(): void {
     this.dialogRef.close();
+  }
+
+  selectType(value: EventType): void {
+    const control = this.eventForm.get('type');
+    control?.setValue(value);
+    control?.markAsTouched();
   }
 }

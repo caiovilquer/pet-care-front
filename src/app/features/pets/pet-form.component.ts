@@ -13,6 +13,7 @@ import { CommonModule } from '@angular/common';
 import { PetService } from '../../core/services/pet.service';
 import { DateTimeService } from '../../core/services/datetime.service';
 import { PetCreateRequest, PetUpdateRequest } from '../../core/models/pet.model';
+import { PetAvatarComponent } from '../../shared/components/ui/pet-avatar.component';
 
 @Component({
   selector: 'app-pet-form',
@@ -27,7 +28,8 @@ import { PetCreateRequest, PetUpdateRequest } from '../../core/models/pet.model'
     MatSelectModule,
     MatDatepickerModule,
     MatIconModule,
-    MatTooltipModule
+    MatTooltipModule,
+    PetAvatarComponent
   ],
   templateUrl: './pet-form.component.html',
   styleUrls: ['./pet-form.component.css']
@@ -156,11 +158,6 @@ export class PetFormComponent implements OnInit {
     } catch {
       return false;
     }
-  }
-
-  onPhotoError(): void {
-    this.photoPreviewUrl = null;
-    this.toast.warning('Não foi possível carregar a imagem. Verifique a URL.');
   }
 
   removePhoto(): void {

@@ -37,6 +37,11 @@ const TOAST_ICONS: Record<ToastType, string> = {
     </div>
   `,
   styles: [`
+    :host {
+      display: block;
+      background: transparent;
+    }
+
     .rp-toast {
       display: flex;
       align-items: flex-start;
