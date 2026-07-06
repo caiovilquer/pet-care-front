@@ -1,0 +1,160 @@
+<div class="landing">
+
+  <!-- ============ E1 — O Portão ============ -->
+  <section class="e1 u-reveal" #revealEl>
+    <a class="enter-link" routerLink="/auth/login">Entrar</a>
+
+    <img class="e1-logo logo-light" src="logo-completa.svg" alt="RotinaPet">
+    <img class="e1-logo logo-dark" src="logo-completa-reverso.svg" alt="RotinaPet">
+
+    <p class="manifesto">
+      A vida de um pet é feita de rotina.<br>
+      A rotina merece um lugar bonito.
+    </p>
+
+    <div class="e1-blob" aria-hidden="true"></div>
+  </section>
+
+  <div class="path-connector u-reveal" #revealEl aria-hidden="true">
+    <svg viewBox="0 0 60 140" class="path-svg"><path pathLength="100" d="M30 0 C 8 35, 52 70, 30 105 S 8 130, 30 140"/></svg>
+  </div>
+
+  <!-- ============ E2 — A Chegada ============ -->
+  <section class="e2">
+    <div class="e2-photo organic-1 u-reveal" #revealEl aria-hidden="true">
+      <span class="photo-mark"></span>
+    </div>
+    <div class="e2-text u-reveal" #revealEl>
+      <p class="q-overline">01 · a chegada</p>
+      <h2>Ela chegou pequena. Chegou com ela uma vida inteira de cuidados.</h2>
+      <p class="lede">
+        Vamos chamá-la de Pipoca. Uma vira-lata caramelo — como tantas que existem por aí —
+        que vai atravessar esta página do jeito que atravessa os dias: com rotina.
+      </p>
+    </div>
+
+    <div class="pegadas u-reveal" #revealEl aria-hidden="true">
+      <span></span><span></span><span></span><span></span><span></span>
+    </div>
+  </section>
+
+  <!-- ============ E3 — Um Dia no Quintal ============ -->
+  <section class="e3">
+    <p class="q-overline e3-overline u-reveal" #revealEl>02 · um dia no quintal</p>
+
+    <div class="momento momento-right u-reveal" #revealEl>
+      <p class="momento-frase">8h — meio comprimido, junto com a ração.</p>
+      <span class="q-ev-chip q-ev-medicine">Anti-inflamatório · hoje, 8h</span>
+    </div>
+
+    <div class="momento momento-left u-reveal" #revealEl>
+      <span class="q-ev-chip q-ev-service">Passeio no parque · 12h</span>
+      <p class="momento-frase">Meio-dia — a hora do passeio nunca muda, e a agenda lembra por ela.</p>
+    </div>
+
+    <div class="momento momento-right momento-foto u-reveal" #revealEl>
+      <div class="e3-photo organic-2" aria-hidden="true"><span class="photo-mark"></span></div>
+      <div class="momento-copy">
+        <p class="momento-frase">Tarde — a caderneta de vacina, sempre em dia.</p>
+        <span class="q-ev-chip q-ev-vaccine">V10 · aplicada</span>
+      </div>
+    </div>
+
+    <div class="momento momento-left u-reveal" #revealEl>
+      <span class="q-ev-chip q-ev-diary">Comeu pouco hoje</span>
+      <p class="momento-frase">Noite — um registro rápido no diário, antes de dormir.</p>
+    </div>
+
+    <p class="e3-pergunta u-reveal" #revealEl>E quando é muita coisa pra lembrar?</p>
+  </section>
+
+  <div class="path-connector flip u-reveal" #revealEl aria-hidden="true">
+    <svg viewBox="0 0 60 140" class="path-svg"><path pathLength="100" d="M30 0 C 52 35, 8 70, 30 105 S 52 130, 30 140"/></svg>
+  </div>
+
+  <!-- ============ E4 — O Painel de Azulejos ============ -->
+  <section class="e4">
+    <p class="q-overline u-reveal" #revealEl>03 · o quintal inteiro</p>
+
+    <div class="azulejos u-reveal" #revealEl>
+      @for (tile of tiles; track $index) {
+        <div
+          class="azulejo"
+          [class.span-2]="tile.span === 2"
+          [class.azulejo-empty]="tile.type === 'empty'"
+          [class.azulejo-rotated]="tile.rotated"
+          [ngClass]="'tile-' + tile.type"
+        >
+          @if (tile.label) {
+            <span>{{ tile.label }}</span>
+          }
+        </div>
+      }
+    </div>
+
+    <p class="e4-frase u-reveal" #revealEl>Cada canto da rotina, com o seu lugar na parede.</p>
+  </section>
+
+  <!-- ============ E5 — A Pausa ============ -->
+  <section class="e5 u-reveal" #revealEl>
+    <div class="e5-photo" aria-hidden="true"><span class="photo-mark"></span></div>
+    <p class="e5-frase">Cuidar também é descansar.</p>
+  </section>
+
+  <!-- ============ E6 — A Vida Inteira ============ -->
+  <section class="e6">
+    <p class="q-overline u-reveal" #revealEl>04 · a vida inteira</p>
+    <div class="timeline">
+      <div class="timeline-line" aria-hidden="true"></div>
+      @for (point of lifePoints; track point.age) {
+        <div class="timeline-point u-reveal" [class]="'side-' + point.side" #revealEl>
+          <span class="timeline-dot" aria-hidden="true"></span>
+          <p class="timeline-age">{{ point.age }}</p>
+          <p class="timeline-text">{{ point.text }}</p>
+        </div>
+      }
+    </div>
+  </section>
+
+  <div class="path-connector u-reveal" #revealEl aria-hidden="true">
+    <svg viewBox="0 0 60 140" class="path-svg"><path pathLength="100" d="M30 0 C 8 35, 52 70, 30 105 S 8 130, 30 140"/></svg>
+  </div>
+
+  <!-- ============ E7 — Além do Portão ============ -->
+  <section class="e7">
+    <div class="e7-text u-reveal" #revealEl>
+      <p class="q-overline">05 · além do portão</p>
+      <h2>O quintal se estende pelo bairro.</h2>
+      <p class="lede">Petshops e veterinários por perto, sempre que ela precisar.</p>
+      <a class="cep-hint" routerLink="/auth/signup">Criar conta e buscar por perto →</a>
+    </div>
+
+    <div class="bairro u-reveal" #revealEl aria-hidden="true">
+      <span class="quarteirao q-organic-a"></span>
+      <span class="quarteirao q-organic-b"></span>
+      <span class="quarteirao q-organic-c"></span>
+      <span class="ponto ponto-1"></span>
+      <span class="ponto ponto-2"></span>
+      <span class="ponto ponto-3"></span>
+    </div>
+  </section>
+
+  <!-- ============ E8 — O Convite ============ -->
+  <section class="e8 u-reveal" #revealEl>
+    <img class="e8-logo" src="logo-completa-reverso.svg" alt="RotinaPet">
+    <h2 class="e8-headline">A Pipoca é inventada. O seu pet não.</h2>
+    <div class="e8-ctas">
+      <a class="cta-primary" routerLink="/auth/signup">Criar conta</a>
+      <a class="cta-secondary" routerLink="/auth/login">Entrar</a>
+    </div>
+
+    <footer class="e8-footer">
+      <img class="footer-wordmark" src="logo-horizontal-reverso.svg" alt="RotinaPet">
+      <button class="theme-toggle" type="button" (click)="toggleTheme()">
+        {{ isDark ? 'Modo claro' : 'Modo escuro' }}
+      </button>
+      <span class="footer-legal">© {{ currentYear }} RotinaPet</span>
+    </footer>
+  </section>
+
+</div>

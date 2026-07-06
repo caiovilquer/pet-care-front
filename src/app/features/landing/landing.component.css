@@ -1,0 +1,568 @@
+/* RotinaPet — landing "O Caminho do Quintal" */
+
+:host {
+  display: block;
+  overflow-x: hidden;
+  background: var(--q-bg);
+  /* "registro noturno" — usado só em E5/E8, deliberadamente fixo (não inverte com o tema) */
+  --landing-night: #14231D;
+  --landing-night-deep: #0F1A15;
+  --landing-sand-fixed: #F6F2E8;
+}
+
+.landing {
+  position: relative;
+}
+
+/* ---------- reveal on scroll ---------- */
+.u-reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.9s ease, transform 0.9s ease;
+}
+
+.u-reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---------- logo theme swap (E1 sits on the light --q-bg surface) ---------- */
+.logo-dark { display: none; }
+
+:root[data-theme="dark"] .logo-light { display: none; }
+:root[data-theme="dark"] .logo-dark { display: block; }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .logo-light { display: none; }
+  :root:not([data-theme="light"]) .logo-dark { display: block; }
+}
+
+/* ---------- organic mask variants (brand signature, same as rp-pet-avatar) ---------- */
+.organic-1 { border-radius: var(--q-organic-1); }
+.organic-2 { border-radius: var(--q-organic-2); }
+.organic-3 { border-radius: var(--q-organic-3); }
+
+/* ---------- shared photo placeholder (duotone stand-in) ---------- */
+.photo-mark {
+  position: absolute;
+  inset: 0;
+  /* cores fixas (não invertem com o tema) — a "foto" deve continuar escura nos dois temas */
+  background:
+    radial-gradient(120% 90% at 25% 20%, color-mix(in srgb, #35705A 55%, transparent), transparent 60%),
+    linear-gradient(150deg, #265949, var(--landing-night-deep));
+}
+
+.photo-mark::after {
+  content: '';
+  position: absolute;
+  right: 12%;
+  bottom: 14%;
+  width: 34%;
+  height: 34%;
+  background: var(--landing-sand-fixed);
+  opacity: 0.14;
+  border-radius: var(--q-organic-3);
+}
+
+/* ============================================================
+   E1 — O Portão
+   ============================================================ */
+.e1 {
+  position: relative;
+  min-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: var(--q-space-8) var(--q-space-6);
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+.enter-link {
+  position: absolute;
+  top: var(--q-space-6);
+  right: var(--q-space-6);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--q-text-2);
+  text-decoration: none;
+}
+
+.enter-link:hover { color: var(--q-green-600); }
+
+.e1-logo {
+  width: min(46vw, 360px);
+  margin-bottom: var(--q-space-7);
+}
+
+.manifesto {
+  font-family: var(--q-font-display);
+  font-weight: 700;
+  font-size: clamp(2.25rem, 6vw, 5rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  max-width: 14ch;
+  color: var(--q-ink);
+}
+
+.e1-blob {
+  position: absolute;
+  right: -10%;
+  bottom: -20%;
+  width: 46vw;
+  height: 46vw;
+  max-width: 560px;
+  max-height: 560px;
+  background: var(--q-green-50);
+  border-radius: var(--q-organic-1);
+  z-index: -1;
+}
+
+/* ============================================================
+   O Caminho — conectores entre estações
+   ============================================================ */
+.path-connector {
+  display: flex;
+  justify-content: center;
+  margin: calc(var(--q-space-8) * -1) auto var(--q-space-4);
+  width: 60px;
+  height: 140px;
+}
+
+.path-connector.flip { transform: scaleX(-1); }
+
+.path-svg { width: 100%; height: 100%; overflow: visible; }
+
+.path-svg path {
+  fill: none;
+  stroke: var(--q-green-600);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  transition: stroke-dashoffset 1.6s ease;
+}
+
+.path-connector.is-visible .path-svg path { stroke-dashoffset: 0; }
+
+/* ============================================================
+   E2 — A Chegada
+   ============================================================ */
+.e2 {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: var(--q-space-8);
+  align-items: center;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: var(--q-space-7) var(--q-space-6) var(--q-space-8);
+  background: var(--q-green-50);
+}
+
+.e2-photo {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  margin-left: -6vw;
+}
+
+.e2-text { grid-column: 2; padding-right: var(--q-space-6); }
+
+.e2-text h2 { margin: var(--q-space-3) 0 var(--q-space-4); font-size: clamp(1.5rem, 2.6vw, 2.25rem); }
+
+.lede { color: var(--q-text-2); max-width: 42ch; }
+
+.pegadas {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: var(--q-space-5);
+  padding-top: var(--q-space-6);
+  justify-content: center;
+}
+
+.pegadas span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--q-green-500);
+  opacity: 0.3;
+}
+
+.pegadas.is-visible span {
+  animation: pegada-pop 0.5s ease forwards;
+}
+
+.pegadas.is-visible span:nth-child(1) { animation-delay: 0s; }
+.pegadas.is-visible span:nth-child(2) { animation-delay: 0.12s; }
+.pegadas.is-visible span:nth-child(3) { animation-delay: 0.24s; }
+.pegadas.is-visible span:nth-child(4) { animation-delay: 0.36s; }
+.pegadas.is-visible span:nth-child(5) { animation-delay: 0.48s; }
+
+@keyframes pegada-pop {
+  from { opacity: 0.3; transform: scale(0.6); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* ============================================================
+   E3 — Um Dia no Quintal
+   ============================================================ */
+.e3 {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: var(--q-space-8) var(--q-space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--q-space-8);
+}
+
+.e3-overline { align-self: center; }
+
+.momento {
+  display: flex;
+  flex-direction: column;
+  gap: var(--q-space-3);
+  max-width: 30ch;
+}
+
+.momento-right { align-self: flex-start; text-align: left; }
+.momento-left { align-self: flex-end; text-align: right; }
+.momento-left .q-ev-chip { align-self: flex-end; }
+
+.momento-frase {
+  font-family: var(--q-font-display);
+  font-size: clamp(1.15rem, 2vw, 1.5rem);
+  font-weight: 600;
+  color: var(--q-ink);
+}
+
+.momento-foto {
+  max-width: none;
+  align-self: center;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--q-space-6);
+  align-items: center;
+  width: 100%;
+}
+
+.e3-photo {
+  position: relative;
+  aspect-ratio: 5 / 4;
+  overflow: hidden;
+}
+
+.momento-copy { display: flex; flex-direction: column; gap: var(--q-space-3); }
+
+.e3-pergunta {
+  align-self: center;
+  font-family: var(--q-font-display);
+  font-weight: 700;
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  text-align: center;
+  color: var(--q-text-2);
+  margin-top: var(--q-space-4);
+}
+
+/* ============================================================
+   E4 — O Painel de Azulejos
+   ============================================================ */
+.e4 {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: var(--q-space-8) var(--q-space-6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--q-space-6);
+}
+
+.azulejos {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-auto-rows: 92px;
+  gap: 10px;
+  width: 100%;
+}
+
+.azulejo {
+  grid-column: span 1;
+  border-radius: var(--q-radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--q-font-display);
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-align: center;
+  padding: var(--q-space-2);
+}
+
+.azulejo.span-2 { grid-column: span 2; }
+.azulejo-rotated { transform: rotate(90deg) scale(0.62); }
+.azulejo-empty { background: transparent; }
+
+.tile-vaccine  { background: var(--q-ev-vaccine-bg);  color: var(--q-ev-vaccine); }
+.tile-medicine { background: var(--q-ev-medicine-bg); color: var(--q-ev-medicine); }
+.tile-diary    { background: var(--q-ev-diary-bg);    color: var(--q-ev-diary); }
+.tile-breed    { background: var(--q-ev-breed-bg);    color: var(--q-ev-breed); }
+.tile-service  { background: var(--q-ev-service-bg);  color: var(--q-ev-service); }
+
+.e4-frase {
+  font-family: var(--q-font-display);
+  font-weight: 600;
+  font-size: 1.15rem;
+  color: var(--q-text-2);
+}
+
+/* ============================================================
+   E5 — A Pausa
+   ============================================================ */
+.e5 {
+  position: relative;
+  min-height: 72vh;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: var(--q-space-8);
+  overflow: hidden;
+}
+
+.e5-photo { position: absolute; inset: 0; }
+
+.e5-frase {
+  position: relative;
+  font-family: var(--q-font-display);
+  font-weight: 600;
+  font-size: clamp(1.25rem, 2.4vw, 1.75rem);
+  color: var(--landing-sand-fixed);
+}
+
+/* ============================================================
+   E6 — A Vida Inteira
+   ============================================================ */
+.e6 {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: var(--q-space-8) var(--q-space-6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--q-space-7);
+}
+
+.timeline {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--q-space-8);
+}
+
+.timeline-line {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--q-border-2);
+  transform: translateX(-50%);
+}
+
+.timeline-point {
+  position: relative;
+  width: 40%;
+  max-width: 360px;
+}
+
+.timeline-point.side-left { align-self: flex-start; text-align: right; }
+.timeline-point.side-right { align-self: flex-end; text-align: left; }
+
+.timeline-dot {
+  position: absolute;
+  top: 6px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--q-ipe-500);
+}
+
+.timeline-point.side-left .timeline-dot { right: calc(-60% - 6px); }
+.timeline-point.side-right .timeline-dot { left: calc(-60% - 6px); }
+
+.timeline-age {
+  font-family: var(--q-font-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  color: var(--q-ipe-600);
+}
+
+.timeline-text { color: var(--q-text-2); margin-top: 4px; }
+
+/* ============================================================
+   E7 — Além do Portão
+   ============================================================ */
+.e7 {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: var(--q-space-8) var(--q-space-6);
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  gap: var(--q-space-8);
+  align-items: center;
+  background: var(--q-green-50);
+}
+
+.e7-text h2 { margin: var(--q-space-3) 0 var(--q-space-4); }
+
+.cep-hint {
+  display: inline-block;
+  margin-top: var(--q-space-5);
+  font-weight: 600;
+  color: var(--q-green-600);
+  text-decoration: none;
+  border-bottom: 1px solid var(--q-green-600);
+  padding-bottom: 2px;
+}
+
+.bairro {
+  position: relative;
+  aspect-ratio: 4 / 3;
+}
+
+.quarteirao {
+  position: absolute;
+  background: var(--q-green-100);
+}
+
+.q-organic-a { top: 4%; left: 8%; width: 42%; height: 46%; border-radius: var(--q-organic-1); }
+.q-organic-b { top: 30%; left: 46%; width: 46%; height: 40%; border-radius: var(--q-organic-2); }
+.q-organic-c { top: 58%; left: 10%; width: 34%; height: 36%; border-radius: var(--q-organic-3); }
+
+.ponto {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--q-ipe-500);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--q-ipe-500) 25%, transparent);
+}
+
+.ponto-1 { top: 22%; left: 26%; }
+.ponto-2 { top: 44%; left: 62%; }
+.ponto-3 { top: 70%; left: 24%; }
+
+/* ============================================================
+   E8 — O Convite
+   ============================================================ */
+/* E8 é o "anoitecer" da página — fundo e texto fixos, independentes do tema claro/escuro do site */
+.e8 {
+  background: var(--landing-night);
+  color: var(--landing-sand-fixed);
+  padding: var(--q-space-8) var(--q-space-6) var(--q-space-6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--q-space-6);
+}
+
+.e8-logo { width: min(40vw, 220px); }
+
+.e8-headline {
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  color: var(--landing-sand-fixed);
+  max-width: 20ch;
+}
+
+.e8-ctas {
+  display: flex;
+  gap: var(--q-space-4);
+  align-items: center;
+}
+
+.cta-primary {
+  background: #DFA32E;
+  color: #20261F;
+  font-weight: 700;
+  padding: 12px 28px;
+  border-radius: var(--q-radius-pill);
+  text-decoration: none;
+}
+
+.cta-secondary {
+  color: var(--landing-sand-fixed);
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--landing-sand-fixed) 50%, transparent);
+  padding-bottom: 2px;
+}
+
+.e8-footer {
+  margin-top: var(--q-space-7);
+  padding-top: var(--q-space-5);
+  border-top: 1px solid color-mix(in srgb, var(--landing-sand-fixed) 15%, transparent);
+  width: 100%;
+  max-width: 1240px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--q-space-4);
+  flex-wrap: wrap;
+}
+
+.footer-wordmark { height: 20px; width: auto; }
+
+.theme-toggle {
+  background: none;
+  border: 1px solid color-mix(in srgb, var(--landing-sand-fixed) 30%, transparent);
+  color: var(--landing-sand-fixed);
+  border-radius: var(--q-radius-pill);
+  padding: 6px 16px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.footer-legal { font-size: 0.8125rem; color: color-mix(in srgb, var(--landing-sand-fixed) 65%, transparent); }
+
+/* ============================================================
+   Responsivo — mobile
+   ============================================================ */
+@media (max-width: 960px) {
+  .e2,
+  .e7 {
+    grid-template-columns: 1fr;
+  }
+
+  .e2-photo { margin-left: 0; }
+  .e2-text { grid-column: 1; padding-right: 0; }
+
+  .momento-foto { grid-template-columns: 1fr; }
+
+  .momento-right,
+  .momento-left {
+    align-self: center;
+    text-align: center;
+    max-width: 36ch;
+  }
+  .momento-left .q-ev-chip { align-self: center; }
+
+  .timeline-line { left: 20px; }
+  .timeline-point { width: 100%; max-width: none; padding-left: 44px; text-align: left !important; }
+  .timeline-point.side-left,
+  .timeline-point.side-right { align-self: stretch; }
+  .timeline-point.side-left .timeline-dot,
+  .timeline-point.side-right .timeline-dot { left: 14px; right: auto; }
+
+  .path-connector { width: 40px; height: 90px; margin-top: calc(var(--q-space-6) * -1); }
+
+  .e8-footer { justify-content: center; text-align: center; }
+}
+
+@media (max-width: 640px) {
+  .azulejos { grid-template-columns: repeat(3, 1fr); grid-auto-rows: 76px; }
+  .azulejo.span-2 { grid-column: span 2; }
+}

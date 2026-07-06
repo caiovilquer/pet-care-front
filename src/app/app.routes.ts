@@ -1,8 +1,14 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { homeGuard } from './core/guards/home.guard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
+  {
+    path: '',
+    pathMatch: 'full',
+    canActivate: [homeGuard],
+    loadComponent: () => import('./features/landing/landing.component').then(m => m.LandingComponent)
+  },
   {
     path: 'auth',
     children: [
