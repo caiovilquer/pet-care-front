@@ -82,62 +82,6 @@
 }
 
 /* ============================================================
-   Aliases de compatibilidade — telas ainda não migradas
-   (locations, profile). Remover ao fim da migração.
-   ============================================================ */
-:root {
-  --primary-color: var(--q-green-600);
-  --primary-light: var(--q-green-500);
-  --primary-dark: var(--q-green-700);
-  --primary-hover: var(--q-green-700);
-  --secondary-color: var(--q-info);
-  --secondary-light: var(--q-info);
-  --secondary-dark: var(--q-info);
-  --accent-color: var(--q-ipe-500);
-  --accent-light: var(--q-ipe-500);
-  --accent-dark: var(--q-ipe-600);
-  --dog-color: var(--q-ev-service);
-  --cat-color: var(--q-ev-breed);
-  --bird-color: var(--q-ev-vaccine);
-  --other-color: var(--q-text-3);
-  --text-primary: var(--q-ink);
-  --text-secondary: var(--q-text-2);
-  --text-muted: var(--q-text-3);
-  --text-light: var(--q-border-2);
-  --bg-primary: var(--q-bg);
-  --bg-secondary: var(--q-surface-2);
-  --bg-surface: var(--q-surface);
-  --bg-hover: var(--q-surface-2);
-  --bg-input: var(--q-surface);
-  --bg-card: var(--q-surface);
-  --border-light: var(--q-border);
-  --border-medium: var(--q-border-2);
-  --border-strong: var(--q-green-600);
-  --success-color: var(--q-success);
-  --success-bg: var(--q-success-bg);
-  --warning-color: var(--q-warning);
-  --warning-bg: var(--q-warning-bg);
-  --error-color: var(--q-error);
-  --error-bg: var(--q-error-bg);
-  --info-color: var(--q-info);
-  --info-bg: var(--q-info-bg);
-  --shadow-soft: var(--q-shadow-sm);
-  --shadow-card: var(--q-shadow-md);
-  --shadow-hover: var(--q-shadow-md);
-  --shadow-xl: var(--q-shadow-lg);
-  --radius-sm: var(--q-radius-sm);
-  --radius-md: var(--q-radius-md);
-  --radius-lg: var(--q-radius-md);
-  --radius-xl: var(--q-radius-lg);
-  --radius-full: 50%;
-  --spacing-xs: 0.5rem;
-  --spacing-sm: 1rem;
-  --spacing-md: 1.5rem;
-  --spacing-lg: 2rem;
-  --spacing-xl: 3rem;
-}
-
-/* ============================================================
    Tokens de sistema Material — valores exatos da marca
    (sobrescrevem o tema gerado em theme.scss)
    ============================================================ */

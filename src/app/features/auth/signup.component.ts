@@ -3,7 +3,6 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { CommonModule } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -17,7 +16,6 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
     CommonModule,
     ReactiveFormsModule,
     RouterLink,
-    MatCardModule,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
@@ -25,25 +23,20 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
     MatSnackBarModule
   ],
   template: `
-    <div class="signup-container">
-      <mat-card class="signup-card" [class.loading]="isLoading">
-        <mat-card-header>
-          <div class="header-image">
-            <mat-icon>person_add</mat-icon>
+    <div class="auth-container">
+      <div class="auth-wrapper">
+        <div class="auth-card">
+          <div class="auth-header">
+            <span class="auth-wordmark">rotina<b>pet</b></span>
+            <h1>Criar conta</h1>
+            <p class="auth-subtitle">Cuide da rotina de quem você ama.</p>
           </div>
-          <mat-card-title>Criar Conta</mat-card-title>
-          <mat-card-subtitle>
-            Crie sua conta no RotinaPet e cuide da rotina de quem você ama
-          </mat-card-subtitle>
-        </mat-card-header>
 
-        <mat-card-content>
-          <form [formGroup]="signupForm" (ngSubmit)="onSubmit()">
+          <form [formGroup]="signupForm" (ngSubmit)="onSubmit()" class="auth-form">
             <div class="form-row">
               <mat-form-field appearance="outline" class="half-width">
                 <mat-label>Nome</mat-label>
-                <input matInput formControlName="firstName" placeholder="Digite seu nome" required>
-                <mat-icon matSuffix>person</mat-icon>
+                <input matInput formControlName="firstName" autocomplete="given-name" required>
                 <mat-error *ngIf="signupForm.get('firstName')?.hasError('required')">
                   Nome é obrigatório
                 </mat-error>
@@ -51,14 +44,13 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
               <mat-form-field appearance="outline" class="half-width">
                 <mat-label>Sobrenome</mat-label>
-                <input matInput formControlName="lastName" placeholder="Digite seu sobrenome">
-                <mat-icon matSuffix>person</mat-icon>
+                <input matInput formControlName="lastName" autocomplete="family-name">
               </mat-form-field>
             </div>
 
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>Email</mat-label>
-              <input matInput type="email" formControlName="email" placeholder="Digite seu e-mail" required>
+              <input matInput type="email" formControlName="email" autocomplete="email" required>
               <mat-icon matSuffix>email</mat-icon>
               <mat-error *ngIf="signupForm.get('email')?.hasError('required')">
                 Email é obrigatório
@@ -70,14 +62,16 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>Telefone</mat-label>
-              <input matInput formControlName="phoneNumber" placeholder="(11) 99999-9999">
+              <input matInput formControlName="phoneNumber" placeholder="(11) 99999-9999" autocomplete="tel">
               <mat-icon matSuffix>phone</mat-icon>
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>Senha</mat-label>
-              <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="rawPassword" placeholder="Digite sua senha" required>
-              <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" type="button">
+              <input matInput [type]="hidePassword ? 'password' : 'text'"
+                     formControlName="rawPassword" autocomplete="new-password" required>
+              <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" type="button"
+                      [attr.aria-label]="hidePassword ? 'Mostrar senha' : 'Ocultar senha'">
                 <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
               </button>
               <mat-error *ngIf="signupForm.get('rawPassword')?.hasError('required')">
@@ -89,9 +83,11 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Confirmar Senha</mat-label>
-              <input matInput [type]="hideConfirmPassword ? 'password' : 'text'" formControlName="confirmPassword" placeholder="Confirme sua senha" required>
-              <button mat-icon-button matSuffix (click)="hideConfirmPassword = !hideConfirmPassword" type="button">
+              <mat-label>Confirmar senha</mat-label>
+              <input matInput [type]="hideConfirmPassword ? 'password' : 'text'"
+                     formControlName="confirmPassword" autocomplete="new-password" required>
+              <button mat-icon-button matSuffix (click)="hideConfirmPassword = !hideConfirmPassword" type="button"
+                      [attr.aria-label]="hideConfirmPassword ? 'Mostrar senha' : 'Ocultar senha'">
                 <mat-icon>{{hideConfirmPassword ? 'visibility_off' : 'visibility'}}</mat-icon>
               </button>
               <mat-error *ngIf="signupForm.get('confirmPassword')?.hasError('required')">
@@ -102,299 +98,39 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
               </mat-error>
             </mat-form-field>
 
-            <mat-card-actions>
-              <button 
-                mat-raised-button 
-                color="primary" 
-                type="submit" 
-                class="full-width"
-                [disabled]="signupForm.invalid || isLoading">
-                <mat-icon *ngIf="isLoading">hourglass_empty</mat-icon>
-                <span>{{isLoading ? 'Criando conta...' : 'Criar conta'}}</span>
-              </button>
-            </mat-card-actions>
-
-            <div class="center-text">
-              Já tem uma conta? 
-              <a routerLink="/auth/login" class="login-link">Entrar</a>
-            </div>
+            <button mat-flat-button type="submit" class="auth-button full-width"
+                    [disabled]="signupForm.invalid || isLoading">
+              {{isLoading ? 'Criando conta...' : 'Criar conta'}}
+            </button>
           </form>
-        </mat-card-content>
-      </mat-card>
+
+          <p class="auth-footer">
+            Já tem uma conta?
+            <a routerLink="/auth/login">Entrar</a>
+          </p>
+        </div>
+      </div>
     </div>
   `,
   styles: [`
-    .signup-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      background: linear-gradient(135deg, var(--q-bg) 0%, var(--q-surface-2) 100%);
-      padding: 20px;
-      position: relative;
-    }
-
-    .signup-container::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: 
-        radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.03) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.03) 0%, transparent 50%);
-      pointer-events: none;
-    }
-
-    .signup-card {
-      width: 100%;
-      max-width: 480px;
-      padding: 2.5rem;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(20px);
-      border-radius: 20px;
-      box-shadow: var(--q-shadow-md);
-      border: 1px solid var(--q-border);
-      position: relative;
-      z-index: 1;
-      animation: fadeInUp 0.6s ease-out;
-      transition: none;
-    }
-
-    .header-image {
-      background: linear-gradient(135deg, var(--q-green-600) 0%, var(--q-green-700) 100%);
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 64px;
-      height: 64px;
-      border-radius: 50%;
-      margin: 0 auto 1.5rem auto;
-      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-    }
-
-    .header-image mat-icon {
-      font-size: 32px;
-      width: 32px;
-      height: 32px;
-    }
-
-    mat-card-header {
-      margin-bottom: 2rem;
-      text-align: center;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    mat-card-title {
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: var(--q-ink);
-      margin-bottom: 0.5rem;
-      letter-spacing: -0.5px;
-    }
-
-    mat-card-subtitle {
-      font-size: 1rem;
-      color: var(--q-text-2);
-      font-weight: 500;
-    }
-
     .form-row {
       display: flex;
-      gap: 1rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .full-width {
-      width: 100%;
-      margin-bottom: 1.5rem;
+      gap: var(--q-space-3);
     }
 
     .half-width {
       flex: 1;
-      margin-bottom: 1.5rem;
+      min-width: 0;
     }
 
-    .center-text {
-      text-align: center;
-      margin: 1.5rem 0 0 0;
-      width: 100%;
-      color: var(--q-text-2);
-    }
-
-    .login-link {
-      color: var(--q-green-600);
-      text-decoration: none;
-      font-weight: 600;
-      transition: color 0.3s ease;
-    }
-
-    .login-link:hover {
-      color: var(--q-green-700);
-      text-decoration: underline;
-    }
-
-    /* Form field styling */
-    ::ng-deep .mat-mdc-form-field {
-      width: 100%;
-    }
-
-    /* Placeholder styling - fonte menor */
-    ::ng-deep .mat-mdc-form-field input::placeholder {
-      font-size: 0.75rem !important;
-      color: rgba(0, 0, 0, 0.5) !important;
-    }
-
-    ::ng-deep .mat-mdc-form-field input::-webkit-input-placeholder {
-      font-size: 0.75rem !important;
-      color: rgba(0, 0, 0, 0.5) !important;
-    }
-
-    ::ng-deep .mat-mdc-form-field input::-moz-placeholder {
-      font-size: 0.75rem !important;
-      color: rgba(0, 0, 0, 0.5) !important;
-    }
-
-    ::ng-deep .mat-mdc-form-field input:-ms-input-placeholder {
-      font-size: 0.75rem !important;
-      color: rgba(0, 0, 0, 0.5) !important;
-    }
-
-
-
-    ::ng-deep .mat-mdc-form-field.mat-focused .mdc-text-field {
-      border-color: var(--q-green-600) !important;
-      box-shadow: none !important;
-    }
-
-    ::ng-deep .mat-mdc-form-field:not(.mat-form-field-disabled) .mdc-text-field:hover {
-      border-color: var(--q-green-500) !important;
-    }
-
-    /* Remove outlines */
-    ::ng-deep .mat-mdc-form-field .mdc-text-field:focus-within {
-      outline: none !important;
-    }
-
-    ::ng-deep .mat-mdc-form-field input:focus {
-      outline: none !important;
-      box-shadow: none !important;
-    }
-
-    /* Button styling */
-    ::ng-deep .mat-mdc-raised-button {
-      border-radius: 12px !important;
-      font-weight: 600 !important;
-      text-transform: none !important;
-      padding: 12px 24px !important;
-      height: 48px !important;
-      background: linear-gradient(135deg, var(--q-green-600) 0%, var(--q-green-700) 100%) !important;
-      color: white !important;
-      box-shadow: 0 4px 12px rgba(251, 146, 60, 0.3) !important;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    }
-
-    ::ng-deep .mat-mdc-raised-button:not([disabled]) {
-      color: white !important;
-    }
-
-    ::ng-deep .mat-mdc-raised-button:hover:not([disabled]) {
-      transform: translateY(-2px) !important;
-      box-shadow: 0 6px 20px rgba(251, 146, 60, 0.4) !important;
-      color: white !important;
-    }
-
-    ::ng-deep .mat-mdc-raised-button:disabled {
-      background: var(--q-text-3) !important;
-      color: white !important;
-      transform: none !important;
-      box-shadow: none !important;
-    }
-
-    /* Ensure button text is always white */
-    ::ng-deep .mat-mdc-raised-button span,
-    ::ng-deep .mat-mdc-raised-button .mdc-button__label {
-      color: white !important;
-    }
-
-    ::ng-deep .mat-mdc-raised-button mat-icon {
-      color: white !important;
-    }
-
-    /* Icon button styling */
-    ::ng-deep .mat-mdc-icon-button {
-      transition: all 0.3s ease !important;
-    }
-
-    ::ng-deep .mat-mdc-icon-button:hover {
-      background: rgba(99, 102, 241, 0.1) !important;
-    }
-
-    /* Card actions */
-    mat-card-actions {
-      padding: 0 !important;
-      margin-top: 1rem;
-    }
-
-    /* Loading state */
-    .signup-card.loading {
-      pointer-events: none;
-      opacity: 0.8;
-    }
-
-    /* Animation */
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    /* Responsive design */
-    @media (max-width: 768px) {
-      .signup-container {
-        padding: 1rem;
-      }
-      
-      .signup-card {
-        padding: 2rem;
-        border-radius: 16px;
-        max-width: 100%;
-      }
-      
+    @media (max-width: 480px) {
       .form-row {
         flex-direction: column;
-        gap: 0;
-      }
-      
-      .half-width {
-        margin-bottom: 1rem;
-      }
-      
-      .header-image {
-        width: 56px;
-        height: 56px;
-        margin-bottom: 1rem;
-      }
-      
-      .header-image mat-icon {
-        font-size: 28px;
-        width: 28px;
-        height: 28px;
-      }
-      
-      mat-card-title {
-        font-size: 1.5rem;
+        gap: var(--q-space-1);
       }
     }
-  `]
+  `],
+  styleUrls: ['./auth-shared.css']
 })
 export class SignupComponent {
   signupForm: FormGroup;

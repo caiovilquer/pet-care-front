@@ -163,13 +163,13 @@ import { LocationService } from '../../core/services/location.service';
     .location-card {
       margin-bottom: 1.5rem;
       transition: all 0.3s ease;
-      border-radius: 12px;
+      border-radius: var(--q-radius-md);
       overflow: hidden;
     }
 
     .location-card:hover {
       transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      box-shadow: var(--q-shadow-md);
     }
 
     .location-card.open {
@@ -191,7 +191,7 @@ import { LocationService } from '../../core/services/location.service';
       position: relative;
       width: 120px;
       height: 120px;
-      border-radius: 8px;
+      border-radius: var(--q-radius-sm);
       overflow: hidden;
       flex-shrink: 0;
     }
@@ -242,7 +242,7 @@ import { LocationService } from '../../core/services/location.service';
       background: rgba(0, 0, 0, 0.8);
       color: white;
       padding: 4px 8px;
-      border-radius: 12px;
+      border-radius: var(--q-radius-md);
       font-size: 0.75rem;
       display: flex;
       align-items: center;
@@ -392,7 +392,7 @@ import { LocationService } from '../../core/services/location.service';
       background: #EDF3EE;
       color: #265949;
       padding: 0.25rem 0.5rem;
-      border-radius: 6px;
+      border-radius: var(--q-radius-xs);
       font-size: 0.8rem;
     }
 
@@ -409,7 +409,7 @@ import { LocationService } from '../../core/services/location.service';
       color: #666;
       padding: 0.75rem;
       background: #FBF8F0;
-      border-radius: 8px;
+      border-radius: var(--q-radius-sm);
       border-left: 4px solid #ddd;
     }
 

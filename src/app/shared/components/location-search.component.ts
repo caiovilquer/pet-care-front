@@ -227,7 +227,7 @@ import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
   styles: [`
     .search-container {
       background: white;
-      border-radius: 16px;
+      border-radius: var(--q-radius-lg);
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
       overflow: hidden;
       margin-bottom: 2rem;
@@ -281,7 +281,7 @@ import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
       min-width: 120px;
       font-size: 1rem;
       font-weight: 500;
-      border-radius: 8px;
+      border-radius: var(--q-radius-sm);
     }
     
     .clear-button {
@@ -301,7 +301,7 @@ import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
     /* Estilização dos filtros ativos */
     .active-filters-container {
       background-color: var(--q-surface);
-      border-radius: 8px;
+      border-radius: var(--q-radius-sm);
       padding: 0.75rem 1rem;
       margin-bottom: 1rem;
       animation: fadeIn 0.3s ease;
@@ -360,7 +360,7 @@ import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 
     .filters-content {
       background-color: var(--q-surface);
-      border-radius: 8px;
+      border-radius: var(--q-radius-sm);
       padding: 1rem;
       animation: fadeIn 0.3s ease-in-out;
       border: 1px solid var(--q-border);

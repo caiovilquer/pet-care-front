@@ -1,13 +1,12 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
+import { RouterLink } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatDividerModule } from '@angular/material/divider';
 import { forkJoin, Subscription } from 'rxjs';
 import { TutorService } from '../../core/services/tutor.service';
 import { EventService } from '../../core/services/event.service';
@@ -15,6 +14,9 @@ import { EventStateService } from '../../core/services/event-state.service';
 import { UserStateService } from '../../core/services/user-state.service';
 import { TutorDetailResult } from '../../shared/models/tutor.model';
 import { EventSummary, isEventDone } from '../../core/models/event.model';
+import { PageHeaderComponent } from '../../shared/components/ui/page-header.component';
+import { StatCardComponent } from '../../shared/components/ui/stat-card.component';
+import { PetAvatarComponent } from '../../shared/components/ui/pet-avatar.component';
 
 @Component({
   selector: 'app-profile',
@@ -22,305 +24,259 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatCardModule,
+    RouterLink,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
     MatIconModule,
     MatSnackBarModule,
-    MatDividerModule
+    PageHeaderComponent,
+    StatCardComponent,
+    PetAvatarComponent
   ],
   template: `
-    <div class="profile-container">
-      <h1>Meu Perfil</h1>
+    <div class="profile-page">
+      <rp-page-header overline="Sua conta" title="Meu perfil"
+                      subtitle="Seus dados e um resumo do seu quintal.">
+      </rp-page-header>
 
-      <div class="profile-content">
-        <mat-card class="profile-card">
-          <mat-card-header>
-            <div mat-card-avatar class="profile-avatar">
-              <img *ngIf="currentUser?.avatar; else defaultProfileAvatar" 
-                   [src]="currentUser!.avatar" 
-                   [alt]="(currentUser!.firstName || '') + ' ' + (currentUser!.lastName || '')"
-                   class="profile-avatar-image">
-              <ng-template #defaultProfileAvatar>
-                <mat-icon>person</mat-icon>
-              </ng-template>
+      <div class="profile-grid">
+        <section class="panel form-panel">
+          <div class="panel-title">
+            <div class="avatar-wrap">
+              @if (currentUser?.avatar && !avatarFailed) {
+                <img [src]="currentUser!.avatar" alt="" (error)="avatarFailed = true">
+              } @else {
+                <span class="avatar-fallback">{{ userInitial }}</span>
+              }
             </div>
-            <mat-card-title>Informações Pessoais</mat-card-title>
-            <mat-card-subtitle>Gerencie suas informações de perfil</mat-card-subtitle>
-          </mat-card-header>
+            <div class="panel-title-tx">
+              <h2>{{ currentUser?.firstName }} {{ currentUser?.lastName }}</h2>
+              <p>{{ currentUser?.email }}</p>
+            </div>
+          </div>
 
-          <mat-card-content>
-            <form [formGroup]="profileForm" (ngSubmit)="onUpdateProfile()">
-              <div class="form-row">
-                <mat-form-field appearance="outline" class="half-width">
-                  <mat-label>Nome</mat-label>
-                  <input matInput formControlName="firstName" required>
-                  <mat-error *ngIf="profileForm.get('firstName')?.hasError('required')">
-                    Nome é obrigatório
-                  </mat-error>
-                </mat-form-field>
-
-                <mat-form-field appearance="outline" class="half-width">
-                  <mat-label>Sobrenome</mat-label>
-                  <input matInput formControlName="lastName">
-                </mat-form-field>
-              </div>
-
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Email</mat-label>
-                <input matInput type="email" [value]="currentUser?.email" readonly>
-                <mat-icon matSuffix>email</mat-icon>
+          <form [formGroup]="profileForm" (ngSubmit)="onUpdateProfile()">
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="half-width">
+                <mat-label>Nome</mat-label>
+                <input matInput formControlName="firstName" required>
+                <mat-error *ngIf="profileForm.get('firstName')?.hasError('required')">
+                  Nome é obrigatório
+                </mat-error>
               </mat-form-field>
 
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Telefone</mat-label>
-                <input matInput formControlName="phoneNumber" placeholder="(11) 99999-9999">
-                <mat-icon matSuffix>phone</mat-icon>
+              <mat-form-field appearance="outline" class="half-width">
+                <mat-label>Sobrenome</mat-label>
+                <input matInput formControlName="lastName">
               </mat-form-field>
-
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>URL do Avatar</mat-label>
-                <input matInput formControlName="avatar" type="url" 
-                       placeholder="https://exemplo.com/sua-foto.jpg">
-                <mat-icon matSuffix>photo_camera</mat-icon>
-                <mat-hint>Cole aqui a URL da sua foto de perfil</mat-hint>
-              </mat-form-field>
-
-              <div class="form-actions">
-                <button mat-raised-button color="primary" type="submit" 
-                        [disabled]="profileForm.invalid || isUpdating">
-                  {{isUpdating ? 'Salvando...' : 'Salvar Alterações'}}
-                </button>
-              </div>
-            </form>
-          </mat-card-content>
-        </mat-card>
-
-        <mat-card class="stats-card">
-          <mat-card-header>
-            <mat-card-title>Estatísticas</mat-card-title>
-            <mat-card-subtitle>Resumo da sua conta</mat-card-subtitle>
-          </mat-card-header>
-
-          <mat-card-content>
-            <div class="stat-item">
-              <mat-icon class="stat-icon pets-icon">pets</mat-icon>
-              <div class="stat-info">
-                <span class="stat-number">{{currentUser?.pets?.length || 0}}</span>
-                <span class="stat-label">Pets cadastrados</span>
-              </div>
             </div>
 
-            <mat-divider></mat-divider>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Email</mat-label>
+              <input matInput type="email" [value]="currentUser?.email" readonly>
+              <mat-icon matSuffix>email</mat-icon>
+            </mat-form-field>
 
-            <div class="stat-item">
-              <mat-icon class="stat-icon events-icon">event</mat-icon>
-              <div class="stat-info">
-                <span class="stat-number">{{totalEvents}}</span>
-                <span class="stat-label">Eventos agendados</span>
-              </div>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Telefone</mat-label>
+              <input matInput formControlName="phoneNumber" placeholder="(11) 99999-9999">
+              <mat-icon matSuffix>phone</mat-icon>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>URL do avatar</mat-label>
+              <input matInput formControlName="avatar" type="url"
+                     placeholder="https://exemplo.com/sua-foto.jpg">
+              <mat-icon matSuffix>photo_camera</mat-icon>
+              <mat-hint>Cole aqui a URL da sua foto de perfil</mat-hint>
+            </mat-form-field>
+
+            <div class="form-actions">
+              <button mat-flat-button type="submit"
+                      [disabled]="profileForm.invalid || isUpdating">
+                {{ isUpdating ? 'Salvando...' : 'Salvar alterações' }}
+              </button>
             </div>
+          </form>
+        </section>
 
-            <mat-divider></mat-divider>
+        <aside class="side">
+          <div class="stats">
+            <rp-stat-card [value]="currentUser?.pets?.length || 0"
+                          label="pets no quintal"
+                          link="/pets" linkLabel="Ver pets"></rp-stat-card>
+            <rp-stat-card [value]="upcomingEvents"
+                          label="cuidados nos próximos 7 dias"
+                          link="/events" linkLabel="Ver agenda"
+                          [accent]="upcomingEvents > 0"></rp-stat-card>
+            <rp-stat-card [value]="totalEvents"
+                          label="cuidados registrados"></rp-stat-card>
+          </div>
 
-            <div class="stat-item">
-              <mat-icon class="stat-icon calendar-icon">today</mat-icon>
-              <div class="stat-info">
-                <span class="stat-number">{{upcomingEvents}}</span>
-                <span class="stat-label">Eventos próximos</span>
+          @if (currentUser?.pets && currentUser!.pets.length > 0) {
+            <section class="panel pets-panel">
+              <h3>Seus pets</h3>
+              <div class="pets-list">
+                @for (pet of currentUser!.pets; track pet.id; let i = $index) {
+                  <a class="pet-item" [routerLink]="['/pets', pet.id]">
+                    <rp-pet-avatar [name]="pet.name" [species]="pet.species"
+                                   size="sm" [seed]="i"></rp-pet-avatar>
+                    <div class="pet-info">
+                      <span class="pet-name">{{ pet.name }}</span>
+                      <span class="pet-specie">{{ pet.species }}</span>
+                    </div>
+                    <mat-icon class="chev">chevron_right</mat-icon>
+                  </a>
+                }
               </div>
-            </div>
-          </mat-card-content>
-        </mat-card>
-
-        <mat-card class="pets-summary-card" *ngIf="currentUser?.pets && currentUser!.pets.length > 0">
-          <mat-card-header>
-            <mat-card-title>Meus Pets</mat-card-title>
-            <mat-card-subtitle>Lista dos seus pets cadastrados</mat-card-subtitle>
-          </mat-card-header>
-
-          <mat-card-content>
-            <div class="pets-list">
-              <div class="pet-item" *ngFor="let pet of currentUser!.pets">
-                <mat-icon class="pet-icon">pets</mat-icon>
-                <div class="pet-info">
-                  <span class="pet-name">{{pet.name}}</span>
-                  <span class="pet-specie">{{pet.species}}</span>
-                </div>
-              </div>
-            </div>
-          </mat-card-content>
-        </mat-card>
+            </section>
+          }
+        </aside>
       </div>
     </div>
   `,
   styles: [`
-    .profile-container {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .profile-container h1 {
-      font-size: 2rem;
-      margin-bottom: 24px;
-      color: #333;
-    }
-
-    .profile-content {
+    .profile-grid {
       display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 24px;
+      grid-template-columns: 1.4fr 1fr;
+      gap: var(--q-space-4);
+      align-items: start;
     }
 
-    .profile-card {
-      grid-column: 1;
-      grid-row: 1 / 3;
+    @media (max-width: 800px) {
+      .profile-grid { grid-template-columns: 1fr; }
     }
 
-    .stats-card {
-      grid-column: 2;
-      grid-row: 1;
+    .panel {
+      background: var(--q-surface);
+      border: 1px solid var(--q-border);
+      border-radius: var(--q-radius-lg);
+      padding: var(--q-space-5);
+      box-shadow: var(--q-shadow-sm);
     }
 
-    .pets-summary-card {
-      grid-column: 2;
-      grid-row: 2;
-    }
-
-    .profile-avatar {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
+    .panel-title {
       display: flex;
       align-items: center;
-      justify-content: center;
+      gap: var(--q-space-4);
+      margin-bottom: var(--q-space-5);
     }
 
-    .profile-avatar-image {
-      width: 40px;
-      height: 40px;
+    .avatar-wrap {
+      width: 64px;
+      height: 64px;
+      border-radius: var(--q-organic-1);
+      overflow: hidden;
+      flex-shrink: 0;
+      background: var(--q-green-600);
+    }
+
+    .avatar-wrap img {
+      width: 100%;
+      height: 100%;
       object-fit: cover;
-      border-radius: 50%;
+      display: block;
+    }
+
+    .avatar-fallback {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      place-items: center;
+      color: var(--q-surface);
+      font-family: var(--q-font-display);
+      font-weight: 700;
+      font-size: 1.5rem;
+    }
+
+    .panel-title-tx h2 {
+      margin: 0;
+      font-size: 1.25rem;
+    }
+
+    .panel-title-tx p {
+      margin: 2px 0 0;
+      color: var(--q-text-2);
+      font-size: 0.8438rem;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: var(--q-space-1);
     }
 
     .form-row {
       display: flex;
-      gap: 16px;
+      gap: var(--q-space-3);
     }
 
-    .full-width {
-      width: 100%;
-      margin-bottom: 16px;
-    }
+    .half-width { flex: 1; min-width: 0; }
+    .full-width { width: 100%; }
 
-    .half-width {
-      width: 100%;
-      margin-bottom: 16px;
+    @media (max-width: 480px) {
+      .form-row { flex-direction: column; gap: var(--q-space-1); }
     }
 
     .form-actions {
-      margin-top: 24px;
+      margin-top: var(--q-space-3);
     }
 
-    .stat-item {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      padding: 16px 0;
+    .side {
+      display: grid;
+      gap: var(--q-space-4);
     }
 
-    .stat-icon {
-      font-size: 32px;
-      width: 32px;
-      height: 32px;
+    .stats {
+      display: grid;
+      gap: var(--q-space-3);
     }
 
-    .pets-icon { color: var(--q-green-600); }
-    .events-icon { color: var(--q-info); }
-    .calendar-icon { color: var(--q-ipe-500); }
-
-    .stat-info {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .stat-number {
-      font-size: 24px;
-      font-weight: 600;
-      color: #333;
-    }
-
-    .stat-label {
-      font-size: 14px;
-      color: #666;
+    .pets-panel h3 {
+      margin: 0 0 var(--q-space-3);
+      font-size: 1.1rem;
     }
 
     .pets-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
+      display: grid;
+      gap: var(--q-space-1);
     }
 
     .pet-item {
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 8px;
-      border-radius: 8px;
-      background: #f5f5f5;
+      gap: var(--q-space-3);
+      padding: var(--q-space-2);
+      border-radius: var(--q-radius-sm);
+      text-decoration: none;
+      color: inherit;
+      transition: background 0.15s ease;
     }
 
-    .pet-icon {
-      color: #667eea;
-      font-size: 20px;
+    .pet-item:hover {
+      background: var(--q-surface-2);
     }
 
     .pet-info {
-      display: flex;
-      flex-direction: column;
+      flex: 1;
+      min-width: 0;
+      display: grid;
     }
 
     .pet-name {
-      font-weight: 500;
-      color: #333;
+      font-weight: 600;
+      font-size: 0.9063rem;
+      color: var(--q-ink);
     }
 
     .pet-specie {
-      font-size: 12px;
-      color: #666;
+      font-size: 0.75rem;
+      color: var(--q-text-2);
     }
 
-    @media (max-width: 768px) {
-      .profile-content {
-        grid-template-columns: 1fr;
-      }
-
-      .profile-card,
-      .stats-card,
-      .pets-summary-card {
-        grid-column: 1;
-        grid-row: auto;
-      }
-
-      .form-row {
-        flex-direction: column;
-        gap: 0;
-      }
-    }
-
-    /* Remove all focus outlines */
-    ::ng-deep .mat-mdc-form-field .mdc-text-field:focus-within {
-      outline: none !important;
-      box-shadow: none !important;
-    }
-
-    ::ng-deep .mat-mdc-form-field input:focus {
-      outline: none !important;
-      box-shadow: none !important;
-    }
-
-    ::ng-deep .mat-mdc-form-field.mat-focused .mdc-text-field {
-      box-shadow: none !important;
+    .chev {
+      color: var(--q-text-3);
     }
   `]
 })
@@ -330,6 +286,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   isUpdating = false;
   totalEvents = 0;
   upcomingEvents = 0;
+  avatarFailed = false;
   private eventUpdateSubscription?: Subscription;
 
   constructor(
@@ -353,7 +310,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
     // Se inscrever para atualizações de eventos
     this.eventUpdateSubscription = this.eventStateService.eventUpdated$.subscribe(() => {
-  
       this.refreshEventData();
     });
   }
@@ -364,9 +320,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
     }
   }
 
+  get userInitial(): string {
+    return (this.currentUser?.firstName || '?').charAt(0).toUpperCase();
+  }
+
   private refreshEventData(): void {
     if (this.currentUser && this.currentUser.pets && this.currentUser.pets.length > 0) {
-  
       this.loadEventsForAllPets(this.currentUser.pets);
     }
   }
@@ -375,6 +334,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.tutorService.getMyProfile().subscribe({
       next: (user) => {
         this.currentUser = user;
+        this.avatarFailed = false;
         this.profileForm.patchValue({
           firstName: user.firstName,
           lastName: user.lastName,
@@ -397,24 +357,15 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   private loadEventsForAllPets(pets: any[]): void {
-  
-  
-
-    const petEventRequests = pets.map(pet => {
-  
-      return this.eventService.listByPet(pet.id);
-    });
+    const petEventRequests = pets.map(pet => this.eventService.listByPet(pet.id));
 
     forkJoin(petEventRequests).subscribe({
       next: (petEventsArrays) => {
-  
-
         // Combinar todos os eventos de todos os pets
         const allEvents: EventSummary[] = [];
 
         petEventsArrays.forEach((petEvents, index) => {
           const pet = pets[index];
-          
 
           if (Array.isArray(petEvents)) {
             petEvents.forEach((event: any) => {
@@ -430,16 +381,11 @@ export class ProfileComponent implements OnInit, OnDestroy {
           }
         });
 
-  
-
         this.totalEvents = allEvents.length;
         const upcomingEvents = this.getUpcomingEvents(allEvents);
         this.upcomingEvents = upcomingEvents.length;
-
-  
       },
-      error: (error) => {
-  
+      error: () => {
         this.totalEvents = 0;
         this.upcomingEvents = 0;
       }
@@ -469,7 +415,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
           this.currentUser = updatedUser;
           this.snackBar.open('Perfil atualizado com sucesso!', 'Fechar', { duration: 3000 });
           this.isUpdating = false;
-          
+
           // Notificar outros componentes sobre a atualização do perfil
           this.userStateService.notifyUserUpdated();
         },

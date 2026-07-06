@@ -1,4 +1,4 @@
-# 🐾 Pet Care Scheduler - Frontend
+# 🌿 RotinaPet — Frontend
 
 > Sistema moderno de agendamento e gerenciamento de cuidados para pets, desenvolvido com Angular 20 e Material Design.
 
@@ -104,20 +104,27 @@ src/
 └── styles.css               # Estilos globais
 ```
 
-## 🎨 Design System
+## 🎨 Design System — RotinaPet (direção "Quintal")
 
 ### Paleta de Cores
-- **Primary**: `#6366f1` (Indigo)
-- **Secondary**: `#8b5cf6` (Purple)
-- **Success**: `#10b981` (Emerald)
-- **Warning**: `#f59e0b` (Amber)
-- **Error**: `#ef4444` (Red)
+- **Primária (verde-mata)**: `#265949`
+- **Acento (amarelo-ipê)**: `#DFA32E`
+- **Fundo (areia)**: `#F6F2E8`
+- **Texto (grafite-verde)**: `#20261F`
+- **Semânticas**: sucesso `#2E7D52` · alerta `#9A6B10` · erro `#B3402F` · info `#38709B`
+- Dark mode completo via `light-dark()` + `color-scheme` (toggle no header, persistido em localStorage)
 
-### Componentes
-- Material Design Components
-- Custom cards e layouts
-- Responsive grid system
-- Smooth animations e transitions
+### Tipografia
+- **Display**: Bricolage Grotesque (600/700)
+- **Corpo**: Hanken Grotesk (400–700)
+
+### Tokens e componentes
+- Tokens `--q-*` em `src/styles.css` (cores, raios, sombras, escala de espaço de 4px)
+- Tema Material M3 próprio em `src/theme.scss` (`mat.theme`) + sobrescrita de `--mat-sys-*`
+- Componentes de UI compartilhados (`rp-*`) em `src/app/shared/components/ui/`:
+  pet-avatar (moldura orgânica), page-header, stat-card, empty-state, skeleton,
+  confirm-dialog, nearby-toggle
+- Shell: header leve no desktop + bottom nav no mobile (breakpoint 960px)
 
 ## 🔐 Variáveis de Ambiente
 

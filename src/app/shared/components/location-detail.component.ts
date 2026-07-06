@@ -490,7 +490,7 @@ import { of } from 'rxjs';
       position: relative;
       width: 200px;
       height: 150px;
-      border-radius: 12px;
+      border-radius: var(--q-radius-md);
       overflow: hidden;
       flex-shrink: 0;
     }
@@ -562,7 +562,7 @@ import { of } from 'rxjs';
       background: rgba(0,0,0,0.7);
       color: white;
       padding: 0.25rem 0.5rem;
-      border-radius: 6px;
+      border-radius: var(--q-radius-xs);
       font-size: 0.75rem;
     }
 
@@ -581,7 +581,7 @@ import { of } from 'rxjs';
       background: rgba(255, 193, 7, 0.9);
       color: white;
       padding: 0.25rem 0.5rem;
-      border-radius: 6px;
+      border-radius: var(--q-radius-xs);
       font-size: 0.75rem;
       font-weight: 600;
     }
@@ -728,7 +728,7 @@ import { of } from 'rxjs';
     .day-hours.today {
       background: #FBF8F0;
       padding: 0.75rem;
-      border-radius: 8px;
+      border-radius: var(--q-radius-sm);
       border-bottom: none;
       margin-bottom: 0.5rem;
       font-weight: 600;
@@ -744,7 +744,7 @@ import { of } from 'rxjs';
       background: #265949;
       color: white;
       padding: 0.125rem 0.5rem;
-      border-radius: 12px;
+      border-radius: var(--q-radius-md);
       font-size: 0.75rem;
       font-weight: 500;
     }
@@ -771,7 +771,7 @@ import { of } from 'rxjs';
       padding: 2rem 1rem;
       margin-top: 1rem;
       background: #F8EDD2;
-      border-radius: 8px;
+      border-radius: var(--q-radius-sm);
       border: 1px dashed #DFA32E;
     }
 
@@ -800,7 +800,7 @@ import { of } from 'rxjs';
       margin-top: 1rem;
       padding: 1rem;
       background: #EDF3EE;
-      border-radius: 8px;
+      border-radius: var(--q-radius-sm);
       color: #265949;
       font-weight: 500;
     }
@@ -838,7 +838,7 @@ import { of } from 'rxjs';
       gap: 1rem;
       padding: 1rem;
       background: #FBF8F0;
-      border-radius: 8px;
+      border-radius: var(--q-radius-sm);
       align-items: flex-start;
     }
 
@@ -983,7 +983,7 @@ import { of } from 'rxjs';
       padding: 2rem;
       color: #666;
       background: #FBF8F0;
-      border-radius: 8px;
+      border-radius: var(--q-radius-sm);
       margin-top: 1rem;
     }
 

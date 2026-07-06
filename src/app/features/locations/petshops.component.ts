@@ -10,6 +10,7 @@ import { finalize } from 'rxjs/operators';
 
 import { LocationSearchComponent } from '../../shared/components/location-search.component';
 import { LocationCardComponent } from '../../shared/components/location-card.component';
+import { NearbyToggleComponent } from '../../shared/components/ui/nearby-toggle.component';
 import { LocationDetailComponent } from '../../shared/components/location-detail.component';
 import { LocationService } from '../../core/services/location.service';
 import { 
@@ -32,16 +33,18 @@ import {
     MatToolbarModule,
     MatDialogModule,
     LocationSearchComponent,
-    LocationCardComponent
+    LocationCardComponent,
+    NearbyToggleComponent
   ],
   template: `
     <div class="petshops-container">
       <div class="petshops-header">
-        <h1>
-          <mat-icon>store</mat-icon>
-          Petshops Próximos
-        </h1>
+        <div class="header-titles">
+          <p class="q-overline">Por perto</p>
+          <h1>Petshops</h1>
+        </div>
         <div class="header-actions">
+          <rp-nearby-toggle active="petshops"></rp-nearby-toggle>
           <span *ngIf="searchResults().total > 0" class="results-count">
             {{ searchResults().total }} petshops encontrados
           </span>
@@ -128,163 +131,55 @@ import {
     </div>
   `,
   styles: [`
-    .petshops-container {
-      min-height: 100vh;
-      background: linear-gradient(135deg, var(--q-bg) 0%, var(--q-surface-2) 100%);
-    }
-
     .petshops-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      margin-bottom: 2rem;
-      padding: 1.5rem;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(20px);
-      border-radius: 16px;
-      box-shadow: var(--q-shadow-md);
-      border: 1px solid var(--q-border);
-      position: relative;
-      overflow: hidden;
-      animation: fadeInUp 0.6s ease-out;
+      align-items: flex-end;
+      gap: var(--q-space-4);
+      flex-wrap: wrap;
+      margin-bottom: var(--q-space-5);
     }
 
-    .petshops-header::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, #065f46, #059669, #10b981, #6ee7b7);
-      border-radius: 16px 16px 0 0;
-      opacity: 0;
-      animation: slideInLeft 0.8s ease-out 0.2s both;
-    }
-
-    .petshops-header h1 {
-      margin: 0;
-      font-size: 2.2rem;
-      font-weight: 700;
-      color: transparent;
-      background: linear-gradient(135deg, #065f46, #059669, #10b981, #6ee7b7);
-      background-clip: text;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      animation: slideInLeft 0.6s ease-out 0.1s both;
-    }
-
-    .petshops-header h1 mat-icon {
-      color: #059669;
-      font-size: 28px;
-      width: 28px;
-      height: 28px;
-      -webkit-text-fill-color: #059669;
-      background: none;
-      animation: gentlePulse 3s ease-in-out infinite;
-    }
+    .header-titles .q-overline { margin-bottom: var(--q-space-2); }
+    .petshops-header h1 { margin: 0; }
 
     .header-actions {
       display: flex;
       align-items: center;
-      gap: 1rem;
-      animation: slideInRight 0.6s ease-out 0.1s both;
-    }
-
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes slideInLeft {
-      from {
-        opacity: 0;
-        transform: translateX(-30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
-    }
-
-    @keyframes slideInRight {
-      from {
-        opacity: 0;
-        transform: translateX(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
-    }
-
-    @keyframes gentlePulse {
-      0%, 100% {
-        transform: scale(1);
-        opacity: 1;
-      }
-      50% {
-        transform: scale(1.05);
-        opacity: 0.8;
-      }
+      gap: var(--q-space-3);
+      flex-wrap: wrap;
     }
 
     .results-count {
-      font-size: 0.9rem;
+      font-size: 0.8438rem;
       color: var(--q-text-2);
       font-weight: 500;
     }
 
-    .content {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 2rem;
-    }
-
-    .search-section {
-      margin-bottom: 2rem;
-    }
+    .content { display: grid; gap: var(--q-space-5); }
 
     .results-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 2rem;
-      padding: 1.5rem;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(20px);
-      border-radius: 16px;
-      box-shadow: var(--q-shadow-md);
-      border: 1px solid var(--q-border);
+      gap: var(--q-space-3);
+      flex-wrap: wrap;
     }
 
-    .results-header h2 {
-      margin: 0;
-      color: var(--q-ink);
-      font-weight: 600;
-    }
+    .results-header h2 { margin: 0; font-size: 1.2rem; }
 
     .search-info {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 6px;
       color: var(--q-text-2);
-      font-size: 0.9rem;
+      font-size: 0.8438rem;
     }
 
     .search-info mat-icon {
       font-size: 18px;
-      height: 18px;
       width: 18px;
+      height: 18px;
       color: var(--q-green-600);
     }
 
@@ -292,181 +187,89 @@ import {
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 3rem;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(20px);
-      border-radius: 16px;
-      box-shadow: var(--q-shadow-md);
+      gap: var(--q-space-3);
+      padding: var(--q-space-7);
+      background: var(--q-surface);
       border: 1px solid var(--q-border);
-    }
-
-    .loading-container p {
-      margin-top: 1rem;
+      border-radius: var(--q-radius-lg);
+      box-shadow: var(--q-shadow-sm);
       color: var(--q-text-2);
     }
 
-    .no-results {
-      display: flex;
-      justify-content: center;
-      padding: 3rem;
+    .no-results,
+    .welcome-section {
+      background: var(--q-surface);
+      border: 1px solid var(--q-border);
+      border-radius: var(--q-radius-lg);
+      box-shadow: var(--q-shadow-sm);
+      padding: var(--q-space-7) var(--q-space-5);
     }
 
-    .no-results-content {
+    .no-results-content,
+    .welcome-content {
+      max-width: 480px;
+      margin: 0 auto;
       text-align: center;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(20px);
-      padding: 3rem;
-      border-radius: 16px;
-      box-shadow: var(--q-shadow-md);
-      border: 1px solid var(--q-border);
-      max-width: 400px;
-    }
-
-    .no-results-icon {
-      font-size: 64px;
-      height: 64px;
-      width: 64px;
-      color: var(--q-text-3);
-      margin-bottom: 1rem;
-    }
-
-    .no-results-content h3 {
-      margin: 0 0 1rem 0;
-      color: var(--q-ink);
-    }
-
-    .no-results-content p {
-      color: var(--q-text-2);
-      margin-bottom: 1rem;
-      line-height: 1.5;
-    }
-
-    .results-list {
       display: flex;
       flex-direction: column;
-      gap: 1.5rem;
+      align-items: center;
+      gap: var(--q-space-2);
     }
 
-    .welcome-section {
-      display: flex;
-      justify-content: center;
-      padding: 3rem;
-    }
-
-    .welcome-content {
-      text-align: center;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(20px);
-      padding: 3rem;
-      border-radius: 16px;
-      box-shadow: var(--q-shadow-md);
-      border: 1px solid var(--q-border);
-      max-width: 600px;
-    }
-
+    .no-results-icon,
     .welcome-icon {
-      font-size: 80px;
-      height: 80px;
-      width: 80px;
+      width: 88px;
+      height: 88px;
+      font-size: 36px;
+      display: grid;
+      place-items: center;
+      background: var(--q-green-50);
       color: var(--q-green-600);
-      margin-bottom: 1.5rem;
+      border-radius: var(--q-organic-1);
+      margin-bottom: var(--q-space-2);
     }
 
-    .welcome-content h2 {
-      margin: 0 0 1rem 0;
-      color: var(--q-ink);
-      font-weight: 600;
-    }
+    .no-results-content h3,
+    .welcome-content h2 { margin: 0; }
 
+    .no-results-content p,
     .welcome-content p {
+      margin: 0;
       color: var(--q-text-2);
-      margin-bottom: 2rem;
-      line-height: 1.6;
+      font-size: 0.9063rem;
     }
+
+    .no-results-content button { margin-top: var(--q-space-3); }
 
     .features-list {
       list-style: none;
       padding: 0;
-      margin: 0;
+      margin: var(--q-space-4) 0 0;
       display: grid;
-      gap: 1rem;
+      gap: var(--q-space-2);
       text-align: left;
     }
 
     .features-list li {
       display: flex;
       align-items: center;
-      gap: 1rem;
-      padding: 1rem;
-      background: var(--q-surface);
-      border-radius: 12px;
-      border: 1px solid var(--q-border);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      gap: var(--q-space-3);
+      color: var(--q-text-2);
+      font-size: 0.9063rem;
     }
 
-    .features-list li:hover {
-      background: var(--q-surface-2);
-      transform: translateY(-2px);
-      box-shadow: var(--q-shadow-md);
-    }
-
-    .features-list mat-icon {
+    .features-list li mat-icon {
       color: var(--q-green-600);
-      flex-shrink: 0;
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
     }
 
-    .features-list span {
-      color: var(--q-ink);
-      font-weight: 500;
-    }
-
-    @media (max-width: 768px) {
-      .content {
-        padding: 1rem;
-      }
-
-      .petshops-header {
-        flex-direction: column;
-        gap: 1rem;
-        text-align: center;
-        padding: 1.25rem;
-      }
-
-      .petshops-header h1 {
-        justify-content: center;
-      }
-
-      .header-actions {
-        justify-content: center;
-        flex-wrap: wrap;
-      }
-
-      .results-header {
-        flex-direction: column;
-        gap: 1rem;
-        text-align: center;
-        padding: 1.25rem;
-      }
-
-      .welcome-content,
-      .no-results-content {
-        padding: 2rem 1rem;
-      }
-
-      .welcome-icon,
-      .no-results-icon {
-        font-size: 60px;
-        height: 60px;
-        width: 60px;
-      }
-
-      .features-list {
-        gap: 0.5rem;
-      }
-
-      .features-list li {
-        padding: 0.75rem;
-      }
+    .results-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: var(--q-space-4);
+      align-items: stretch;
     }
   `]
 })
