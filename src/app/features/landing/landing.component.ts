@@ -127,6 +127,10 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.setTheme(this.isDark ? 'light' : 'dark');
   }
 
+  scrollToE3(): void {
+    document.getElementById('e3')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
   private applyLandingTheme(): void {
     let saved: string | null = null;
     try {

@@ -77,13 +77,27 @@
       </p>
     </div>
 
-    <div class="pegadas u-reveal" #revealEl aria-hidden="true">
-      <span></span><span></span><span></span><span></span><span></span>
-    </div>
+    <button
+      type="button"
+      class="e2-continua u-reveal"
+      #revealEl
+      (click)="scrollToE3()"
+      aria-label="Continuar leitura: um dia no quintal"
+    >
+      <span class="e2-continua-label">Um dia no quintal</span>
+      <span class="e2-continua-trail" aria-hidden="true">
+        <svg class="e2-continua-path" viewBox="0 0 40 64">
+          <path pathLength="100" d="M20 2 C 8 18, 32 34, 20 50 S 8 58, 20 62"/>
+        </svg>
+        <svg class="e2-paw" viewBox="0 0 24 24"><path d="M12 17.5c-3.2 0-5.5-2-5.5-4.2 0-1.2 1-2.3 2.5-2.3.9 0 1.7.4 2.2 1 .5-.6 1.3-1 2.2-1 1.5 0 2.5 1.1 2.5 2.3 0 2.2-2.3 4.2-5.5 4.2Z"/><circle cx="7.5" cy="9" r="2.2"/><circle cx="12" cy="7" r="2.2"/><circle cx="16.5" cy="9" r="2.2"/></svg>
+        <svg class="e2-paw" viewBox="0 0 24 24"><path d="M12 17.5c-3.2 0-5.5-2-5.5-4.2 0-1.2 1-2.3 2.5-2.3.9 0 1.7.4 2.2 1 .5-.6 1.3-1 2.2-1 1.5 0 2.5 1.1 2.5 2.3 0 2.2-2.3 4.2-5.5 4.2Z"/><circle cx="7.5" cy="9" r="2.2"/><circle cx="12" cy="7" r="2.2"/><circle cx="16.5" cy="9" r="2.2"/></svg>
+        <svg class="e2-paw" viewBox="0 0 24 24"><path d="M12 17.5c-3.2 0-5.5-2-5.5-4.2 0-1.2 1-2.3 2.5-2.3.9 0 1.7.4 2.2 1 .5-.6 1.3-1 2.2-1 1.5 0 2.5 1.1 2.5 2.3 0 2.2-2.3 4.2-5.5 4.2Z"/><circle cx="7.5" cy="9" r="2.2"/><circle cx="12" cy="7" r="2.2"/><circle cx="16.5" cy="9" r="2.2"/></svg>
+      </span>
+    </button>
   </section>
 
   <!-- ============ E3 — Um Dia no Quintal ============ -->
-  <section class="e3">
+  <section class="e3" id="e3">
     <p class="q-overline e3-overline u-reveal" #revealEl>02. Um dia no quintal</p>
 
     <div class="momento momento-right u-reveal" #revealEl>
