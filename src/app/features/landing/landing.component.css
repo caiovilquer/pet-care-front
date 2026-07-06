@@ -610,10 +610,26 @@
   width: 100%;
   max-width: 1240px;
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--q-space-4);
+}
+
+.e8-footer-main {
+  width: 100%;
+  display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--q-space-4);
   flex-wrap: wrap;
+}
+
+.e8-footer-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
 }
 
 .footer-wordmark { height: 20px; width: auto; }
@@ -629,7 +645,41 @@
   cursor: pointer;
 }
 
-.footer-legal { font-size: 0.8125rem; color: color-mix(in srgb, var(--landing-sand-fixed) 65%, transparent); }
+.footer-legal {
+  font-size: 0.8125rem;
+  color: color-mix(in srgb, var(--landing-sand-fixed) 65%, transparent);
+}
+
+.e8-credits {
+  margin: 0;
+  font-size: 0.75rem;
+  color: color-mix(in srgb, var(--landing-sand-fixed) 55%, transparent);
+}
+
+.e8-credit-link {
+  color: var(--landing-sand-fixed);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--landing-sand-fixed) 40%, transparent);
+  text-underline-offset: 3px;
+  transition: color 0.15s ease, text-decoration-color 0.15s ease;
+}
+
+.e8-credit-link:hover {
+  color: #DFA32E;
+  text-decoration-color: #DFA32E;
+}
+
+.e8-credit-link:focus-visible {
+  outline: 2px solid #DFA32E;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.e8-credits-sep {
+  margin: 0 0.35em;
+  opacity: 0.5;
+}
 
 /* ============================================================
    Responsivo — mobile
@@ -667,7 +717,10 @@
 
   .path-connector { width: 40px; height: 90px; margin-top: calc(var(--q-space-6) * -1); }
 
-  .e8-footer { justify-content: center; text-align: center; }
+  .e8-footer-main {
+    justify-content: center;
+    text-align: center;
+  }
 }
 
 @media (max-width: 640px) {

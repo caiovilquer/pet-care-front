@@ -224,11 +224,31 @@
     </div>
 
     <footer class="e8-footer">
-      <img class="footer-wordmark" src="logo-horizontal-reverso.svg" alt="RotinaPet">
-      <button class="theme-toggle" type="button" (click)="toggleTheme()">
-        {{ isDark ? 'Modo claro' : 'Modo escuro' }}
-      </button>
-      <span class="footer-legal">© {{ currentYear }} RotinaPet</span>
+      <div class="e8-footer-main">
+        <img class="footer-wordmark" src="logo-horizontal-reverso.svg" alt="RotinaPet">
+        <button class="theme-toggle" type="button" (click)="toggleTheme()">
+          {{ isDark ? 'Modo claro' : 'Modo escuro' }}
+        </button>
+      </div>
+      <div class="e8-footer-meta">
+        <span class="footer-legal">© {{ currentYear }} RotinaPet</span>
+        <p class="e8-credits">
+          Desenvolvido por
+          <a
+            class="e8-credit-link"
+            href="https://www.linkedin.com/in/caio-vilquer/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >Caio Vilquer Carvalho</a>
+          <span class="e8-credits-sep" aria-hidden="true">·</span>
+          <a
+            class="e8-credit-link"
+            href="https://vilquer.dev"
+            target="_blank"
+            rel="noopener noreferrer"
+          >Portfólio</a>
+        </p>
+      </div>
     </footer>
   </section>
 
