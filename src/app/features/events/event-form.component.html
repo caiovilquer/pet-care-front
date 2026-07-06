@@ -6,7 +6,7 @@
       <mat-label>Pet</mat-label>
       <mat-select formControlName="petId" required>
         <mat-option *ngFor="let pet of pets" [value]="pet.id">
-          {{pet.name}} ({{pet.specie}})
+          {{pet.name}} ({{pet.species}})
         </mat-option>
       </mat-select>
       <mat-error *ngIf="eventForm.get('petId')?.hasError('required')">

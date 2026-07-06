@@ -35,7 +35,7 @@ export class PetsComponent implements OnInit {
   totalItems = 0;
   currentPage = 0;
   pageSize = 10;
-  displayedColumns: string[] = ['photo', 'name', 'specie', 'actions'];
+  displayedColumns: string[] = ['photo', 'name', 'species', 'actions'];
   isLoading = true;
 
   constructor(
@@ -121,7 +121,7 @@ export class PetsComponent implements OnInit {
     }
   }
 
-  getDefaultPetImage(specie: string): string {
+  getDefaultPetImage(species: string): string {
     // Retorna uma imagem padrão baseada na espécie
     const defaultImages: { [key: string]: string } = {
       'Cão': '🐕',
@@ -131,12 +131,12 @@ export class PetsComponent implements OnInit {
       'Coelho': '🐰',
       'Peixe': '🐠'
     };
-    return defaultImages[specie] || '🐾';
+    return defaultImages[species] || '🐾';
   }
 
   onImageError(event: Event): void {
     const imgElement = event.target as HTMLImageElement;
-    const petSpecie = imgElement.getAttribute('data-specie') || 'Pet';
+    const petSpecies = imgElement.getAttribute('data-species') || 'Pet';
     // Criar um avatar com emoji como fallback
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
@@ -148,7 +148,7 @@ export class PetsComponent implements OnInit {
       ctx.fillRect(0, 0, 40, 40);
       ctx.font = '20px serif';
       ctx.textAlign = 'center';
-      ctx.fillText(this.getDefaultPetImage(petSpecie), 20, 25);
+      ctx.fillText(this.getDefaultPetImage(petSpecies), 20, 25);
     }
     
     imgElement.src = canvas.toDataURL();

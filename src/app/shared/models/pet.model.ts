@@ -1,20 +1,20 @@
 export interface PetInfo {
   id: number;
   name: string;
-  specie: string;
+  species: string;
 }
 
 export interface PetSummary {
   id: number;
   name: string;
-  specie: string;
+  species: string;
 }
 
 export interface PetDetailResult {
   id: number;
   name: string;
-  specie: string;
-  race?: string;
+  species: string;
+  breed?: string;
   birthdate: string;
   events: EventInfo[];
 }

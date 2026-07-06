@@ -3,8 +3,8 @@ import { EventInfo } from "./event.model";
 export interface Pet {
     id: number;
     name: string;
-    specie: string;
-    race: string;
+    species: string;
+    breed: string;
     birthdate: string; // format: date
     photoUrl?: string; // URL da foto do pet
     events: EventInfo[];
@@ -13,13 +13,13 @@ export interface Pet {
 export interface PetInfo {
     id: number;
     name: string;
-    specie: string;
+    species: string;
 }
 
 export interface PetSummary {
     id: number;
     name: string;
-    specie: string;
+    species: string;
     photoUrl?: string; // URL da foto do pet
 }
 
@@ -32,16 +32,15 @@ export interface PetsPage {
 
 export interface PetCreateRequest {
     name: string;
-    specie: string;
-    race?: string;
+    species: string;
+    breed?: string;
     birthdate: string; // format: date
     photoUrl?: string; // URL da foto do pet
 }
 
 export interface PetUpdateRequest {
     name?: string;
-    specie?: string;
-    race?: string;
+    breed?: string;
     birthdate?: string; // format: date
     photoUrl?: string; // URL da foto do pet
 }

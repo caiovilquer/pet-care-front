@@ -12,7 +12,7 @@
 
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Espécie</mat-label>
-      <mat-select formControlName="specie" required>
+      <mat-select formControlName="species" required>
         <mat-option value="Cão">Cão</mat-option>
         <mat-option value="Gato">Gato</mat-option>
         <mat-option value="Pássaro">Pássaro</mat-option>
@@ -21,14 +21,15 @@
         <mat-option value="Coelho">Coelho</mat-option>
         <mat-option value="Outro">Outro</mat-option>
       </mat-select>
-      <mat-error *ngIf="petForm.get('specie')?.hasError('required')">
+      <mat-error *ngIf="petForm.get('species')?.hasError('required')">
         Espécie é obrigatória
       </mat-error>
+      <mat-hint *ngIf="isEdit">Espécie não pode ser alterada após o cadastro</mat-hint>
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Raça</mat-label>
-      <input matInput formControlName="race">
+      <input matInput formControlName="breed">
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="full-width">

@@ -61,16 +61,16 @@
                       [src]="getPetData(event.petId).photoUrl" 
                       [alt]="getPetData(event.petId).name"
                       class="pet-photo-small"
-                      (error)="onImageError($event, getPetData(event.petId).specie)">
+                      (error)="onImageError($event, getPetData(event.petId).species)">
                   } @else {
                     <div class="pet-placeholder-small">
-                      <span class="pet-emoji-small">{{getDefaultPetImage(getPetData(event.petId).specie)}}</span>
+                      <span class="pet-emoji-small">{{getDefaultPetImage(getPetData(event.petId).species)}}</span>
                     </div>
                   }
                 </div>
                 <div class="pet-details">
                   <span class="pet-name">{{getPetData(event.petId).name}}</span>
-                  <span class="pet-specie">{{getPetData(event.petId).specie}}</span>
+                  <span class="pet-specie">{{getPetData(event.petId).species}}</span>
                 </div>
               </div>
             </td>

@@ -146,7 +146,7 @@ import { EventSummary, isEventDone } from '../../core/models/event.model';
                 <mat-icon class="pet-icon">pets</mat-icon>
                 <div class="pet-info">
                   <span class="pet-name">{{pet.name}}</span>
-                  <span class="pet-specie">{{pet.specie}}</span>
+                  <span class="pet-specie">{{pet.species}}</span>
                 </div>
               </div>
             </div>

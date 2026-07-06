@@ -27,12 +27,12 @@
                [alt]="'Foto de ' + pet.name">
         } @else {
           <div class="pet-placeholder-large">
-            <span class="pet-emoji-large">{{getDefaultPetImage(pet.specie)}}</span>
+            <span class="pet-emoji-large">{{getDefaultPetImage(pet.species)}}</span>
           </div>
         }
       </div>
       <mat-card-title>{{pet.name}}</mat-card-title>
-      <mat-card-subtitle>{{pet.specie}} • {{pet.race || 'Raça não informada'}}</mat-card-subtitle>
+      <mat-card-subtitle>{{pet.species}} • {{pet.breed || 'Raça não informada'}}</mat-card-subtitle>
     </mat-card-header>
     <mat-card-content>
       <div class="pet-details-grid">
@@ -56,15 +56,15 @@
           <mat-icon class="detail-icon">category</mat-icon>
           <div class="detail-content">
             <span class="detail-label">Espécie</span>
-            <span class="detail-value">{{pet.specie}}</span>
+            <span class="detail-value">{{pet.species}}</span>
           </div>
         </div>
         
-        <div class="detail-item" *ngIf="pet.race">
+        <div class="detail-item" *ngIf="pet.breed">
           <mat-icon class="detail-icon">pets</mat-icon>
           <div class="detail-content">
             <span class="detail-label">Raça</span>
-            <span class="detail-value">{{pet.race}}</span>
+            <span class="detail-value">{{pet.breed}}</span>
           </div>
         </div>
       </div>

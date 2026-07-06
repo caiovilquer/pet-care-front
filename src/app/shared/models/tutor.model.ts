@@ -29,5 +29,5 @@ export interface TutorsPageResult {
 export interface PetInfo {
   id: number;
   name: string;
-  specie: string;
+  species: string;
 }

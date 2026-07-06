@@ -46,7 +46,7 @@ export class EventsComponent implements OnInit {
   petId: number | null = null;
   petName: string = '';
   petNamesMap: { [key: number]: string } = {};
-  petsMap: { [key: number]: { name: string; specie: string; photoUrl?: string } } = {};
+  petsMap: { [key: number]: { name: string; species: string; photoUrl?: string } } = {};
   isLoading = true;
 
   constructor(
@@ -99,7 +99,7 @@ export class EventsComponent implements OnInit {
           this.petNamesMap[pet.id] = pet.name;
           this.petsMap[pet.id] = {
             name: pet.name,
-            specie: pet.specie,
+            species: pet.species,
             photoUrl: pet.photoUrl
           };
         });
@@ -337,11 +337,11 @@ export class EventsComponent implements OnInit {
     return this.petNamesMap[petId] || `Pet #${petId}`;
   }
 
-  getPetData(petId: number): { name: string; specie: string; photoUrl?: string } {
-    return this.petsMap[petId] || { name: `Pet #${petId}`, specie: 'Desconhecido' };
+  getPetData(petId: number): { name: string; species: string; photoUrl?: string } {
+    return this.petsMap[petId] || { name: `Pet #${petId}`, species: 'Desconhecido' };
   }
 
-  getDefaultPetImage(specie: string): string {
+  getDefaultPetImage(species: string): string {
     const specieIcons: { [key: string]: string } = {
       'Cão': '🐕',
       'Gato': '🐱',
@@ -350,10 +350,10 @@ export class EventsComponent implements OnInit {
       'Hamster': '🐹',
       'Coelho': '🐰'
     };
-    return specieIcons[specie] || '🐾';
+    return specieIcons[species] || '🐾';
   }
 
-  onImageError(event: any, specie: string): void {
+  onImageError(event: any, species: string): void {
     // Substituir a imagem por um canvas com emoji quando falhar
     const img = event.target;
     const canvas = document.createElement('canvas');
@@ -374,7 +374,7 @@ export class EventsComponent implements OnInit {
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillStyle = '#374151';
-      ctx.fillText(this.getDefaultPetImage(specie), 32, 32);
+      ctx.fillText(this.getDefaultPetImage(species), 32, 32);
       
       img.src = canvas.toDataURL();
       img.classList.add('fallback-image');

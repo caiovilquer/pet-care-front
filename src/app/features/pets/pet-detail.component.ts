@@ -67,9 +67,10 @@ export class PetDetailComponent implements OnInit {
   
       },
       error: (err) => {
-  
-        this.snackBar.open('Erro ao carregar detalhes do pet.', 'Fechar', { duration: 3000 });
         this.isLoading = false;
+        if (err.status === 404) {
+          this.router.navigate(['/pets']);
+        }
       }
     });
   }
@@ -104,8 +105,8 @@ export class PetDetailComponent implements OnInit {
         data: {
           id: this.pet.id,
           name: this.pet.name,
-          specie: this.pet.specie,
-          race: this.pet.race,
+          species: this.pet.species,
+          breed: this.pet.breed,
           birthdate: this.pet.birthdate
         }
       });
@@ -201,7 +202,7 @@ export class PetDetailComponent implements OnInit {
     return 'status-pending';
   }
 
-  getDefaultPetImage(specie: string): string {
+  getDefaultPetImage(species: string): string {
     const specieIcons: { [key: string]: string } = {
       'Cão': '🐕',
       'Gato': '🐱',
@@ -210,7 +211,7 @@ export class PetDetailComponent implements OnInit {
       'Hamster': '🐹',
       'Coelho': '🐰'
     };
-    return specieIcons[specie] || '🐾';
+    return specieIcons[species] || '🐾';
   }
 
   onImageError(event: any): void {
@@ -234,7 +235,7 @@ export class PetDetailComponent implements OnInit {
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillStyle = '#374151';
-      ctx.fillText(this.getDefaultPetImage(this.pet.specie), 150, 150);
+      ctx.fillText(this.getDefaultPetImage(this.pet.species), 150, 150);
       
       img.src = canvas.toDataURL();
       img.classList.add('fallback-image');

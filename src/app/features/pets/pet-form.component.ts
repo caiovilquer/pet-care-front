@@ -49,8 +49,8 @@ export class PetFormComponent implements OnInit {
     this.isEdit = !!data;
     this.petForm = this.fb.group({
       name: ['', Validators.required],
-      specie: ['', Validators.required],
-      race: [''],
+      species: ['', Validators.required],
+      breed: [''],
       birthdate: [''],
       photoUrl: ['']
     });
@@ -63,6 +63,8 @@ export class PetFormComponent implements OnInit {
     });
 
     if (this.isEdit) {
+      this.petForm.get('species')?.disable();
+
       this.petService.getById(this.data.id).subscribe(pet => {
         // Converter a string de data para objeto Date evitando problemas de timezone
         let birthdate = null;
@@ -90,24 +92,31 @@ export class PetFormComponent implements OnInit {
     }
 
     this.isLoading = true;
-    const formValue = this.petForm.value;
-
-    const request: PetCreateRequest | PetUpdateRequest = {
-      name: formValue.name,
-      specie: formValue.specie,
-      race: formValue.race,
-      birthdate: formValue.birthdate ? this.dateTimeService.formatDateOnlyForAPI(formValue.birthdate) : '',
-      photoUrl: formValue.photoUrl || ''
-    };
+    const formValue = this.petForm.getRawValue();
 
     if (this.isEdit) {
-      this.petService.update(this.data.id, request as PetUpdateRequest).subscribe({
+      const updateRequest: PetUpdateRequest = {
+        name: formValue.name,
+        breed: formValue.breed,
+        birthdate: formValue.birthdate ? this.dateTimeService.formatDateOnlyForAPI(formValue.birthdate) : '',
+        photoUrl: formValue.photoUrl || ''
+      };
+
+      this.petService.update(this.data.id, updateRequest).subscribe({
         next: () => this.handleSuccess('Pet atualizado com sucesso!'),
         error: (err) => this.handleError(err, 'Erro ao atualizar pet.'),
         complete: () => this.isLoading = false
       });
     } else {
-      this.petService.create(request as PetCreateRequest).subscribe({
+      const createRequest: PetCreateRequest = {
+        name: formValue.name,
+        species: formValue.species,
+        breed: formValue.breed,
+        birthdate: formValue.birthdate ? this.dateTimeService.formatDateOnlyForAPI(formValue.birthdate) : '',
+        photoUrl: formValue.photoUrl || ''
+      };
+
+      this.petService.create(createRequest).subscribe({
         next: () => this.handleSuccess('Pet adicionado com sucesso!'),
         error: (err) => this.handleError(err, 'Erro ao adicionar pet.'),
         complete: () => this.isLoading = false
