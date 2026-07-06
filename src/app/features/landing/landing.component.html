@@ -57,8 +57,16 @@
 
   <!-- ============ E2 — A Chegada ============ -->
   <section class="e2">
-    <div class="e2-photo organic-1 u-reveal" #revealEl aria-hidden="true">
-      <span class="photo-mark"></span>
+    <div class="e2-photo organic-1 u-reveal" #revealEl>
+      <img
+        class="landing-photo"
+        src="images/chegada.webp"
+        alt="Filhote vira-lata nos braços de quem a recebeu"
+        width="1000"
+        height="1250"
+        loading="lazy"
+        decoding="async"
+      >
     </div>
     <div class="e2-text u-reveal" #revealEl>
       <p class="q-overline">01 · a chegada</p>
@@ -89,7 +97,17 @@
     </div>
 
     <div class="momento momento-right momento-foto u-reveal" #revealEl>
-      <div class="e3-photo organic-2" aria-hidden="true"><span class="photo-mark"></span></div>
+      <div class="e3-photo organic-2">
+        <img
+          class="landing-photo"
+          src="images/consulta.webp"
+          alt="Cachorra na mesa de consulta veterinária"
+          width="1100"
+          height="880"
+          loading="lazy"
+          decoding="async"
+        >
+      </div>
       <div class="momento-copy">
         <p class="momento-frase">Tarde — a caderneta de vacina, sempre em dia.</p>
         <span class="q-ev-chip q-ev-vaccine">V10 · aplicada</span>
@@ -133,7 +151,17 @@
 
   <!-- ============ E5 — A Pausa ============ -->
   <section class="e5 u-reveal" #revealEl>
-    <div class="e5-photo" aria-hidden="true"><span class="photo-mark"></span></div>
+    <div class="e5-photo" aria-hidden="true">
+      <img
+        class="landing-photo"
+        src="images/pausa.webp"
+        alt=""
+        width="1800"
+        height="1013"
+        loading="lazy"
+        decoding="async"
+      >
+    </div>
     <p class="e5-frase">Cuidar também é descansar.</p>
   </section>
 
@@ -145,6 +173,17 @@
       @for (point of lifePoints; track point.age) {
         <div class="timeline-point u-reveal" [class]="'side-' + point.side" #revealEl>
           <span class="timeline-dot" aria-hidden="true"></span>
+          @if (point.image) {
+            <div class="timeline-photo" [ngClass]="point.imageShape ?? 'organic-3'">
+              <img
+                class="landing-photo"
+                [src]="point.image"
+                [alt]="point.imageAlt ?? ''"
+                loading="lazy"
+                decoding="async"
+              >
+            </div>
+          }
           <p class="timeline-age">{{ point.age }}</p>
           <p class="timeline-text">{{ point.text }}</p>
         </div>

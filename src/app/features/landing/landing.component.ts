@@ -22,6 +22,9 @@ interface LifePoint {
   age: string;
   text: string;
   side: 'left' | 'right';
+  image?: string;
+  imageAlt?: string;
+  imageShape?: 'organic-1' | 'organic-2' | 'organic-3';
 }
 
 @Component({
@@ -53,14 +56,28 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly lifePoints: LifePoint[] = [
     { age: 'filhote', text: 'A primeira vacina, o primeiro nome na agenda.', side: 'left' },
     { age: 'adulta', text: 'A rotina vira hábito: passeio, ração, remédio, sempre na hora certa.', side: 'right' },
-    { age: 'uma ninhada', text: 'Uma nova vida chega, e o histórico dela começa junto.', side: 'left' },
-    { age: 'anos grisalhos', text: 'Anos de cuidado, num só lugar — pronto para mostrar ao veterinário.', side: 'right' }
+    {
+      age: 'uma ninhada',
+      text: 'Uma nova vida chega, e o histórico dela começa junto.',
+      side: 'left',
+      image: 'images/ninhada.webp',
+      imageAlt: 'Filhotes recém-nascidos com a mãe',
+      imageShape: 'organic-3'
+    },
+    {
+      age: 'anos grisalhos',
+      text: 'Anos de cuidado, num só lugar — pronto para mostrar ao veterinário.',
+      side: 'right',
+      image: 'images/idosa.webp',
+      imageAlt: 'Cachorra idosa com óculos, pronta para a consulta',
+      imageShape: 'organic-2'
+    }
   ];
 
   private observer?: IntersectionObserver;
 
   ngOnInit(): void {
-    this.isDark = this.resolveIsDark();
+    this.applyLandingTheme();
     this.topbarScrolled = typeof window !== 'undefined' && window.scrollY > 12;
   }
 
@@ -110,10 +127,21 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.setTheme(this.isDark ? 'light' : 'dark');
   }
 
-  private resolveIsDark(): boolean {
-    const attr = document.documentElement.getAttribute('data-theme');
-    if (attr === 'dark') return true;
-    if (attr === 'light') return false;
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  private applyLandingTheme(): void {
+    let saved: string | null = null;
+    try {
+      saved = localStorage.getItem('rp-theme');
+    } catch {
+      /* localStorage indisponível */
+    }
+
+    if (saved === 'dark' || saved === 'light') {
+      document.documentElement.setAttribute('data-theme', saved);
+      this.isDark = saved === 'dark';
+      return;
+    }
+
+    document.documentElement.setAttribute('data-theme', 'light');
+    this.isDark = false;
   }
 }
