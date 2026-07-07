@@ -38,6 +38,27 @@ export interface DaySchedule {
   closeTime?: string; // HH:mm format
 }
 
+// Detalhes completos de um local, buscados sob demanda (tela de detalhe) —
+// o backend só resolve isso quando o usuário efetivamente abre o local.
+export interface PlaceDetailsInfo {
+  description: string;
+  phone?: string;
+  website?: string;
+  googleMapsUrl?: string;
+  priceLevel?: number;
+  businessStatus?: string;
+  openingHours: OpeningHours | null;
+  photos: string[]; // URLs prontas (via proxy do backend)
+}
+
+export interface PlaceReviewInfo {
+  authorName: string;
+  rating: number;
+  text: string;
+  relativeTime: string;
+  profilePhotoUrl?: string;
+}
+
 export interface Petshop extends Location {
   type: 'petshop';
   hasGrooming: boolean;

@@ -12,8 +12,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Inject } from '@angular/core';
 import { Location, Petshop, Veterinary } from '../../core/models/location.model';
 import { LocationService } from '../../core/services/location.service';
-import { GoogleMapsService } from '../../core/services/google-maps.service';
-import { Subject, forkJoin } from 'rxjs';
+import { Subject } from 'rxjs';
 import { takeUntil, catchError, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
 
@@ -179,24 +178,6 @@ import { of } from 'rxjs';
                     <div class="detail-item" *ngIf="detailedInfo.priceLevel && detailedInfo.priceLevel > 0">
                       <strong>Nível de preços</strong>
                       <p>{{ getPriceLevelText(detailedInfo.priceLevel) }}</p>
-                    </div>
-
-                    <div class="detail-item" *ngIf="detailedInfo.accessibility?.length > 0">
-                      <strong>Acessibilidade</strong>
-                      <mat-chip-set>
-                        <mat-chip *ngFor="let feature of detailedInfo.accessibility">
-                          {{ getAccessibilityLabel(feature) }}
-                        </mat-chip>
-                      </mat-chip-set>
-                    </div>
-
-                    <div class="detail-item" *ngIf="detailedInfo.paymentMethods?.length > 0">
-                      <strong>Formas de pagamento</strong>
-                      <mat-chip-set>
-                        <mat-chip *ngFor="let method of detailedInfo.paymentMethods">
-                          {{ getPaymentMethodLabel(method) }}
-                        </mat-chip>
-                      </mat-chip-set>
                     </div>
 
                     <!-- Mensagem quando não houver detalhes adicionais -->
@@ -1095,7 +1076,6 @@ export class LocationDetailComponent implements OnInit, OnDestroy {
     @Inject(MAT_DIALOG_DATA) public data: { location: Location },
     private dialogRef: MatDialogRef<LocationDetailComponent>,
     private locationService: LocationService,
-    private googleMapsService: GoogleMapsService,
     private toast: ToastService
   ) {
     this.location = data.location;
@@ -1117,39 +1097,25 @@ export class LocationDetailComponent implements OnInit, OnDestroy {
 
   loadDetailedInfo() {
     this.loadingDetails = true;
-    
-    // ULTRA ECONÔMICO: Carregar apenas detalhes essenciais, sem reviews
-    this.googleMapsService.getPlaceDetails(this.location.id).pipe(
+
+    // Carregado sob demanda: só quando o usuário abre a tela de detalhe é
+    // que pagamos um Place Details — nunca durante a busca/listagem.
+    this.locationService.getPlaceDetails(this.location.id).pipe(
       takeUntil(this.destroy$),
       finalize(() => this.loadingDetails = false)
     ).subscribe({
       next: (details) => {
-        console.log('Detalhes carregados:', details);
-        if (details) {
-          this.detailedInfo = details;
-        } else {
-          // Se não houver detalhes, criar objeto vazio mas válido
-          this.detailedInfo = {
-            description: '',
-            priceLevel: 0,
-            photos: [],
-            phone: this.location.phone || '',
-            website: this.location.website || '',
-            googleMapsUrl: '',
-            types: [],
-            vicinity: '',
-            addressComponents: [],
-            accessibility: [],
-            paymentMethods: [],
-            businessStatus: '',
-            openingHours: null
-          };
-          this.toast.warning('Algumas informações não estão disponíveis');
+        this.detailedInfo = details;
+
+        // A grade semanal completa só existe a partir daqui — mescla no
+        // `location` (a lista trazia apenas aberto/fechado agora).
+        if (details.openingHours) {
+          this.location = { ...this.location, openingHours: details.openingHours };
+          this.checkIfOpen();
         }
       },
       error: (error) => {
         console.error('Erro ao carregar detalhes:', error);
-        // Mesmo em caso de erro, criar estrutura básica
         this.detailedInfo = {
           description: '',
           priceLevel: 0,
@@ -1157,11 +1123,6 @@ export class LocationDetailComponent implements OnInit, OnDestroy {
           phone: this.location.phone || '',
           website: this.location.website || '',
           googleMapsUrl: '',
-          types: [],
-          vicinity: '',
-          addressComponents: [],
-          accessibility: [],
-          paymentMethods: [],
           businessStatus: '',
           openingHours: null
         };
@@ -1172,9 +1133,9 @@ export class LocationDetailComponent implements OnInit, OnDestroy {
 
   loadReviews() {
     if (this.reviewsLoaded) return; // Já carregou ou está carregando
-    
+
     this.loadingReviews = true;
-    this.googleMapsService.getPlaceReviews(this.location.id).pipe(
+    this.locationService.getPlaceReviews(this.location.id).pipe(
       catchError(() => of([])),
       takeUntil(this.destroy$),
       finalize(() => {
@@ -1261,15 +1222,13 @@ export class LocationDetailComponent implements OnInit, OnDestroy {
 
   hasAdditionalDetails(): boolean {
     if (!this.detailedInfo) return false;
-    
+
     return !!(
       this.detailedInfo.description ||
       this.detailedInfo.phone ||
       this.detailedInfo.website ||
       this.detailedInfo.googleMapsUrl ||
-      (this.detailedInfo.priceLevel && this.detailedInfo.priceLevel > 0) ||
-      (this.detailedInfo.accessibility && this.detailedInfo.accessibility.length > 0) ||
-      (this.detailedInfo.paymentMethods && this.detailedInfo.paymentMethods.length > 0)
+      (this.detailedInfo.priceLevel && this.detailedInfo.priceLevel > 0)
     );
   }
 
@@ -1319,27 +1278,6 @@ export class LocationDetailComponent implements OnInit, OnDestroy {
   getPriceLevelText(level: number): string {
     const levels = ['Muito barato', 'Barato', 'Moderado', 'Caro', 'Muito caro'];
     return levels[level - 1] || 'Não informado';
-  }
-
-  getAccessibilityLabel(feature: string): string {
-    const labels: { [key: string]: string } = {
-      wheelchair_accessible: 'Acessível para cadeirantes',
-      parking: 'Estacionamento acessível',
-      entrance: 'Entrada acessível',
-      restroom: 'Banheiro acessível'
-    };
-    return labels[feature] || feature;
-  }
-
-  getPaymentMethodLabel(method: string): string {
-    const labels: { [key: string]: string } = {
-      cash: 'Dinheiro',
-      credit_card: 'Cartão de crédito',
-      debit_card: 'Cartão de débito',
-      pix: 'PIX',
-      check: 'Cheque'
-    };
-    return labels[method] || method;
   }
 
   onCall() {
