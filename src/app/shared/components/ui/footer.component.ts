@@ -9,7 +9,9 @@ import { CommonModule } from '@angular/common';
   template: `
     <footer class="rp-footer">
       <div class="rp-footer-main">
-        <img class="rp-footer-wordmark" src="logo-horizontal.svg" alt="RotinaPet">
+        <img class="rp-footer-wordmark"
+             [src]="isDark ? 'logo-horizontal-reverso.svg' : 'logo-horizontal.svg'"
+             alt="RotinaPet">
         <button class="rp-footer-theme-toggle" type="button" (click)="themeToggle.emit()">
           {{ isDark ? 'Modo claro' : 'Modo escuro' }}
         </button>
