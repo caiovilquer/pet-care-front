@@ -43,7 +43,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
       }
 
       // Exibir erro apenas se não for uma requisição de autenticação
-      if (!req.url.includes('/auth/login') && !req.url.includes('/auth/signup')) {
+      if (!req.url.includes('/auth/login') && !req.url.includes('/auth/signup') && !req.url.includes('/auth/refresh')) {
         toast.error(errorMessage, 5000);
       }
 

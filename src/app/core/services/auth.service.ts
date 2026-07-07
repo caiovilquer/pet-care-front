@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, finalize, shareReplay, tap } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
 import { LoginDto, TokenDto, CreateRequest } from '../../shared/models/auth.model';
 import { TutorCreatedResult } from '../../shared/models/tutor.model';
@@ -22,6 +22,8 @@ export class AuthService {
   private currentUserSubject = new BehaviorSubject<any>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
+  private refreshInFlight$: Observable<TokenDto> | null = null;
+
   constructor(private http: HttpClient) {
     this.loadCurrentUser();
   }
@@ -30,7 +32,7 @@ export class AuthService {
     return this.http.post<TokenDto>(`${this.API_URL}/auth/login`, credentials)
       .pipe(
         tap(response => {
-          this.setToken(response.token);
+          this.setToken(this.extractAccessToken(response));
           this.loadCurrentUser();
         })
       );
@@ -40,7 +42,33 @@ export class AuthService {
     return this.http.post<TutorCreatedResult>(`${this.API_URL}/public/signup`, userData);
   }
 
-  logout(): void {
+  /** Renova o access token usando o refresh token (cookie HttpOnly). Único voo em andamento é reaproveitado por chamadas concorrentes. */
+  refreshToken(): Observable<TokenDto> {
+    if (!this.refreshInFlight$) {
+      this.refreshInFlight$ = this.http.post<TokenDto>(`${this.API_URL}/auth/refresh`, {}).pipe(
+        tap(response => {
+          this.setToken(this.extractAccessToken(response));
+          this.loadCurrentUser();
+        }),
+        finalize(() => this.refreshInFlight$ = null),
+        shareReplay(1)
+      );
+    }
+    return this.refreshInFlight$;
+  }
+
+  logout(): Observable<void> {
+    return this.http.post<void>(`${this.API_URL}/auth/logout`, {})
+      .pipe(finalize(() => this.clearSession()));
+  }
+
+  logoutAll(): Observable<void> {
+    return this.http.post<void>(`${this.API_URL}/auth/logout-all`, {})
+      .pipe(finalize(() => this.clearSession()));
+  }
+
+  /** Limpa apenas o estado local (sem chamar o backend) — usado após logout/refresh mal sucedido. */
+  clearSession(): void {
     localStorage.removeItem(this.TOKEN_KEY);
     this.currentUserSubject.next(null);
   }
@@ -75,8 +103,12 @@ export class AuthService {
           token: token
         });
       } catch {
-        this.logout();
+        this.clearSession();
       }
     }
+  }
+
+  private extractAccessToken(response: TokenDto): string {
+    return response.access_token ?? response.token;
   }
 }
