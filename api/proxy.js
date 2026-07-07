@@ -2,6 +2,9 @@
  * Proxy same-origin para a API backend.
  * A URL real fica em API_BACKEND_URL (variável de ambiente no Vercel).
  * Com isso o refresh_token é gravado no domínio do frontend (first-party).
+ *
+ * Roteado via vercel.json: /api/v1/:path* -> /api/proxy?path=:path*
+ * (catch-all aninhado em api/v1/ não cobre paths com múltiplos segmentos no Vercel)
  */
 module.exports = async (req, res) => {
   const backendBase = process.env.API_BACKEND_URL;

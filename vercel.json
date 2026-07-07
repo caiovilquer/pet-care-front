@@ -4,6 +4,10 @@
   "outputDirectory": "dist/pet-care-scheduler-front/browser",
   "rewrites": [
     {
+      "source": "/api/v1/:path*",
+      "destination": "/api/proxy?path=:path*"
+    },
+    {
       "source": "/((?!api/).*)",
       "destination": "/index.html"
     }
