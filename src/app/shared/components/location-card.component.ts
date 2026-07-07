@@ -602,14 +602,22 @@ export class LocationCardComponent {
   }
 
   getTodayHours(): string {
+    // A listagem só tem o status em tempo real (isOpen); a grade semanal
+    // completa só existe depois que a tela de detalhe a busca sob demanda.
+    // Sem ela, cair no texto por dia mostraria "Fechado hoje" mesmo quando
+    // isOpen é true — usar o status real em vez de inventar um horário.
+    if (!this.locationService.hasKnownOpeningHours(this.location)) {
+      return this.isOpen ? 'Aberto agora' : 'Fechado no momento';
+    }
+
     const now = new Date();
     const dayOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][now.getDay()] as keyof typeof this.location.openingHours;
     const todaySchedule = this.location.openingHours[dayOfWeek];
-    
+
     if (!todaySchedule?.isOpen) {
       return 'Fechado hoje';
     }
-    
+
     if (todaySchedule.openTime && todaySchedule.closeTime) {
       // Verificar se é 24h
       if (todaySchedule.openTime === '00:00' && todaySchedule.closeTime === '23:59') {
@@ -617,7 +625,7 @@ export class LocationCardComponent {
       }
       return `${todaySchedule.openTime} às ${todaySchedule.closeTime}`;
     }
-    
+
     return 'Horário não informado';
   }
 
@@ -626,8 +634,8 @@ export class LocationCardComponent {
   }
 
   getNextOpenTime(): string | null {
-    if (this.isOpen) return null;
-    
+    if (this.isOpen || !this.locationService.hasKnownOpeningHours(this.location)) return null;
+
     const now = new Date();
     const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
     

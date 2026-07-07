@@ -220,34 +220,40 @@ import { of } from 'rxjs';
               </mat-card-header>
               <mat-card-content>
                 <div class="hours-list">
-                  <div 
-                    class="day-hours" 
-                    *ngFor="let day of weekDays; let i = index"
-                    [class.today]="isToday(i)"
-                    [class.open]="isDayOpen(day.key)"
-                    [class.closed]="!isDayOpen(day.key)">
-                    
-                    <div class="day-name">
-                      <span>{{ day.label }}</span>
-                      <span *ngIf="isToday(i)" class="today-badge">Hoje</span>
+                  <!-- A grade só aparece com dados reais (após carregar detalhes) —
+                       exibi-la vazia ("Fechado" em todos os dias) contradiria o
+                       status "Aberto agora" do topo, que já é o dado correto. -->
+                  <ng-container *ngIf="hasOpeningHoursData(); else noHoursInfo">
+                    <div
+                      class="day-hours"
+                      *ngFor="let day of weekDays; let i = index"
+                      [class.today]="isToday(i)"
+                      [class.open]="isDayOpen(day.key)"
+                      [class.closed]="!isDayOpen(day.key)">
+
+                      <div class="day-name">
+                        <span>{{ day.label }}</span>
+                        <span *ngIf="isToday(i)" class="today-badge">Hoje</span>
+                      </div>
+
+                      <div class="day-time">
+                        <span *ngIf="isDayOpen(day.key) && getDayHours(day.key) !== 'Horário não informado'; else closedOrUnknown">
+                          {{ getDayHours(day.key) }}
+                        </span>
+                        <ng-template #closedOrUnknown>
+                          <span class="closed-text">{{ getDayHours(day.key) }}</span>
+                        </ng-template>
+                      </div>
                     </div>
-                    
-                    <div class="day-time">
-                      <span *ngIf="isDayOpen(day.key) && getDayHours(day.key) !== 'Horário não informado'; else closedOrUnknown">
-                        {{ getDayHours(day.key) }}
-                      </span>
-                      <ng-template #closedOrUnknown>
-                        <span class="closed-text">{{ getDayHours(day.key) }}</span>
-                      </ng-template>
+                  </ng-container>
+
+                  <ng-template #noHoursInfo>
+                    <div class="no-hours-info">
+                      <mat-icon>info_outline</mat-icon>
+                      <p>{{ isOpen ? 'Aberto agora' : 'Fechado no momento' }} — grade semanal completa não carregada ainda.</p>
+                      <p class="small-text">Abra a aba Informações e carregue os detalhes para ver a grade completa, ou entre em contato diretamente com o estabelecimento.</p>
                     </div>
-                  </div>
-                  
-                  <!-- Mensagem quando não há horários disponíveis -->
-                  <div class="no-hours-info" *ngIf="!hasOpeningHoursData()">
-                    <mat-icon>info_outline</mat-icon>
-                    <p>Horários de funcionamento não disponíveis no Google Maps.</p>
-                    <p class="small-text">Entre em contato diretamente com o estabelecimento para confirmar os horários.</p>
-                  </div>
+                  </ng-template>
                 </div>
 
                 <div class="next-open" *ngIf="!isOpen && getNextOpenTime()">

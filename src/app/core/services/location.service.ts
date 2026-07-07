@@ -103,6 +103,20 @@ export class LocationService {
     return zipCode;
   }
 
+  /**
+   * A busca/listagem só traz "aberto agora" (booleano em tempo real); a
+   * grade semanal completa (`openingHours`) só é preenchida de fato depois
+   * que a tela de detalhe busca os horários sob demanda. Até lá, todo
+   * `openingHours` vem como um placeholder "fechado o dia inteiro" — usar
+   * esse método antes de exibir textos como "Fechado hoje"/horário
+   * específico, para não contradizer o status real (`isOpen`).
+   */
+  hasKnownOpeningHours(location: Location): boolean {
+    return Object.values(location.openingHours).some(
+      day => day.isOpen || day.openTime || day.closeTime
+    );
+  }
+
   isOpenNow(location: Location): boolean {
     if (location.isOpen !== undefined) {
       return location.isOpen;
