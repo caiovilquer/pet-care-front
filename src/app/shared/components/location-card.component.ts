@@ -50,16 +50,21 @@ import { LocationService } from '../../core/services/location.service';
             {{ getTypeLabel() }}
           </div>
           
-          <div class="rating-distance">
-            <div class="rating">
+          <div class="location-meta">
+            <div class="meta-item rating">
               <mat-icon class="star">star</mat-icon>
-              <span>{{ location.rating.toFixed(1) }}</span>
-              <span class="review-count">({{ location.reviewCount }})</span>
+              <span class="rating-value">{{ location.rating.toFixed(1) }}</span>
+              <span class="review-count">{{ location.reviewCount }} avaliações</span>
             </div>
-            <div class="distance">
-              <mat-icon>near_me</mat-icon>
-              <span>{{ location.distanceText || (location.distance.toFixed(1) + 'km') }}</span>
-              <span *ngIf="location.durationText" class="duration"> • {{ location.durationText }}</span>
+            <div class="meta-row">
+              <div class="meta-item distance">
+                <mat-icon>near_me</mat-icon>
+                <span>{{ location.distanceText || (location.distance.toFixed(1) + ' km') }}</span>
+              </div>
+              <div class="meta-item duration" *ngIf="location.durationText">
+                <mat-icon>schedule</mat-icon>
+                <span>{{ location.durationText }}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -176,6 +181,7 @@ import { LocationService } from '../../core/services/location.service';
 
     .location-card mat-card-content {
       flex: 1;
+      padding: 0 1rem 1rem;
     }
 
     .location-card:hover {
@@ -297,48 +303,48 @@ import { LocationService } from '../../core/services/location.service';
       width: 18px;
     }
 
-    .rating-distance {
+    .location-meta {
       display: flex;
-      gap: 1rem;
-      align-items: center;
+      flex-direction: column;
+      gap: 0.5rem;
     }
 
-    .rating {
+    .meta-row {
       display: flex;
-      align-items: center;
-      gap: 0.25rem;
-      color: #DFA32E;
+      flex-wrap: wrap;
+      gap: 0.75rem;
     }
 
-    .rating .star {
-      color: #DFA32E;
+    .meta-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.875rem;
+      color: var(--q-text-2);
+    }
+
+    .meta-item mat-icon {
+      flex-shrink: 0;
       font-size: 18px;
       height: 18px;
       width: 18px;
     }
 
+    .meta-item.rating {
+      color: #DFA32E;
+    }
+
+    .meta-item.rating .star {
+      color: #DFA32E;
+    }
+
+    .rating-value {
+      font-weight: 600;
+    }
+
     .review-count {
       color: var(--q-text-2);
-      font-size: 0.85rem;
-    }
-
-    .distance {
-      display: flex;
-      align-items: center;
-      gap: 0.25rem;
-      color: var(--q-text-2);
-      font-size: 0.9rem;
-    }
-
-    .distance mat-icon {
-      font-size: 16px;
-      height: 16px;
-      width: 16px;
-    }
-
-    .duration {
-      color: var(--q-text-3);
-      font-size: 0.85rem;
+      font-size: 0.8125rem;
     }
 
     .address {
@@ -347,11 +353,23 @@ import { LocationService } from '../../core/services/location.service';
       gap: 0.5rem;
       margin-bottom: 1rem;
       color: var(--q-text-2);
+      min-width: 0;
     }
 
     .address mat-icon {
-      margin-top: 2px;
+      flex-shrink: 0;
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+      margin-top: 1px;
       color: var(--q-green-600);
+      overflow: visible;
+    }
+
+    .address span {
+      flex: 1;
+      min-width: 0;
+      line-height: 1.45;
     }
 
     .contact-info {
@@ -492,7 +510,11 @@ import { LocationService } from '../../core/services/location.service';
         align-self: center;
       }
 
-      .rating-distance {
+      .location-meta {
+        align-items: center;
+      }
+
+      .meta-row {
         justify-content: center;
       }
 
