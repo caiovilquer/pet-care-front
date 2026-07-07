@@ -8,6 +8,7 @@ import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ToastService } from '../../core/services/toast.service';
 import { PetService } from '../../core/services/pet.service';
+import { UserStateService } from '../../core/services/user-state.service';
 import { PetSummary, PetsPage } from '../../core/models/pet.model';
 import { PetFormComponent } from './pet-form.component';
 import { PageHeaderComponent } from '../../shared/components/ui/page-header.component';
@@ -45,7 +46,8 @@ export class PetsComponent implements OnInit {
   constructor(
     private petService: PetService,
     private dialog: MatDialog,
-    private toast: ToastService
+    private toast: ToastService,
+    private userStateService: UserStateService
   ) { }
 
   ngOnInit(): void {
@@ -54,7 +56,7 @@ export class PetsComponent implements OnInit {
 
   loadPets(): void {
     this.isLoading = true;
-    this.petService.getAll(this.currentPage, this.pageSize).subscribe({
+    this.petService.getAllCached(this.currentPage, this.pageSize).subscribe({
       next: (page: PetsPage) => {
         this.pets = page.items;
         this.totalItems = page.total;
@@ -84,6 +86,7 @@ export class PetsComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.loadPets();
+        this.userStateService.notifyUserUpdated();
       }
     });
   }
@@ -97,6 +100,7 @@ export class PetsComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.loadPets();
+        this.userStateService.notifyUserUpdated();
       }
     });
   }
@@ -117,6 +121,7 @@ export class PetsComponent implements OnInit {
         next: () => {
           this.toast.success(`${pet.name} foi removido.`);
           this.loadPets();
+          this.userStateService.notifyUserUpdated();
         },
         error: () => {
           this.toast.error('Erro ao remover pet.');

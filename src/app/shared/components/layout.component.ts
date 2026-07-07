@@ -426,7 +426,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
   }
 
   loadUserProfile(): void {
-    this.tutorService.getMyProfile().subscribe({
+    this.tutorService.getMyProfileCached().subscribe({
       next: (user) => {
         this.currentUser = user;
         this.avatarFailed = false;
@@ -443,7 +443,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
   }
 
   private loadUpcomingEventsCount(pets: any[]): void {
-    const petEventRequests = pets.map(pet => this.eventService.listByPet(pet.id));
+    const petEventRequests = pets.map(pet => this.eventService.listByPetCached(pet.id));
 
     forkJoin(petEventRequests).subscribe({
       next: (petEventsArrays) => {
@@ -529,7 +529,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
   }
 
   private refreshUserProfile(): void {
-    this.tutorService.getMyProfile().subscribe({
+    this.tutorService.getMyProfileCached().subscribe({
       next: (user) => {
         this.currentUser = user;
         this.avatarFailed = false;

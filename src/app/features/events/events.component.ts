@@ -76,7 +76,7 @@ export class EventsComponent implements OnInit {
 
   private loadPetName(): void {
     if (this.petId) {
-      this.petService.getById(this.petId).subscribe({
+      this.petService.getByIdCached(this.petId).subscribe({
         next: (pet) => {
           this.petName = pet.name;
         },
@@ -88,7 +88,7 @@ export class EventsComponent implements OnInit {
   }
 
   private loadPetsMap(): void {
-    this.petService.getPets().subscribe({
+    this.petService.getPetsCached().subscribe({
       next: (pets) => {
         this.petNamesMap = {};
         this.petsMap = {};
@@ -109,7 +109,7 @@ export class EventsComponent implements OnInit {
 
   loadAllEvents(): void {
     this.isLoading = true;
-    this.eventService.getAll(this.currentPage, this.pageSize).subscribe({
+    this.eventService.getAllCached(this.currentPage, this.pageSize).subscribe({
       next: (page: EventsPage) => {
         this.events = this.sortEventsByDate(page.items);
         this.buildGroups();
@@ -130,7 +130,7 @@ export class EventsComponent implements OnInit {
   loadEventsByPet(): void {
     if (this.petId) {
       this.isLoading = true;
-      this.eventService.listByPet(this.petId).pipe(
+      this.eventService.listByPetCached(this.petId).pipe(
         map((events: Event[]): EventSummary[] => {
           return events.map(event => {
             const eventWithPetId: EventSummary = {

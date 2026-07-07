@@ -10,6 +10,7 @@ import { SkeletonComponent } from '../../shared/components/ui/skeleton.component
 import { ToastService } from '../../core/services/toast.service';
 import { PetService } from '../../core/services/pet.service';
 import { EventService } from '../../core/services/event.service';
+import { UserStateService } from '../../core/services/user-state.service';
 import { DateTimeService } from '../../core/services/datetime.service';
 import { Pet } from '../../core/models/pet.model';
 import { EventSummary } from '../../core/models/event.model';
@@ -43,7 +44,8 @@ export class PetDetailComponent implements OnInit {
     private eventService: EventService,
     private dateTimeService: DateTimeService,
     private dialog: MatDialog,
-    private toast: ToastService
+    private toast: ToastService,
+    private userStateService: UserStateService
   ) { }
 
   ngOnInit(): void {
@@ -60,7 +62,7 @@ export class PetDetailComponent implements OnInit {
   }
 
   private loadPetDetails(): void {
-    this.petService.getById(this.petId).subscribe({
+    this.petService.getByIdCached(this.petId).subscribe({
       next: (pet) => {
         this.pet = pet;
         this.isLoading = false;
@@ -76,7 +78,7 @@ export class PetDetailComponent implements OnInit {
   }
 
   private loadRecentEvents(): void {
-    this.eventService.listByPet(this.petId).subscribe({
+    this.eventService.listByPetCached(this.petId).subscribe({
       next: (events) => {
         // Pegar apenas os 5 eventos mais recentes
         this.recentEvents = events
@@ -116,6 +118,7 @@ export class PetDetailComponent implements OnInit {
           // Recarregar os dados do pet após edição
           this.loadPetDetails();
           this.toast.success('Pet atualizado com sucesso!');
+          this.userStateService.notifyUserUpdated();
         }
       });
     }

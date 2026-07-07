@@ -330,7 +330,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   loadProfile(): void {
-    this.tutorService.getMyProfile().subscribe({
+    this.tutorService.getMyProfileCached().subscribe({
       next: (user) => {
         this.currentUser = user;
         this.avatarFailed = false;
@@ -356,7 +356,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   private loadEventsForAllPets(pets: any[]): void {
-    const petEventRequests = pets.map(pet => this.eventService.listByPet(pet.id));
+    const petEventRequests = pets.map(pet => this.eventService.listByPetCached(pet.id));
 
     forkJoin(petEventRequests).subscribe({
       next: (petEventsArrays) => {

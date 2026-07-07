@@ -78,7 +78,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   loadDashboardData(): void {
     this.isLoading = true;
-    this.tutorService.getMyProfile().subscribe({
+    this.tutorService.getMyProfileCached().subscribe({
       next: (user: Tutor) => {
         this.currentUser = user;
         this.totalPets = user.pets.length;
@@ -110,7 +110,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   private loadEventsForAllPets(pets: any[]): void {
     const petEventRequests = pets.map(pet => {
-      return this.eventService.listByPet(pet.id);
+      return this.eventService.listByPetCached(pet.id);
     });
 
     forkJoin(petEventRequests).subscribe({

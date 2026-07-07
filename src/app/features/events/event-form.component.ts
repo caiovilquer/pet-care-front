@@ -126,7 +126,7 @@ export class EventFormComponent implements OnInit {
 
   loadPets(): void {
     // Assuming the user has a reasonable number of pets, otherwise use pagination
-    this.petService.getAll(0, 100).subscribe(page => {
+    this.petService.getAllCached(0, 100).subscribe(page => {
       this.pets = page.items;
     });
   }
