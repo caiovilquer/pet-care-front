@@ -16,6 +16,7 @@ import { DateTimeService } from '../../core/services/datetime.service';
 import { UserStateService } from '../../core/services/user-state.service';
 import { TutorDetailResult } from '../../shared/models/tutor.model';
 import { isEventDone } from '../../core/models/event.model';
+import { FooterComponent } from './ui/footer.component';
 
 @Component({
   selector: 'app-layout',
@@ -29,7 +30,8 @@ import { isEventDone } from '../../core/models/event.model';
     MatIconModule,
     MatMenuModule,
     MatDividerModule,
-    MatTooltipModule
+    MatTooltipModule,
+    FooterComponent
   ],
   template: `
     <div class="shell">
@@ -76,6 +78,7 @@ import { isEventDone } from '../../core/models/event.model';
 
       <main class="rp-main">
         <router-outlet></router-outlet>
+        <rp-footer [isDark]="isDark" (themeToggle)="toggleTheme()"></rp-footer>
       </main>
 
       <nav class="rp-bottom-nav" aria-label="Navegação principal">
