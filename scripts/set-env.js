@@ -27,9 +27,13 @@ function loadLocalEnv() {
 // Função para criar o arquivo env.js com as variáveis de ambiente
 function createEnvFile() {
   const localEnv = loadLocalEnv();
-  
+
+  const backendUrl = process.env['API_BACKEND_URL'] || localEnv['API_BACKEND_URL'];
+  const explicitApiUrl = process.env['API_URL'] || localEnv['API_URL'];
+
   const envConfig = {
-    API_URL: process.env['API_URL'] || localEnv['API_URL'] || '/api/v1',
+    // Com proxy (dev: ng serve / prod: api/v1/[...path].js no Vercel), use caminho relativo.
+    API_URL: explicitApiUrl || (backendUrl ? '/api/v1' : '/api/v1'),
     GOOGLE_MAPS_API_KEY: process.env['GOOGLE_MAPS_API_KEY'] || localEnv['GOOGLE_MAPS_API_KEY'] || ''
   };
 
@@ -52,6 +56,9 @@ function createEnvFile() {
   console.log(`Environment file generated at: ${targetPath}`);
   console.log('Environment variables:');
   console.log(`API_URL: ${envConfig.API_URL}`);
+  if (backendUrl) {
+    console.log(`API_BACKEND_URL: ${backendUrl}`);
+  }
   console.log(`GOOGLE_MAPS_API_KEY: ${envConfig.GOOGLE_MAPS_API_KEY ? '***' + envConfig.GOOGLE_MAPS_API_KEY.slice(-4) : 'NOT_SET'}`);
 }
 
