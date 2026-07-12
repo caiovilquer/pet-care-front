@@ -1,5 +1,4 @@
-import { Pet, PetInfo } from './pet.model';
-import { Event } from './event.model';
+import { PetInfo } from './pet.model';
 
 export interface Tutor {
   id: number;
@@ -8,6 +7,7 @@ export interface Tutor {
   email: string;
   phoneNumber?: string;
   avatar?: string;
+  avatarAssetId?: string;
   pets: PetInfo[];
 }
 
@@ -23,4 +23,15 @@ export interface TutorsPage {
   total: number;
   page: number;
   size: number;
+}
+
+export interface TutorUpdateRequest {
+  firstName: string;
+  lastName: string | null;
+  phoneNumber: string | null;
+  avatar: string | null;
+}
+
+export interface TutorCreatedResult {
+  tutorId: number;
 }

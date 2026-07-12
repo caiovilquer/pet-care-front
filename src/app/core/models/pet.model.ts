@@ -4,9 +4,10 @@ export interface Pet {
     id: number;
     name: string;
     species: string;
-    breed: string;
-    birthdate: string; // format: date
+    breed?: string;
+    birthdate?: string; // format: date
     photoUrl?: string; // URL da foto do pet
+    photoAssetId?: string;
     events: EventInfo[];
 }
 
@@ -14,6 +15,8 @@ export interface PetInfo {
     id: number;
     name: string;
     species: string;
+    photoUrl?: string;
+    photoAssetId?: string;
 }
 
 export interface PetSummary {
@@ -21,6 +24,7 @@ export interface PetSummary {
     name: string;
     species: string;
     photoUrl?: string; // URL da foto do pet
+    photoAssetId?: string;
 }
 
 export interface PetsPage {
@@ -34,13 +38,13 @@ export interface PetCreateRequest {
     name: string;
     species: string;
     breed?: string;
-    birthdate: string; // format: date
-    photoUrl?: string; // URL da foto do pet
+    birthdate?: string | null; // format: date
+    photoUrl?: string | null; // URL da foto do pet
 }
 
 export interface PetUpdateRequest {
-    name?: string;
-    breed?: string;
-    birthdate?: string; // format: date
-    photoUrl?: string; // URL da foto do pet
+    name: string;
+    breed: string | null;
+    birthdate: string | null; // format: date
+    photoUrl: string | null; // URL da foto do pet
 }

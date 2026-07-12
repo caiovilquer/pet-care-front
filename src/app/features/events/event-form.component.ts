@@ -1,5 +1,5 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -15,6 +15,9 @@ import { EventStateService } from '../../core/services/event-state.service';
 import { DateTimeService } from '../../core/services/datetime.service';
 import { EventCreateRequest, EventUpdateRequest, EventType, RecurrenceFrequency } from '../../core/models/event.model';
 import { PetSummary } from '../../core/models/pet.model';
+import { ApiErrorService } from '../../core/services/api-error.service';
+
+interface EventFormData { eventId?: number; petId?: number }
 
 @Component({
   selector: 'app-event-form',
@@ -61,29 +64,31 @@ export class EventFormComponent implements OnInit {
     private eventStateService: EventStateService,
     private dateTimeService: DateTimeService,
     private toast: ToastService,
+    private apiError: ApiErrorService,
     public dialogRef: MatDialogRef<EventFormComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any
+    @Inject(MAT_DIALOG_DATA) public data: EventFormData | null
   ) {
     this.isEdit = !!data && !!data.eventId;
 
     this.eventForm = this.fb.group({
       petId: [null, Validators.required],
       type: ['', Validators.required],
-      description: ['', Validators.required],
+      description: ['', [Validators.required, Validators.maxLength(255)]],
       dateStart: [null, Validators.required],
       timeStart: ['', Validators.required],
       frequency: [''],
       intervalCount: [1, [Validators.min(1)]],
       repetitions: [null, [Validators.min(1)]],
       finalDate: [null]
-    });
+    }, { validators: this.finalDateValidator });
   }
 
   ngOnInit(): void {
 
     this.loadPets();
     if (this.isEdit) {
-      this.eventService.getById(this.data.eventId).subscribe(event => {
+      this.eventForm.get('petId')?.disable();
+      this.eventService.getById(this.data!.eventId!).subscribe(event => {
   
 
         // Tratar a data corretamente
@@ -105,7 +110,7 @@ export class EventFormComponent implements OnInit {
         }
 
         this.eventForm.patchValue({
-          petId: this.data.petId, // Usar sempre o petId passado no data
+          petId: this.data!.petId,
           type: event.type,
           description: event.description,
           dateStart: dateStart,
@@ -132,20 +137,8 @@ export class EventFormComponent implements OnInit {
   }
 
   onSubmit(): void {
-    console.log('Event Form - onSubmit chamado');
-    console.log('Form valid:', this.eventForm.valid);
-    console.log('Form errors:', this.eventForm.errors);
-    console.log('Form value:', this.eventForm.value);
-    
     if (this.eventForm.invalid) {
-      console.log('Form inválido - parando submissão');
-      // Log de erros específicos por campo
-      Object.keys(this.eventForm.controls).forEach(key => {
-        const control = this.eventForm.get(key);
-        if (control && control.invalid) {
-          console.log(`Campo ${key} inválido:`, control.errors);
-        }
-      });
+      this.eventForm.markAllAsTouched();
       return;
     }
 
@@ -153,14 +146,10 @@ export class EventFormComponent implements OnInit {
     const formValue = this.eventForm.value;
 
     // Criar o objeto Date a partir dos valores do formulário
-    console.log('Form dateStart value:', formValue.dateStart, 'type:', typeof formValue.dateStart);
-    console.log('Form timeStart value:', formValue.timeStart);
-
     let dateStart: Date;
     
     // Garantir que temos uma data válida
     if (!formValue.dateStart) {
-      console.error('Data não fornecida');
       this.toast.warning('Data é obrigatória');
       this.isLoading = false;
       return;
@@ -175,7 +164,6 @@ export class EventFormComponent implements OnInit {
 
     // Verificar se a data é válida
     if (isNaN(dateStart.getTime())) {
-      console.error('Data inválida:', formValue.dateStart);
       this.toast.warning('Data inválida');
       this.isLoading = false;
       return;
@@ -188,7 +176,6 @@ export class EventFormComponent implements OnInit {
       const minutesNum = parseInt(minutes, 10);
       
       if (isNaN(hoursNum) || isNaN(minutesNum)) {
-        console.error('Hora inválida:', formValue.timeStart);
         this.toast.warning('Hora inválida');
         this.isLoading = false;
         return;
@@ -200,35 +187,22 @@ export class EventFormComponent implements OnInit {
       dateStart.setHours(0, 0, 0, 0);
     }
 
-    console.log('Data final criada:', dateStart);
-
-    // Criar request sem campos undefined para o backend
-    const request: any = {
+    const request: EventCreateRequest | EventUpdateRequest = {
       petId: formValue.petId,
       type: formValue.type,
-      description: formValue.description,
+      description: formValue.description.trim(),
       dateStart: this.dateTimeService.formatDateTimeForAPIWithoutTimezone(dateStart),
-      intervalCount: formValue.frequency ? (formValue.intervalCount || 1) : 1
+      frequency: formValue.frequency || null,
+      intervalCount: formValue.frequency ? (formValue.intervalCount || 1) : 1,
+      repetitions: formValue.frequency && formValue.repetitions > 0 ? formValue.repetitions : null,
+      finalDate: formValue.frequency && formValue.finalDate
+        ? this.dateTimeService.formatDateAsLocalDateTime(formValue.finalDate)
+        : null
     };
 
-    // Adicionar campos opcionais apenas se tiverem valor
-    if (formValue.frequency) {
-      request.frequency = formValue.frequency;
-    }
-    
-    if (formValue.repetitions && formValue.repetitions > 0) {
-      request.repetitions = formValue.repetitions;
-    }
-    
-    if (formValue.finalDate) {
-      request.finalDate = this.dateTimeService.formatDateAsLocalDateTime(formValue.finalDate);
-    }
-
-    // Debug: log do request que será enviado
-    console.log('Event Form - Request sendo enviado:', request);
-
     if (this.isEdit) {
-      this.eventService.update(this.data.eventId, request as EventUpdateRequest).subscribe({
+      const { petId: _petId, ...updateRequest } = request as EventCreateRequest;
+      this.eventService.update(this.data!.eventId!, updateRequest as EventUpdateRequest).subscribe({
         next: () => {
           this.eventStateService.notifyEventUpdated();
           this.handleSuccess('Evento atualizado com sucesso!');
@@ -253,16 +227,9 @@ export class EventFormComponent implements OnInit {
     this.dialogRef.close(true);
   }
 
-  private handleError(error: any, message: string): void {
-    console.error('Event Form Error:', error);
-    console.error('Error details:', {
-      status: error.status,
-      statusText: error.statusText,
-      url: error.url,
-      message: error.message,
-      error: error.error
-    });
-    this.toast.error(message);
+  private handleError(error: unknown, message: string): void {
+    this.toast.error(this.apiError.message(error, message));
+    this.isLoading = false;
   
   }
 
@@ -274,5 +241,14 @@ export class EventFormComponent implements OnInit {
     const control = this.eventForm.get('type');
     control?.setValue(value);
     control?.markAsTouched();
+  }
+
+  private finalDateValidator(group: AbstractControl): ValidationErrors | null {
+    const start = group.get('dateStart')?.value;
+    const end = group.get('finalDate')?.value;
+    if (!start || !end) return null;
+    return new Date(end).setHours(23, 59, 59, 999) < new Date(start).getTime()
+      ? { finalDateBeforeStart: true }
+      : null;
   }
 }

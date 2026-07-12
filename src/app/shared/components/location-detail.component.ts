@@ -10,7 +10,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { ToastService } from '../../core/services/toast.service';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Inject } from '@angular/core';
-import { Location, Petshop, Veterinary } from '../../core/models/location.model';
+import { Location, Petshop, PlaceDetailsInfo, PlaceReviewInfo, Veterinary } from '../../core/models/location.model';
 import { LocationService } from '../../core/services/location.service';
 import { Subject } from 'rxjs';
 import { takeUntil, catchError, finalize } from 'rxjs/operators';
@@ -1060,8 +1060,8 @@ export class LocationDetailComponent implements OnInit, OnDestroy {
   @Input() location!: Location;
   
   isOpen = false;
-  detailedInfo: any = null;
-  reviews: any[] = [];
+  detailedInfo: PlaceDetailsInfo | null = null;
+  reviews: PlaceReviewInfo[] = [];
   loadingDetails = false;
   loadingReviews = false;
   reviewsLoaded = false;
@@ -1121,7 +1121,6 @@ export class LocationDetailComponent implements OnInit, OnDestroy {
         }
       },
       error: (error) => {
-        console.error('Erro ao carregar detalhes:', error);
         this.detailedInfo = {
           description: '',
           priceLevel: 0,
@@ -1153,7 +1152,6 @@ export class LocationDetailComponent implements OnInit, OnDestroy {
         this.reviews = reviews || [];
       },
       error: (error) => {
-        console.error('Erro ao carregar reviews:', error);
         this.toast.error('Erro ao carregar avaliações');
       }
     });
@@ -1215,7 +1213,7 @@ export class LocationDetailComponent implements OnInit, OnDestroy {
 
   // Retornar todos os serviços (com tradução)
   getDisplayServices(): string[] {
-    return this.location.services;
+    return this.location.services.filter(service => service !== 'petshop' && service !== 'veterinary');
   }
 
   isPetshop(location: Location): location is Petshop {
@@ -1292,13 +1290,13 @@ export class LocationDetailComponent implements OnInit, OnDestroy {
     }
   }
 
-  onImageError(event: any) {
-    // Se a imagem falhar ao carregar, esconder e mostrar placeholder
-    event.target.style.display = 'none';
+  onImageError(event: Event) {
+    const image = event.target as HTMLImageElement | null;
+    if (image) image.style.display = 'none';
   }
 
   onDirections() {
-    const url = `https://www.google.com/maps/dir/?api=1&destination=${this.location.latitude},${this.location.longitude}&destination_place_id=${this.location.name}`;
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${this.location.latitude},${this.location.longitude}&destination_place_id=${encodeURIComponent(this.location.id)}`;
     window.open(url, '_blank');
   }
 
@@ -1308,7 +1306,7 @@ export class LocationDetailComponent implements OnInit, OnDestroy {
         title: this.location.name,
         text: `Confira ${this.location.name} - ${this.getTypeLabel()}`,
         url: window.location.href
-      }).catch(console.error);
+      }).catch(() => undefined);
     } else {
       // Fallback: copiar para área de transferência
       const shareText = `${this.location.name}\n${this.location.address}\n${window.location.href}`;

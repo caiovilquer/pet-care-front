@@ -6,16 +6,15 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { forkJoin, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../core/services/auth.service';
-import { TutorService } from '../../core/services/tutor.service';
-import { EventService } from '../../core/services/event.service';
+import { DashboardService } from '../../core/services/dashboard.service';
 import { EventStateService } from '../../core/services/event-state.service';
 import { DateTimeService } from '../../core/services/datetime.service';
 import { UserStateService } from '../../core/services/user-state.service';
-import { TutorDetailResult } from '../../shared/models/tutor.model';
-import { isEventDone } from '../../core/models/event.model';
+import { DashboardOverview } from '../../core/models/dashboard.model';
+import { EventSummary } from '../../core/models/event.model';
 import { FooterComponent } from './ui/footer.component';
 
 @Component({
@@ -34,6 +33,7 @@ import { FooterComponent } from './ui/footer.component';
     FooterComponent
   ],
   template: `
+    <a class="skip-link" href="#main-content">Pular para o conteúdo</a>
     <div class="shell">
       <header class="rp-header">
         <a routerLink="/dashboard" class="wordmark" aria-label="RotinaPet — início">
@@ -51,7 +51,8 @@ import { FooterComponent } from './ui/footer.component';
 
         <div class="header-actions">
           <button mat-icon-button (click)="toggleTheme()"
-                  [matTooltip]="isDark ? 'Tema claro' : 'Tema escuro'">
+                  [matTooltip]="isDark ? 'Tema claro' : 'Tema escuro'"
+                  [attr.aria-label]="isDark ? 'Ativar tema claro' : 'Ativar tema escuro'">
             <mat-icon>{{ isDark ? 'light_mode' : 'dark_mode' }}</mat-icon>
           </button>
 
@@ -76,7 +77,7 @@ import { FooterComponent } from './ui/footer.component';
         </div>
       </header>
 
-      <main class="rp-main">
+      <main class="rp-main" id="main-content" tabindex="-1">
         <router-outlet></router-outlet>
         <rp-footer [isDark]="isDark" (themeToggle)="toggleTheme()"></rp-footer>
       </main>
@@ -161,6 +162,20 @@ import { FooterComponent } from './ui/footer.component';
       flex-direction: column;
       background: var(--q-bg);
     }
+
+    .skip-link {
+      position: fixed;
+      top: 8px;
+      left: 8px;
+      z-index: 1000;
+      transform: translateY(-160%);
+      padding: 10px 14px;
+      border-radius: var(--q-radius-md);
+      background: var(--q-ink);
+      color: var(--q-bg);
+      font-weight: 700;
+    }
+    .skip-link:focus { transform: translateY(0); }
 
     /* ---------- header ---------- */
     .rp-header {
@@ -360,9 +375,9 @@ import { FooterComponent } from './ui/footer.component';
   `]
 })
 export class LayoutComponent implements OnInit, OnDestroy {
-  currentUser: TutorDetailResult | null = null;
+  currentUser: Pick<DashboardOverview, 'firstName' | 'lastName' | 'email' | 'avatar'> | null = null;
   upcomingEventsCount = 0;
-  upcomingEventsList: any[] = [];
+  upcomingEventsList: Array<EventSummary & { petName?: string }> = [];
   avatarFailed = false;
   isDark = false;
   isProduction = environment.production;
@@ -371,8 +386,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
 
   constructor(
     private authService: AuthService,
-    private tutorService: TutorService,
-    private eventService: EventService,
+    private dashboardService: DashboardService,
     private eventStateService: EventStateService,
     private dateTimeService: DateTimeService,
     private userStateService: UserStateService,
@@ -385,11 +399,11 @@ export class LayoutComponent implements OnInit, OnDestroy {
     this.loadUserProfile();
 
     this.eventUpdateSubscription = this.eventStateService.eventUpdated$.subscribe(() => {
-      this.refreshNotifications();
+      this.loadOverview(true);
     });
 
     this.userUpdateSubscription = this.userStateService.userUpdated$.subscribe(() => {
-      this.refreshUserProfile();
+      this.loadOverview(true);
     });
   }
 
@@ -422,66 +436,21 @@ export class LayoutComponent implements OnInit, OnDestroy {
     return false;
   }
 
-  private refreshNotifications(): void {
-    if (this.currentUser?.pets && this.currentUser.pets.length > 0) {
-      this.loadUpcomingEventsCount(this.currentUser.pets);
-    }
-  }
-
   loadUserProfile(): void {
-    this.tutorService.getMyProfileCached().subscribe({
-      next: (user) => {
-        this.currentUser = user;
-        this.avatarFailed = false;
-        if (user.pets && user.pets.length > 0) {
-          this.loadUpcomingEventsCount(user.pets);
-        } else {
-          this.upcomingEventsCount = 0;
-        }
-      },
-      error: () => {
-        this.upcomingEventsCount = 0;
-      }
-    });
+    this.loadOverview();
   }
 
-  private loadUpcomingEventsCount(pets: any[]): void {
-    const petEventRequests = pets.map(pet => this.eventService.listByPetCached(pet.id));
-
-    forkJoin(petEventRequests).subscribe({
-      next: (petEventsArrays) => {
-        const allEvents: any[] = [];
-
-        petEventsArrays.forEach((petEvents, index) => {
-          const pet = pets[index];
-          if (Array.isArray(petEvents)) {
-            petEvents.forEach((event: any) => {
-              allEvents.push({
-                id: event.id,
-                type: event.type,
-                description: event.description,
-                dateStart: event.dateStart,
-                petId: pet.id,
-                petName: pet.name,
-                status: event.status
-              });
-            });
-          }
-        });
-
-        const now = new Date();
-        const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-
-        const upcomingEvents = allEvents.filter(event => {
-          const eventDate = new Date(event.dateStart);
-          return !isEventDone(event.status) && eventDate >= now && eventDate <= nextWeek;
-        });
-
-        upcomingEvents.sort((a, b) =>
-          new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime());
-
-        this.upcomingEventsCount = upcomingEvents.length;
-        this.upcomingEventsList = upcomingEvents.slice(0, 5);
+  private loadOverview(forceRefresh = false): void {
+    this.dashboardService.getOverview(forceRefresh).subscribe({
+      next: (overview) => {
+        this.currentUser = overview;
+        this.avatarFailed = false;
+        const petNames = new Map(overview.pets.map(pet => [pet.id, pet.name]));
+        this.upcomingEventsCount = overview.upcomingEvents.length;
+        this.upcomingEventsList = overview.upcomingEvents.slice(0, 5).map(event => ({
+          ...event,
+          petName: petNames.get(event.petId)
+        }));
       },
       error: () => {
         this.upcomingEventsCount = 0;
@@ -531,18 +500,4 @@ export class LayoutComponent implements OnInit, OnDestroy {
     return Math.round((b.getTime() - a.getTime()) / 86400000);
   }
 
-  private refreshUserProfile(): void {
-    this.tutorService.getMyProfileCached().subscribe({
-      next: (user) => {
-        this.currentUser = user;
-        this.avatarFailed = false;
-        if (user.pets && user.pets.length > 0) {
-          this.loadUpcomingEventsCount(user.pets);
-        } else {
-          this.upcomingEventsCount = 0;
-        }
-      },
-      error: () => { /* mantém estado atual */ }
-    });
-  }
 }

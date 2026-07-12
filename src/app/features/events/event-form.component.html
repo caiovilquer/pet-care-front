@@ -4,7 +4,7 @@
 </div>
 
 <mat-dialog-content>
-  <form [formGroup]="eventForm">
+  <form id="event-form" [formGroup]="eventForm" (ngSubmit)="onSubmit()">
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Pet</mat-label>
       <mat-select formControlName="petId" required>
@@ -15,15 +15,17 @@
       <mat-error *ngIf="eventForm.get('petId')?.hasError('required')">
         Pet é obrigatório
       </mat-error>
+      <mat-hint *ngIf="isEdit">O pet não pode ser alterado depois que o cuidado é criado</mat-hint>
     </mat-form-field>
 
     <div class="type-field">
       <label class="type-label">Tipo de cuidado</label>
-      <div class="type-picker">
+      <div class="type-picker" role="radiogroup" aria-label="Tipo de cuidado">
         @for (t of eventTypes; track t.value) {
           <button type="button"
                   class="type-chip tc-{{t.value.toLowerCase()}}"
                   [class.selected]="eventForm.get('type')?.value === t.value"
+                  [attr.aria-pressed]="eventForm.get('type')?.value === t.value"
                   (click)="selectType(t.value)">
             <mat-icon>{{t.icon}}</mat-icon>
             {{t.label}}
@@ -34,11 +36,12 @@
 
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Descrição</mat-label>
-      <textarea matInput formControlName="description" rows="3"
+      <textarea matInput formControlName="description" rows="3" maxlength="255"
                 placeholder="Ex.: V10 — reforço anual" required></textarea>
       <mat-error *ngIf="eventForm.get('description')?.hasError('required')">
         Descrição é obrigatória
       </mat-error>
+      <mat-error *ngIf="eventForm.get('description')?.hasError('maxlength')">Use no máximo 255 caracteres</mat-error>
     </mat-form-field>
 
     <div class="form-row">
@@ -74,12 +77,14 @@
     <div *ngIf="eventForm.get('frequency')?.value" class="form-row">
       <mat-form-field appearance="outline" class="half-width">
         <mat-label>A cada</mat-label>
-        <input matInput type="number" formControlName="intervalCount">
+        <input matInput type="number" min="1" formControlName="intervalCount">
+        <mat-error *ngIf="eventForm.get('intervalCount')?.hasError('min')">O intervalo mínimo é 1</mat-error>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="half-width">
         <mat-label>Repetições (opcional)</mat-label>
-        <input matInput type="number" formControlName="repetitions">
+        <input matInput type="number" min="1" formControlName="repetitions">
+        <mat-error *ngIf="eventForm.get('repetitions')?.hasError('min')">Use ao menos 1 repetição</mat-error>
       </mat-form-field>
     </div>
 
@@ -88,6 +93,7 @@
       <input matInput [matDatepicker]="finalDatePicker" formControlName="finalDate">
       <mat-datepicker-toggle matSuffix [for]="finalDatePicker"></mat-datepicker-toggle>
       <mat-datepicker #finalDatePicker></mat-datepicker>
+      <mat-error *ngIf="eventForm.hasError('finalDateBeforeStart')">A data final deve ser igual ou posterior à data inicial</mat-error>
     </mat-form-field>
   </form>
 </mat-dialog-content>
@@ -95,8 +101,10 @@
 <mat-dialog-actions align="end">
   <button mat-button (click)="onCancel()">Cancelar</button>
   <button mat-flat-button
+          type="submit"
+          form="event-form"
           [disabled]="eventForm.invalid || isLoading"
-          (click)="onSubmit()">
+          >
     {{isLoading ? 'Salvando...' : (isEdit ? 'Salvar' : 'Adicionar')}}
   </button>
 </mat-dialog-actions>

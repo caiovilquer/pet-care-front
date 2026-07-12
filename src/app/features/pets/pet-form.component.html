@@ -4,22 +4,22 @@
 </div>
 
 <mat-dialog-content>
-  <form [formGroup]="petForm">
-    <div class="identity-row">
-      <rp-pet-avatar [name]="petForm.get('name')?.value"
-                     [species]="petForm.get('species')?.value"
-                     [photoUrl]="photoPreviewUrl"
-                     size="lg">
-      </rp-pet-avatar>
+  <form id="pet-form" [formGroup]="petForm" (ngSubmit)="onSubmit()">
+    <rp-photo-upload #photoUpload
+                     purpose="PET_PHOTO"
+                     label="Foto do pet"
+                     [subjectName]="petForm.get('name')?.value"
+                     [existingUrl]="existingPhotoUrl"
+                     [existingAssetId]="existingPhotoAssetId"
+                     [compact]="true">
+    </rp-photo-upload>
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Nome do pet</mat-label>
-        <input matInput formControlName="name" required>
-        <mat-error *ngIf="petForm.get('name')?.hasError('required')">
-          Nome é obrigatório
-        </mat-error>
-      </mat-form-field>
-    </div>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Nome do pet</mat-label>
+      <input matInput formControlName="name" required maxlength="80" autocomplete="off">
+      <mat-error *ngIf="petForm.get('name')?.hasError('required')">Nome é obrigatório</mat-error>
+      <mat-error *ngIf="petForm.get('name')?.hasError('maxlength')">Use no máximo 80 caracteres</mat-error>
+    </mat-form-field>
 
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Espécie</mat-label>
@@ -40,39 +40,28 @@
 
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Raça</mat-label>
-      <input matInput formControlName="breed">
+      <input matInput formControlName="breed" maxlength="80">
+      <mat-error *ngIf="petForm.get('breed')?.hasError('maxlength')">Use no máximo 80 caracteres</mat-error>
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Data de nascimento</mat-label>
-      <input matInput [matDatepicker]="picker" formControlName="birthdate">
+      <input matInput [matDatepicker]="picker" formControlName="birthdate" [max]="maxBirthdate">
       <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
       <mat-datepicker #picker></mat-datepicker>
+      <mat-error *ngIf="petForm.get('birthdate')?.hasError('matDatepickerMax')">A data não pode estar no futuro</mat-error>
     </mat-form-field>
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>URL da foto</mat-label>
-      <input matInput
-             formControlName="photoUrl"
-             placeholder="https://exemplo.com/foto-do-pet.jpg"
-             type="url">
-      <mat-icon matSuffix>photo_camera</mat-icon>
-      @if (photoPreviewUrl) {
-        <button mat-icon-button matSuffix type="button"
-                (click)="removePhoto()" matTooltip="Remover foto">
-          <mat-icon>close</mat-icon>
-        </button>
-      }
-      <mat-hint>Cole a URL de uma foto do seu pet — o preview aparece ao lado do nome</mat-hint>
-    </mat-form-field>
   </form>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
   <button mat-button (click)="onCancel()">Cancelar</button>
   <button mat-flat-button
-          [disabled]="petForm.invalid || isLoading"
-          (click)="onSubmit()">
+          type="submit"
+          form="pet-form"
+          [disabled]="petForm.invalid || isLoading || photoUpload.isPreparing"
+          >
     {{isLoading ? 'Salvando...' : (isEdit ? 'Salvar' : 'Adicionar')}}
   </button>
 </mat-dialog-actions>

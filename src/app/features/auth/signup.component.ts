@@ -148,7 +148,7 @@ export class SignupComponent {
       lastName: [''],
       email: ['', [Validators.required, Validators.email]],
       phoneNumber: [''],
-      rawPassword: ['', [Validators.required, Validators.minLength(6)]],
+      rawPassword: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(72)]],
       confirmPassword: ['', [Validators.required]]
     }, { validators: this.passwordMatchValidator });
   }
@@ -168,6 +168,9 @@ export class SignupComponent {
       this.isLoading = true;
       const formData = { ...this.signupForm.value };
       delete formData.confirmPassword;
+      formData.firstName = formData.firstName.trim();
+      formData.lastName = formData.lastName?.trim() || null;
+      formData.phoneNumber = formData.phoneNumber?.trim() || null;
 
       this.authService.signup(formData).subscribe({
         next: () => {

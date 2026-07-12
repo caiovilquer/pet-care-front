@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -7,16 +7,18 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { ToastService } from '../../core/services/toast.service';
-import { forkJoin, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { TutorService } from '../../core/services/tutor.service';
-import { EventService } from '../../core/services/event.service';
+import { DashboardService } from '../../core/services/dashboard.service';
 import { EventStateService } from '../../core/services/event-state.service';
 import { UserStateService } from '../../core/services/user-state.service';
-import { TutorDetailResult } from '../../shared/models/tutor.model';
-import { EventSummary, isEventDone } from '../../core/models/event.model';
+import { Tutor } from '../../core/models/tutor.model';
 import { PageHeaderComponent } from '../../shared/components/ui/page-header.component';
 import { StatCardComponent } from '../../shared/components/ui/stat-card.component';
 import { PetAvatarComponent } from '../../shared/components/ui/pet-avatar.component';
+import { PhotoUploadComponent } from '../../shared/components/ui/photo-upload.component';
+import { ApiErrorService } from '../../core/services/api-error.service';
+import { finalize, map, of, switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-profile',
@@ -31,7 +33,8 @@ import { PetAvatarComponent } from '../../shared/components/ui/pet-avatar.compon
     MatIconModule,
     PageHeaderComponent,
     StatCardComponent,
-    PetAvatarComponent
+    PetAvatarComponent,
+    PhotoUploadComponent
   ],
   template: `
     <div class="profile-page">
@@ -42,13 +45,6 @@ import { PetAvatarComponent } from '../../shared/components/ui/pet-avatar.compon
       <div class="profile-grid">
         <section class="panel form-panel">
           <div class="panel-title">
-            <div class="avatar-wrap">
-              @if (currentUser?.avatar && !avatarFailed) {
-                <img [src]="currentUser!.avatar" alt="" (error)="avatarFailed = true">
-              } @else {
-                <span class="avatar-fallback">{{ userInitial }}</span>
-              }
-            </div>
             <div class="panel-title-tx">
               <h2>{{ currentUser?.firstName }} {{ currentUser?.lastName }}</h2>
               <p>{{ currentUser?.email }}</p>
@@ -56,6 +52,14 @@ import { PetAvatarComponent } from '../../shared/components/ui/pet-avatar.compon
           </div>
 
           <form [formGroup]="profileForm" (ngSubmit)="onUpdateProfile()">
+            <rp-photo-upload #avatarUpload
+                             purpose="TUTOR_AVATAR"
+                             label="Foto de perfil"
+                             [subjectName]="currentUser?.firstName || ''"
+                             [existingUrl]="currentUser?.avatar || null"
+                             [existingAssetId]="currentUser?.avatarAssetId || null">
+            </rp-photo-upload>
+
             <div class="form-row">
               <mat-form-field appearance="outline" class="half-width">
                 <mat-label>Nome</mat-label>
@@ -83,17 +87,9 @@ import { PetAvatarComponent } from '../../shared/components/ui/pet-avatar.compon
               <mat-icon matSuffix>phone</mat-icon>
             </mat-form-field>
 
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>URL do avatar</mat-label>
-              <input matInput formControlName="avatar" type="url"
-                     placeholder="https://exemplo.com/sua-foto.jpg">
-              <mat-icon matSuffix>photo_camera</mat-icon>
-              <mat-hint>Cole aqui a URL da sua foto de perfil</mat-hint>
-            </mat-form-field>
-
             <div class="form-actions">
               <button mat-flat-button type="submit"
-                      [disabled]="profileForm.invalid || isUpdating">
+                      [disabled]="profileForm.invalid || isUpdating || avatarUpload.isPreparing">
                 {{ isUpdating ? 'Salvando...' : 'Salvar alterações' }}
               </button>
             </div>
@@ -120,6 +116,7 @@ import { PetAvatarComponent } from '../../shared/components/ui/pet-avatar.compon
                 @for (pet of currentUser!.pets; track pet.id; let i = $index) {
                   <a class="pet-item" [routerLink]="['/pets', pet.id]">
                     <rp-pet-avatar [name]="pet.name" [species]="pet.species"
+                                   [photoUrl]="pet.photoUrl"
                                    size="sm" [seed]="i"></rp-pet-avatar>
                     <div class="pet-info">
                       <span class="pet-name">{{ pet.name }}</span>
@@ -160,33 +157,6 @@ import { PetAvatarComponent } from '../../shared/components/ui/pet-avatar.compon
       align-items: center;
       gap: var(--q-space-4);
       margin-bottom: var(--q-space-5);
-    }
-
-    .avatar-wrap {
-      width: 64px;
-      height: 64px;
-      border-radius: var(--q-organic-1);
-      overflow: hidden;
-      flex-shrink: 0;
-      background: var(--q-green-600);
-    }
-
-    .avatar-wrap img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
-    .avatar-fallback {
-      width: 100%;
-      height: 100%;
-      display: grid;
-      place-items: center;
-      color: var(--q-surface);
-      font-family: var(--q-font-display);
-      font-weight: 700;
-      font-size: 1.5rem;
     }
 
     .panel-title-tx h2 {
@@ -280,27 +250,28 @@ import { PetAvatarComponent } from '../../shared/components/ui/pet-avatar.compon
   `]
 })
 export class ProfileComponent implements OnInit, OnDestroy {
+  @ViewChild(PhotoUploadComponent) avatarUpload?: PhotoUploadComponent;
   profileForm: FormGroup;
-  currentUser: TutorDetailResult | null = null;
+  currentUser: Tutor | null = null;
   isUpdating = false;
   totalEvents = 0;
   upcomingEvents = 0;
-  avatarFailed = false;
+  private legacyAvatar: string | null = null;
   private eventUpdateSubscription?: Subscription;
 
   constructor(
     private fb: FormBuilder,
     private tutorService: TutorService,
-    private eventService: EventService,
+    private dashboardService: DashboardService,
     private eventStateService: EventStateService,
     private userStateService: UserStateService,
-    private toast: ToastService
+    private toast: ToastService,
+    private apiError: ApiErrorService
   ) {
     this.profileForm = this.fb.group({
-      firstName: ['', [Validators.required]],
-      lastName: [''],
-      phoneNumber: [''],
-      avatar: ['']
+      firstName: ['', [Validators.required, Validators.maxLength(80)]],
+      lastName: ['', Validators.maxLength(100)],
+      phoneNumber: ['']
     });
   }
 
@@ -319,13 +290,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
     }
   }
 
-  get userInitial(): string {
-    return (this.currentUser?.firstName || '?').charAt(0).toUpperCase();
-  }
-
   private refreshEventData(): void {
     if (this.currentUser && this.currentUser.pets && this.currentUser.pets.length > 0) {
-      this.loadEventsForAllPets(this.currentUser.pets);
+      this.loadStats(true);
     }
   }
 
@@ -333,21 +300,14 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.tutorService.getMyProfileCached().subscribe({
       next: (user) => {
         this.currentUser = user;
-        this.avatarFailed = false;
+        this.legacyAvatar = user.avatarAssetId ? null : user.avatar || null;
         this.profileForm.patchValue({
           firstName: user.firstName,
           lastName: user.lastName,
-          phoneNumber: user.phoneNumber,
-          avatar: user.avatar
+          phoneNumber: user.phoneNumber
         });
 
-        // Carregar eventos reais dos pets
-        if (user.pets && user.pets.length > 0) {
-          this.loadEventsForAllPets(user.pets);
-        } else {
-          this.totalEvents = 0;
-          this.upcomingEvents = 0;
-        }
+        this.loadStats();
       },
       error: () => {
         this.toast.error('Erro ao carregar perfil');
@@ -355,34 +315,11 @@ export class ProfileComponent implements OnInit, OnDestroy {
     });
   }
 
-  private loadEventsForAllPets(pets: any[]): void {
-    const petEventRequests = pets.map(pet => this.eventService.listByPetCached(pet.id));
-
-    forkJoin(petEventRequests).subscribe({
-      next: (petEventsArrays) => {
-        // Combinar todos os eventos de todos os pets
-        const allEvents: EventSummary[] = [];
-
-        petEventsArrays.forEach((petEvents, index) => {
-          const pet = pets[index];
-
-          if (Array.isArray(petEvents)) {
-            petEvents.forEach((event: any) => {
-              allEvents.push({
-                id: event.id,
-                type: event.type,
-                description: event.description,
-                dateStart: event.dateStart,
-                petId: pet.id,
-                status: event.status || 'PENDING'
-              });
-            });
-          }
-        });
-
-        this.totalEvents = allEvents.length;
-        const upcomingEvents = this.getUpcomingEvents(allEvents);
-        this.upcomingEvents = upcomingEvents.length;
+  private loadStats(forceRefresh = false): void {
+    this.dashboardService.getOverview(forceRefresh).subscribe({
+      next: overview => {
+        this.totalEvents = overview.totalEvents;
+        this.upcomingEvents = overview.upcomingEvents.length;
       },
       error: () => {
         this.totalEvents = 0;
@@ -391,36 +328,37 @@ export class ProfileComponent implements OnInit, OnDestroy {
     });
   }
 
-  private getUpcomingEvents(events: EventSummary[]): EventSummary[] {
-    const now = new Date();
-    const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-
-    return events.filter(event => {
-      const eventDate = new Date(event.dateStart);
-      const isNotDone = !isEventDone(event.status);
-      const isInFuture = eventDate >= now;
-      const isWithinWeek = eventDate <= nextWeek;
-
-      return isNotDone && isInFuture && isWithinWeek;
-    });
-  }
-
   onUpdateProfile(): void {
     if (this.profileForm.valid && this.currentUser) {
       this.isUpdating = true;
 
-      this.tutorService.updateProfile(this.currentUser.id, this.profileForm.value).subscribe({
-        next: (updatedUser) => {
-          this.currentUser = updatedUser;
+      const value = this.profileForm.value;
+      this.tutorService.updateProfile(this.currentUser.id, {
+        firstName: value.firstName.trim(),
+        lastName: value.lastName?.trim() || null,
+        phoneNumber: value.phoneNumber?.trim() || null,
+        avatar: this.avatarUpload?.removalRequested ? null : this.legacyAvatar
+      }).pipe(
+        switchMap(updatedUser => (this.avatarUpload?.commit(updatedUser.id) ?? of(null)).pipe(
+          map(() => updatedUser)
+        )),
+        finalize(() => this.isUpdating = false)
+      ).subscribe({
+        next: () => {
+          this.avatarUpload?.markComplete();
+          this.loadProfile();
           this.toast.success('Perfil atualizado com sucesso!');
-          this.isUpdating = false;
 
           // Notificar outros componentes sobre a atualização do perfil
           this.userStateService.notifyUserUpdated();
         },
-        error: () => {
-          this.toast.error('Erro ao atualizar perfil');
-          this.isUpdating = false;
+        error: (error) => {
+          const message = this.apiError.message(
+            error,
+            'Seus dados foram salvos, mas não foi possível atualizar a foto. Tente novamente.'
+          );
+          this.avatarUpload?.markFailed(message);
+          this.toast.error(message);
         }
       });
     }

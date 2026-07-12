@@ -5,7 +5,6 @@ import { ToastService } from '../../core/services/toast.service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatBadgeModule } from '@angular/material/badge';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { finalize } from 'rxjs/operators';
 
@@ -31,7 +30,6 @@ import {
     MatButtonModule,
     MatIconModule,
     MatToolbarModule,
-    MatBadgeModule,
     MatDialogModule,
     LocationSearchComponent,
     LocationCardComponent,
@@ -49,17 +47,6 @@ import {
           <span *ngIf="searchResults().total > 0" class="results-count">
             {{ searchResults().total }} veterinários encontrados
           </span>
-          <button 
-            mat-raised-button
-            color="accent"
-            *ngIf="emergencyCount() > 0"
-            matBadge="{{ emergencyCount() }}"
-            matBadgeColor="warn"
-            matTooltip="Emergência 24h disponível"
-            (click)="filterEmergencyOnly()">
-            <mat-icon>emergency</mat-icon>
-            Emergência 24h
-          </button>
         </div>
       </div>
 
@@ -70,19 +57,6 @@ import {
             [isLoading]="isLoading()"
             (search)="onSearch($event)">
           </app-location-search>
-        </div>
-
-        <div class="emergency-banner" *ngIf="emergencyCount() > 0">
-          <div class="emergency-content">
-            <mat-icon>emergency</mat-icon>
-            <div>
-              <h3>{{ emergencyCount() }} veterinários com atendimento de emergência 24h disponíveis!</h3>
-              <p>Para emergências, dê preferência aos veterinários com o ícone de emergência.</p>
-            </div>
-            <button mat-raised-button color="warn" (click)="filterEmergencyOnly()">
-              Ver apenas emergência
-            </button>
-          </div>
         </div>
 
         <div class="results-section" *ngIf="searchResults().locations.length > 0 || hasSearched()">
@@ -102,7 +76,18 @@ import {
             <p>Buscando veterinários próximos...</p>
           </div>
 
-          <div class="no-results" *ngIf="!isLoading() && hasSearched() && searchResults().locations.length === 0">
+          <div class="no-results" *ngIf="!isLoading() && searchError()">
+            <div class="no-results-content" role="alert">
+              <mat-icon class="no-results-icon">cloud_off</mat-icon>
+              <h3>Não foi possível buscar agora</h3>
+              <p>{{ searchError() }}</p>
+              <button mat-raised-button color="primary" (click)="retrySearch()">
+                <mat-icon>refresh</mat-icon> Tentar novamente
+              </button>
+            </div>
+          </div>
+
+          <div class="no-results" *ngIf="!isLoading() && !searchError() && hasSearched() && searchResults().locations.length === 0">
             <div class="no-results-content">
               <mat-icon class="no-results-icon">local_hospital_off</mat-icon>
               <h3>Nenhum veterinário encontrado</h3>
@@ -130,39 +115,13 @@ import {
           <div class="welcome-content">
             <mat-icon class="welcome-icon">local_hospital</mat-icon>
             <h2>Encontre veterinários próximos a você</h2>
-            <p>Digite seu CEP acima para descobrir os melhores veterinários da sua região.</p>
-            
-            <div class="info-cards">
-              <div class="info-card emergency">
-                <mat-icon>emergency</mat-icon>
-                <h4>Emergência 24h</h4>
-                <p>Atendimento de urgência disponível a qualquer hora</p>
-              </div>
-              
-              <div class="info-card surgery">
-                <mat-icon>local_hospital</mat-icon>
-                <h4>Cirurgias</h4>
-                <p>Procedimentos cirúrgicos com equipamentos modernos</p>
-              </div>
-              
-              <div class="info-card laboratory">
-                <mat-icon>science</mat-icon>
-                <h4>Laboratório</h4>
-                <p>Exames e diagnósticos precisos</p>
-              </div>
-              
-              <div class="info-card specialty">
-                <mat-icon>healing</mat-icon>
-                <h4>Especialidades</h4>
-                <p>Cardiologia, dermatologia, ortopedia e mais</p>
-              </div>
-            </div>
+            <p>Digite seu CEP para consultar clínicas próximas, com distância e avaliação pública.</p>
 
             <div class="emergency-notice">
               <mat-icon>warning</mat-icon>
               <div>
                 <strong>Em caso de emergência:</strong>
-                <p>Para situações de risco de vida, procure imediatamente um veterinário com atendimento 24h ou entre em contato direto.</p>
+                <p>Confirme por telefone a disponibilidade de atendimento e os serviços antes de se deslocar.</p>
               </div>
             </div>
           </div>
@@ -377,7 +336,7 @@ import {
 export class VeterinariesComponent implements OnInit {
   isLoading = signal(false);
   hasSearched = signal(false);
-  emergencyCount = signal(0);
+  searchError = signal<string | null>(null);
   searchResults = signal<LocationSearchResponse>({
     locations: [],
     total: 0,
@@ -394,16 +353,10 @@ export class VeterinariesComponent implements OnInit {
     // Pode carregar veterinários populares ou próximos se houver localização
   }
 
-  private updateEmergencyCount() {
-    const count = this.searchResults().locations.filter(location => 
-      (location as Veterinary).hasEmergency
-    ).length;
-    this.emergencyCount.set(count);
-  }
-
   onSearch(params: LocationSearchParams) {
     this.isLoading.set(true);
     this.hasSearched.set(true);
+    this.searchError.set(null);
     
     this.locationService.searchVeterinaries(params)
       .pipe(
@@ -412,36 +365,15 @@ export class VeterinariesComponent implements OnInit {
       .subscribe({
         next: (response: LocationSearchResponse) => {
           this.searchResults.set(response);
-          this.updateEmergencyCount();
           if (response.locations.length === 0) {
             this.toast.info('Nenhum veterinário encontrado na região especificada', 5000);
-          } else {
-            const emergencyCount = this.emergencyCount();
-            if (emergencyCount > 0) {
-              this.toast.info(`${emergencyCount} veterinários com emergência 24h encontrados`, 5000);
-            }
           }
         },
         error: (error: any) => {
-          
+          this.searchError.set('Verifique sua conexão e tente novamente em instantes.');
           this.toast.error('Erro ao buscar veterinários. Tente novamente.', 5000);
         }
       });
-  }
-
-  filterEmergencyOnly() {
-    const currentResults = this.searchResults();
-    const emergencyOnly = currentResults.locations.filter(location => 
-      (location as Veterinary).hasEmergency
-    );
-    
-    this.searchResults.set({
-      ...currentResults,
-      locations: emergencyOnly,
-      total: emergencyOnly.length
-    });
-
-    this.toast.info('Mostrando apenas veterinários com emergência 24h');
   }
 
   onExpandSearch() {
@@ -454,6 +386,11 @@ export class VeterinariesComponent implements OnInit {
     this.onSearch(expandedParams);
   }
 
+  retrySearch(): void {
+    const params = this.searchResults().searchParams;
+    if (params?.zipCode) this.onSearch(params);
+  }
+
   onCallVeterinary(location: Location) {
     if (location.phone) {
       window.open(`tel:${location.phone}`, '_self');
@@ -461,7 +398,7 @@ export class VeterinariesComponent implements OnInit {
   }
 
   onGetDirections(location: Location) {
-    const url = `https://www.google.com/maps/dir/?api=1&destination=${location.latitude},${location.longitude}&destination_place_id=${location.name}`;
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${location.latitude},${location.longitude}&destination_place_id=${encodeURIComponent(location.id)}`;
     window.open(url, '_blank');
   }
 
@@ -473,8 +410,8 @@ export class VeterinariesComponent implements OnInit {
       height: '90vh',
       maxHeight: '800px',
       panelClass: 'location-detail-dialog',
-      autoFocus: false,
-      restoreFocus: false
+      autoFocus: 'first-tabbable',
+      restoreFocus: true
     });
 
     dialogRef.afterClosed().subscribe(result => {

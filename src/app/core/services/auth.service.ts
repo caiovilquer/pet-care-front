@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, finalize, shareReplay, tap } from 'rxjs';
+import { BehaviorSubject, Observable, catchError, finalize, map, of, shareReplay, tap } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
-import { LoginDto, TokenDto, CreateRequest } from '../../shared/models/auth.model';
-import { TutorCreatedResult } from '../../shared/models/tutor.model';
+import { LoginRequest, SignupRequest, TokenResponse, TutorCreatedResult } from '../models/auth.model';
 import { environment } from '../../../environments/environment';
 
 interface JwtPayload {
@@ -17,44 +16,50 @@ interface JwtPayload {
 })
 export class AuthService {
   private readonly API_URL = environment.apiUrl;
-  private readonly TOKEN_KEY = 'pet_care_token';
-  
-  private currentUserSubject = new BehaviorSubject<any>(null);
-  public currentUser$ = this.currentUserSubject.asObservable();
+  private accessToken: string | null = null;
+  private readonly currentUserSubject = new BehaviorSubject<{ id: string } | null>(null);
+  readonly currentUser$ = this.currentUserSubject.asObservable();
 
-  private refreshInFlight$: Observable<TokenDto> | null = null;
+  private refreshInFlight$: Observable<TokenResponse> | null = null;
 
   constructor(private http: HttpClient) {
-    this.loadCurrentUser();
+    // Remove tokens persistidos por versões antigas. O refresh token continua
+    // exclusivamente no cookie HttpOnly e o access token vive só em memória.
+    localStorage.removeItem('pet_care_token');
   }
 
-  login(credentials: LoginDto): Observable<TokenDto> {
-    return this.http.post<TokenDto>(`${this.API_URL}/auth/login`, credentials)
+  login(credentials: LoginRequest): Observable<TokenResponse> {
+    return this.http.post<TokenResponse>(`${this.API_URL}/auth/login`, credentials)
       .pipe(
-        tap(response => {
-          this.setToken(this.extractAccessToken(response));
-          this.loadCurrentUser();
-        })
+        tap(response => this.setToken(this.extractAccessToken(response)))
       );
   }
 
-  signup(userData: CreateRequest): Observable<TutorCreatedResult> {
+  signup(userData: SignupRequest): Observable<TutorCreatedResult> {
     return this.http.post<TutorCreatedResult>(`${this.API_URL}/public/signup`, userData);
   }
 
   /** Renova o access token usando o refresh token (cookie HttpOnly). Único voo em andamento é reaproveitado por chamadas concorrentes. */
-  refreshToken(): Observable<TokenDto> {
+  refreshToken(): Observable<TokenResponse> {
     if (!this.refreshInFlight$) {
-      this.refreshInFlight$ = this.http.post<TokenDto>(`${this.API_URL}/auth/refresh`, {}).pipe(
-        tap(response => {
-          this.setToken(this.extractAccessToken(response));
-          this.loadCurrentUser();
-        }),
+      this.refreshInFlight$ = this.http.post<TokenResponse>(`${this.API_URL}/auth/refresh`, {}).pipe(
+        tap(response => this.setToken(this.extractAccessToken(response))),
         finalize(() => this.refreshInFlight$ = null),
         shareReplay(1)
       );
     }
     return this.refreshInFlight$;
+  }
+
+  ensureSession(): Observable<boolean> {
+    if (this.isAuthenticated()) return of(true);
+    return this.refreshToken().pipe(
+      map(() => true),
+      catchError(() => {
+        this.clearSession();
+        return of(false);
+      })
+    );
   }
 
   logout(): Observable<void> {
@@ -69,12 +74,12 @@ export class AuthService {
 
   /** Limpa apenas o estado local (sem chamar o backend) — usado após logout/refresh mal sucedido. */
   clearSession(): void {
-    localStorage.removeItem(this.TOKEN_KEY);
+    this.accessToken = null;
     this.currentUserSubject.next(null);
   }
 
   getToken(): string | null {
-    return localStorage.getItem(this.TOKEN_KEY);
+    return this.accessToken;
   }
 
   isAuthenticated(): boolean {
@@ -90,25 +95,17 @@ export class AuthService {
   }
 
   private setToken(token: string): void {
-    localStorage.setItem(this.TOKEN_KEY, token);
-  }
-
-  private loadCurrentUser(): void {
-    const token = this.getToken();
-    if (token && this.isAuthenticated()) {
-      try {
-        const decoded = jwtDecode<JwtPayload>(token);
-        this.currentUserSubject.next({
-          id: decoded.sub,
-          token: token
-        });
-      } catch {
-        this.clearSession();
-      }
+    try {
+      const decoded = jwtDecode<JwtPayload>(token);
+      this.accessToken = token;
+      this.currentUserSubject.next({ id: decoded.sub });
+    } catch {
+      this.clearSession();
+      throw new Error('Token de acesso inválido');
     }
   }
 
-  private extractAccessToken(response: TokenDto): string {
+  private extractAccessToken(response: TokenResponse): string {
     return response.access_token ?? response.token;
   }
 }

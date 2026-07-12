@@ -321,6 +321,13 @@ input:-webkit-autofill:focus {
 
 .mat-mdc-dialog-surface {
   border-radius: var(--q-radius-lg) !important;
+  background: var(--q-surface) !important;
+  color: var(--q-ink) !important;
+  box-shadow: var(--q-shadow-lg) !important;
+}
+
+.cdk-overlay-dark-backdrop {
+  background: light-dark(rgba(16, 42, 34, 0.52), rgba(0, 0, 0, 0.68));
 }
 
 .mat-mdc-form-field {

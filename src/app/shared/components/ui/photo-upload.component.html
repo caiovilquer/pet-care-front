@@ -1,0 +1,53 @@
+<section class="photo-field" [class.compact]="compact" [attr.aria-label]="label">
+  <div class="preview" [class.has-image]="previewUrl">
+    @if (previewUrl) {
+      <img [src]="previewUrl" [alt]="subjectName ? 'Foto de ' + subjectName : 'Foto selecionada'">
+      <button mat-icon-button type="button" class="remove"
+              (click)="remove()" [disabled]="isUploading"
+              aria-label="Remover foto">
+        <mat-icon>close</mat-icon>
+      </button>
+    } @else {
+      @if (fallbackInitial) {
+        <span class="initial" aria-hidden="true">{{ fallbackInitial }}</span>
+      } @else {
+        <mat-icon aria-hidden="true">pets</mat-icon>
+      }
+    }
+  </div>
+
+  <div class="upload-copy">
+    <span class="field-label">{{ label }}</span>
+    <label class="dropzone"
+           [class.dragging]="isDragging"
+           [class.disabled]="isPreparing || isUploading"
+           (dragover)="dragOver($event)"
+           (dragleave)="dragLeave($event)"
+           (drop)="dropped($event)">
+      <input type="file" accept="image/jpeg,image/png"
+             (change)="fileChanged($event)"
+             [disabled]="isPreparing || isUploading">
+      <mat-icon aria-hidden="true">add_photo_alternate</mat-icon>
+      <span>
+        <strong>{{ previewUrl ? 'Trocar foto' : 'Escolher foto' }}</strong>
+        <small>JPG ou PNG · ajuste automático · até 20 MB</small>
+      </span>
+    </label>
+
+    @if (isPreparing) {
+      <div class="status" role="status">
+        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+        <span>Preparando e protegendo sua foto…</span>
+      </div>
+    }
+    @if (isUploading) {
+      <div class="status" role="status" aria-live="polite">
+        <mat-progress-bar mode="determinate" [value]="progress"></mat-progress-bar>
+        <span>Enviando foto… {{ progress }}%</span>
+      </div>
+    }
+    @if (errorMessage) {
+      <p class="error" role="alert"><mat-icon>error_outline</mat-icon>{{ errorMessage }}</p>
+    }
+  </div>
+</section>

@@ -25,17 +25,6 @@ mat-dialog-content form {
   width: 100%;
 }
 
-.identity-row {
-  display: flex;
-  align-items: center;
-  gap: var(--q-space-4);
-  margin-bottom: var(--q-space-2);
-}
-
-.identity-row rp-pet-avatar {
-  flex-shrink: 0;
-}
-
 mat-dialog-actions {
   padding: var(--q-space-3) var(--q-space-5) var(--q-space-4);
   gap: var(--q-space-2);

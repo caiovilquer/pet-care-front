@@ -77,7 +77,7 @@ import { PasswordResetService } from '../../core/services/password-reset.service
                   matSuffix
                   type="button"
                   (click)="hidePassword = !hidePassword"
-                  [attr.aria-label]="'Hide password'"
+                  [attr.aria-label]="hidePassword ? 'Mostrar senha' : 'Ocultar senha'"
                   [attr.aria-pressed]="hidePassword"
                 >
                   <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
@@ -86,7 +86,7 @@ import { PasswordResetService } from '../../core/services/password-reset.service
                   Senha é obrigatória
                 </mat-error>
                 <mat-error *ngIf="resetForm.get('password')?.hasError('minlength')">
-                  Senha deve ter pelo menos 6 caracteres
+                  Senha deve ter entre 8 e 72 caracteres
                 </mat-error>
               </mat-form-field>
 
@@ -104,7 +104,7 @@ import { PasswordResetService } from '../../core/services/password-reset.service
                   matSuffix
                   type="button"
                   (click)="hideConfirmPassword = !hideConfirmPassword"
-                  [attr.aria-label]="'Hide password'"
+                  [attr.aria-label]="hideConfirmPassword ? 'Mostrar confirmação de senha' : 'Ocultar confirmação de senha'"
                   [attr.aria-pressed]="hideConfirmPassword"
                 >
                   <mat-icon>{{hideConfirmPassword ? 'visibility_off' : 'visibility'}}</mat-icon>
@@ -159,7 +159,7 @@ export class ResetPasswordComponent implements OnInit {
     private toast: ToastService
   ) {
     this.resetForm = this.fb.group({
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      password: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(72)]],
       confirmPassword: ['', Validators.required]
     }, { validators: this.passwordsMatchValidator });
   }
@@ -186,7 +186,6 @@ export class ResetPasswordComponent implements OnInit {
         this.invalidToken = false;
       },
       error: (error) => {
-        console.error('Token inválido:', error);
         this.isValidating = false;
         this.tokenValidated = false;
         this.invalidToken = true;
@@ -214,7 +213,6 @@ export class ResetPasswordComponent implements OnInit {
       },
       error: (error) => {
         this.isLoading = false;
-        console.error('Erro ao redefinir senha:', error);
         
         if (error.status === 400) {
           this.toast.error(

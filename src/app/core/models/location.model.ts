@@ -61,21 +61,21 @@ export interface PlaceReviewInfo {
 
 export interface Petshop extends Location {
   type: 'petshop';
-  hasGrooming: boolean;
-  hasDaycare: boolean;
-  hasHotel: boolean;
-  hasVaccination: boolean;
-  acceptedPetTypes: PetType[];
+  hasGrooming?: boolean | null;
+  hasDaycare?: boolean | null;
+  hasHotel?: boolean | null;
+  hasVaccination?: boolean | null;
+  acceptedPetTypes?: PetType[];
 }
 
 export interface Veterinary extends Location {
   type: 'veterinary';
-  hasEmergency: boolean;
-  hasLaboratory: boolean;
-  hasSurgery: boolean;
-  hasRadiology: boolean;
-  specialties: VeterinarySpecialty[];
-  acceptedPetTypes: PetType[];
+  hasEmergency?: boolean | null;
+  hasLaboratory?: boolean | null;
+  hasSurgery?: boolean | null;
+  hasRadiology?: boolean | null;
+  specialties?: VeterinarySpecialty[];
+  acceptedPetTypes?: PetType[];
 }
 
 export enum PetType {
@@ -103,8 +103,6 @@ export interface LocationSearchParams {
   zipCode: string;
   radius: number; // em km
   type: 'petshop' | 'veterinary';
-  services?: string[];
-  petTypes?: PetType[];
   isOpenNow?: boolean;
   sortBy?: 'distance' | 'rating' | 'name';
 }

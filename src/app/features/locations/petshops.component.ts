@@ -76,7 +76,18 @@ import {
             <p>Buscando petshops próximos...</p>
           </div>
 
-          <div class="no-results" *ngIf="!isLoading() && hasSearched() && searchResults().locations.length === 0">
+          <div class="no-results" *ngIf="!isLoading() && searchError()">
+            <div class="no-results-content" role="alert">
+              <mat-icon class="no-results-icon">cloud_off</mat-icon>
+              <h3>Não foi possível buscar agora</h3>
+              <p>{{ searchError() }}</p>
+              <button mat-raised-button color="primary" (click)="retrySearch()">
+                <mat-icon>refresh</mat-icon> Tentar novamente
+              </button>
+            </div>
+          </div>
+
+          <div class="no-results" *ngIf="!isLoading() && !searchError() && hasSearched() && searchResults().locations.length === 0">
             <div class="no-results-content">
               <mat-icon class="no-results-icon">store_off</mat-icon>
               <h3>Nenhum petshop encontrado</h3>
@@ -105,25 +116,8 @@ import {
           <div class="welcome-content">
             <mat-icon class="welcome-icon">store</mat-icon>
             <h2>Encontre petshops próximos a você</h2>
-            <p>Digite seu CEP acima para descobrir os melhores petshops da sua região.</p>
-            <ul class="features-list">
-              <li>
-                <mat-icon>spa</mat-icon>
-                <span>Banho e tosa profissional</span>
-              </li>
-              <li>
-                <mat-icon>pets</mat-icon>
-                <span>Creche e hotel para pets</span>
-              </li>
-              <li>
-                <mat-icon>shopping_cart</mat-icon>
-                <span>Ração e produtos especializados</span>
-              </li>
-              <li>
-                <mat-icon>medical_services</mat-icon>
-                <span>Vacinação e cuidados básicos</span>
-              </li>
-            </ul>
+            <p>Digite seu CEP para consultar estabelecimentos próximos, com distância e avaliação pública.</p>
+            <p class="data-notice">Confirme horários e serviços diretamente com o estabelecimento antes de se deslocar.</p>
           </div>
         </div>
       </div>
@@ -275,6 +269,7 @@ import {
 export class PetshopsComponent implements OnInit {
   isLoading = signal(false);
   hasSearched = signal(false);
+  searchError = signal<string | null>(null);
   userLocation?: { lat: number; lng: number };
   searchResults = signal<LocationSearchResponse>({
     locations: [],
@@ -295,6 +290,7 @@ export class PetshopsComponent implements OnInit {
   onSearch(params: LocationSearchParams) {
     this.isLoading.set(true);
     this.hasSearched.set(true);
+    this.searchError.set(null);
     
     this.locationService.searchPetshops(params)
       .pipe(
@@ -308,7 +304,7 @@ export class PetshopsComponent implements OnInit {
           }
         },
         error: (error) => {
-          
+          this.searchError.set('Verifique sua conexão e tente novamente em instantes.');
           this.toast.error('Erro ao buscar petshops. Tente novamente.', 5000);
         }
       });
@@ -324,6 +320,11 @@ export class PetshopsComponent implements OnInit {
     this.onSearch(expandedParams);
   }
 
+  retrySearch(): void {
+    const params = this.searchResults().searchParams;
+    if (params?.zipCode) this.onSearch(params);
+  }
+
   onCallPetshop(location: Location) {
     if (location.phone) {
       window.open(`tel:${location.phone}`, '_self');
@@ -331,7 +332,7 @@ export class PetshopsComponent implements OnInit {
   }
 
   onGetDirections(location: Location) {
-    const url = `https://www.google.com/maps/dir/?api=1&destination=${location.latitude},${location.longitude}&destination_place_id=${location.name}`;
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${location.latitude},${location.longitude}&destination_place_id=${encodeURIComponent(location.id)}`;
     window.open(url, '_blank');
   }
 
@@ -343,8 +344,8 @@ export class PetshopsComponent implements OnInit {
       height: '90vh',
       maxHeight: '800px',
       panelClass: 'location-detail-dialog',
-      autoFocus: false,
-      restoreFocus: false
+      autoFocus: 'first-tabbable',
+      restoreFocus: true
     });
 
     dialogRef.afterClosed().subscribe(result => {

@@ -63,7 +63,6 @@ export class PetsComponent implements OnInit {
         this.isLoading = false;
       },
       error: (err) => {
-        console.error('Erro ao carregar pets:', err);
         this.pets = [];
         this.totalItems = 0;
         this.toast.error('Erro ao carregar pets. Tente novamente mais tarde.');
@@ -80,7 +79,8 @@ export class PetsComponent implements OnInit {
 
   openPetForm(): void {
     const dialogRef = this.dialog.open(PetFormComponent, {
-      width: '400px'
+      width: '520px',
+      maxWidth: 'calc(100vw - 24px)'
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -93,7 +93,8 @@ export class PetsComponent implements OnInit {
 
   editPet(pet: PetSummary): void {
     const dialogRef = this.dialog.open(PetFormComponent, {
-      width: '400px',
+      width: '520px',
+      maxWidth: 'calc(100vw - 24px)',
       data: pet
     });
 

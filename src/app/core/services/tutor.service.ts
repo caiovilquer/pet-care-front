@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
-import { TutorDetailResult, TutorsPageResult } from '../../shared/models/tutor.model';
-import { UpdateRequest } from '../../shared/models/auth.model';
-import { PageRequest } from '../../shared/models/common.model';
+import { map, tap } from 'rxjs/operators';
+import { Tutor, TutorsPage, TutorUpdateRequest } from '../models/tutor.model';
+import { PageRequest } from '../models/common.model';
 import { environment } from '../../../environments/environment';
 import { CacheService } from './cache.service';
 import { CacheKeys } from './cache-keys';
+import { MediaService } from './media.service';
 
 const CACHE_TTL_MS = 60_000;
 
@@ -17,20 +17,24 @@ const CACHE_TTL_MS = 60_000;
 export class TutorService {
   private readonly API_URL = `${environment.apiUrl}/tutors`;
 
-  constructor(private http: HttpClient, private cache: CacheService) {}
+  constructor(private http: HttpClient, private cache: CacheService, private media: MediaService) {}
 
-  getMyProfile(): Observable<TutorDetailResult> {
-    return this.http.get<TutorDetailResult>(`${this.API_URL}/me`);
+  getMyProfile(): Observable<Tutor> {
+    return this.http.get<Tutor>(`${this.API_URL}/me`).pipe(map(tutor => this.withMedia(tutor)));
   }
 
   /** Versão cacheada de getMyProfile — reaproveita a resposta ao trocar de aba/rota em vez de refazer a requisição. */
-  getMyProfileCached(): Observable<TutorDetailResult> {
+  getMyProfileCached(): Observable<Tutor> {
     return this.cache.get(CacheKeys.tutorMe, () => this.getMyProfile(), CACHE_TTL_MS);
   }
 
-  updateProfile(id: number, data: UpdateRequest): Observable<TutorDetailResult> {
-    return this.http.put<TutorDetailResult>(`${this.API_URL}/${id}`, data).pipe(
-      tap(() => this.cache.invalidate(CacheKeys.tutorMe))
+  updateProfile(id: number, data: TutorUpdateRequest): Observable<Tutor> {
+    return this.http.put<Tutor>(`${this.API_URL}/${id}`, data).pipe(
+      map(tutor => this.withMedia(tutor)),
+      tap(() => {
+        this.cache.invalidate(CacheKeys.tutorMe);
+        this.cache.invalidate(CacheKeys.dashboard);
+      })
     );
   }
 
@@ -40,7 +44,7 @@ export class TutorService {
     );
   }
 
-  getTutors(pageRequest?: PageRequest): Observable<TutorsPageResult> {
+  getTutors(pageRequest?: PageRequest): Observable<TutorsPage> {
     let params = new HttpParams();
     if (pageRequest?.page !== undefined) {
       params = params.set('page', pageRequest.page.toString());
@@ -49,6 +53,21 @@ export class TutorService {
       params = params.set('size', pageRequest.size.toString());
     }
     
-    return this.http.get<TutorsPageResult>(this.API_URL, { params });
+    return this.http.get<TutorsPage>(this.API_URL, { params });
+  }
+
+  private withMedia(tutor: Tutor): Tutor {
+    const normalized: Tutor = {
+      ...tutor,
+      pets: tutor.pets?.map(pet => ({
+        ...pet,
+        ...(this.media.contentUrl(pet.photoAssetId, pet.photoUrl)
+          ? { photoUrl: this.media.contentUrl(pet.photoAssetId, pet.photoUrl)! }
+          : {})
+      })) || []
+    };
+    const avatar = this.media.contentUrl(tutor.avatarAssetId, tutor.avatar);
+    if (avatar) normalized.avatar = avatar;
+    return normalized;
   }
 }

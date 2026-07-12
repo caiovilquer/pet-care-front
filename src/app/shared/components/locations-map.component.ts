@@ -202,7 +202,6 @@ export class LocationsMapComponent implements OnInit, OnDestroy {
       this.isGoogleMapsLoaded = true;
       this.initializeMap();
     } catch (error) {
-      console.error('Erro ao carregar Google Maps:', error);
     }
   }
 
@@ -337,12 +336,10 @@ export class LocationsMapComponent implements OnInit, OnDestroy {
       trafficLayer.setMap(this.googleMap);
     } else {
       // Remover camada de trânsito (seria necessário manter referência)
-      console.log('Traffic layer disabled');
     }
   }
 
   onUserMarkerClick() {
-    console.log('User location clicked');
   }
 
   onLocationMarkerClick(location: Location, marker: any) {

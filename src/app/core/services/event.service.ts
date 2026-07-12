@@ -40,20 +40,20 @@ export class EventService {
     return this.cache.get(CacheKeys.eventById(id), () => this.getById(id), CACHE_TTL_MS);
   }
 
-  create(event: EventCreateRequest): Observable<any> {
-    return this.http.post<any>(this.apiUrl, event).pipe(tap(() => this.invalidateCache()));
+  create(event: EventCreateRequest): Observable<{ eventId: number }> {
+    return this.http.post<{ eventId: number }>(this.apiUrl, event).pipe(tap(() => this.invalidateCache()));
   }
 
-  update(id: number, event: EventUpdateRequest): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/${id}`, event).pipe(tap(() => this.invalidateCache()));
+  update(id: number, event: EventUpdateRequest): Observable<Event> {
+    return this.http.put<Event>(`${this.apiUrl}/${id}`, event).pipe(tap(() => this.invalidateCache()));
   }
 
-  delete(id: number): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl}/${id}`).pipe(tap(() => this.invalidateCache()));
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(tap(() => this.invalidateCache()));
   }
 
-  toggleDone(id: number): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/${id}/toggle`, {}).pipe(tap(() => this.invalidateCache()));
+  toggleDone(id: number): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/${id}/toggle`, {}).pipe(tap(() => this.invalidateCache()));
   }
 
   listByPet(petId: number): Observable<Event[]> {
@@ -82,5 +82,6 @@ export class EventService {
    */
   private invalidateCache(): void {
     this.cache.invalidatePrefix(CacheKeys.eventsPrefix);
+    this.cache.invalidate(CacheKeys.dashboard);
   }
 }

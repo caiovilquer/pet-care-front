@@ -11,8 +11,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { LocationSearchParams, PetType } from '../../core/models/location.model';
-import { LocationService } from '../../core/services/location.service';
+import { LocationSearchParams } from '../../core/models/location.model';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 
@@ -151,54 +150,6 @@ import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
               </mat-checkbox>
             </div>
 
-            <div class="filter-row" *ngIf="type === 'petshop'">
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Serviços desejados</mat-label>
-                <mat-select formControlName="services" multiple>
-                  <mat-option value="grooming">Banho e tosa</mat-option>
-                  <mat-option value="daycare">Creche</mat-option>
-                  <mat-option value="hotel">Hotel</mat-option>
-                  <mat-option value="vaccination">Vacinação</mat-option>
-                  <mat-option value="food">Ração e produtos</mat-option>
-                  <mat-option value="toys">Brinquedos</mat-option>
-                </mat-select>
-                <mat-hint>Selecione um ou mais serviços</mat-hint>
-              </mat-form-field>
-            </div>
-
-            <div class="filter-row" *ngIf="type === 'veterinary'">
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Especialidades</mat-label>
-                <mat-select formControlName="services" multiple>
-                  <mat-option value="general">Clínica geral</mat-option>
-                  <mat-option value="emergency">Emergência 24h</mat-option>
-                  <mat-option value="surgery">Cirurgia</mat-option>
-                  <mat-option value="laboratory">Laboratório</mat-option>
-                  <mat-option value="radiology">Radiologia</mat-option>
-                  <mat-option value="cardiology">Cardiologia</mat-option>
-                  <mat-option value="dermatology">Dermatologia</mat-option>
-                  <mat-option value="orthopedics">Ortopedia</mat-option>
-                </mat-select>
-                <mat-hint>Selecione uma ou mais especialidades</mat-hint>
-              </mat-form-field>
-            </div>
-
-            <div class="filter-row">
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Tipos de pets</mat-label>
-                <mat-select formControlName="petTypes" multiple>
-                  <mat-option value="dog">Cachorro</mat-option>
-                  <mat-option value="cat">Gato</mat-option>
-                  <mat-option value="bird">Pássaro</mat-option>
-                  <mat-option value="fish">Peixe</mat-option>
-                  <mat-option value="rabbit">Coelho</mat-option>
-                  <mat-option value="hamster">Hamster</mat-option>
-                  <mat-option value="other">Outros</mat-option>
-                </mat-select>
-                <mat-hint>Selecione um ou mais tipos de pet</mat-hint>
-              </mat-form-field>
-            </div>
-            
             <div class="filter-actions">
               <button 
                 mat-stroked-button 
@@ -450,20 +401,6 @@ import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
       }
     }
 
-    /* Remove all focus outlines */
-    ::ng-deep .mat-mdc-form-field .mdc-text-field:focus-within {
-      outline: none !important;
-      box-shadow: none !important;
-    }
-
-    ::ng-deep .mat-mdc-form-field input:focus {
-      outline: none !important;
-      box-shadow: none !important;
-    }
-
-    ::ng-deep .mat-mdc-form-field.mat-focused .mdc-text-field {
-      box-shadow: none !important;
-    }
   `]
 })
 export class LocationSearchComponent implements OnInit, OnDestroy {
@@ -476,35 +413,6 @@ export class LocationSearchComponent implements OnInit, OnDestroy {
   activeFilters: Array<{ key: string; label: string; value: any }> = [];
   hasActiveFilters = false;
 
-  // Mapeamento de serviços para exibição legível
-  private serviceLabels: { [key: string]: string } = {
-    grooming: 'Banho e tosa',
-    daycare: 'Creche',
-    hotel: 'Hotel',
-    vaccination: 'Vacinação',
-    food: 'Ração e produtos',
-    toys: 'Brinquedos',
-    general: 'Clínica geral',
-    emergency: 'Emergência 24h',
-    surgery: 'Cirurgia',
-    laboratory: 'Laboratório',
-    radiology: 'Radiologia',
-    cardiology: 'Cardiologia',
-    dermatology: 'Dermatologia',
-    orthopedics: 'Ortopedia'
-  };
-
-  // Mapeamento de tipos de pet para exibição legível
-  private petTypeLabels: { [key: string]: string } = {
-    dog: 'Cachorro',
-    cat: 'Gato',
-    bird: 'Pássaro',
-    fish: 'Peixe',
-    rabbit: 'Coelho',
-    hamster: 'Hamster',
-    other: 'Outros'
-  };
-
   // Para unsubscribe em ngOnDestroy
   private destroy$ = new Subject<void>();
 
@@ -512,16 +420,11 @@ export class LocationSearchComponent implements OnInit, OnDestroy {
   private defaultValues = {
     zipCode: '',
     radius: 10,
-    services: [],
-    petTypes: [],
     isOpenNow: false,
     sortBy: 'distance'
   };
 
-  constructor(
-    private fb: FormBuilder,
-    private locationService: LocationService
-  ) {}
+  constructor(private fb: FormBuilder) {}
 
   ngOnInit() {
     this.initForm();
@@ -537,8 +440,6 @@ export class LocationSearchComponent implements OnInit, OnDestroy {
     this.searchForm = this.fb.group({
       zipCode: ['', [Validators.required, Validators.pattern(/^\d{5}-?\d{3}$/)]],
       radius: [10],
-      services: [[]],
-      petTypes: [[]],
       isOpenNow: [false],
       sortBy: ['distance']
     });
@@ -650,32 +551,6 @@ export class LocationSearchComponent implements OnInit, OnDestroy {
       });
     }
     
-    // Serviços
-    if (formValue.services && formValue.services.length > 0) {
-      const serviceNames = formValue.services.map((service: string) => 
-        this.serviceLabels[service] || service
-      );
-      
-      filters.push({
-        key: 'services',
-        label: `Serviços: ${serviceNames.join(', ')}`,
-        value: formValue.services
-      });
-    }
-    
-    // Tipos de pet
-    if (formValue.petTypes && formValue.petTypes.length > 0) {
-      const petNames = formValue.petTypes.map((type: string) => 
-        this.petTypeLabels[type] || type
-      );
-      
-      filters.push({
-        key: 'petTypes',
-        label: `Pets: ${petNames.join(', ')}`,
-        value: formValue.petTypes
-      });
-    }
-    
     this.activeFilters = filters;
     this.hasActiveFilters = filters.length > 0;
   }
@@ -691,12 +566,6 @@ export class LocationSearchComponent implements OnInit, OnDestroy {
         break;
       case 'isOpenNow':
         this.searchForm.patchValue({ isOpenNow: false });
-        break;
-      case 'services':
-        this.searchForm.patchValue({ services: [] });
-        break;
-      case 'petTypes':
-        this.searchForm.patchValue({ petTypes: [] });
         break;
     }
   }

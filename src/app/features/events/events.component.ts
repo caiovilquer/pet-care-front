@@ -117,7 +117,6 @@ export class EventsComponent implements OnInit {
         this.isLoading = false;
       },
       error: (err) => {
-        console.error('Erro ao carregar eventos:', err);
         // Definir dados padrão em caso de erro
         this.events = [];
         this.totalItems = 0;
@@ -148,7 +147,6 @@ export class EventsComponent implements OnInit {
           this.isLoading = false;
         },
         error: (err) => {
-          console.error('Erro ao carregar eventos do pet:', err);
           // Definir dados padrão em caso de erro
           this.events = [];
           this.totalItems = 0;

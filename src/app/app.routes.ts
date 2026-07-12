@@ -33,7 +33,7 @@ export const routes: Routes = [
   {
     path: '',
     loadComponent: () => import('./shared/components/layout.component').then(m => m.LayoutComponent),
-    // canActivate: [authGuard], // Comentado para desenvolvimento - remover comentário em produção
+    canActivate: [authGuard],
     children: [
       {
         path: 'dashboard',

@@ -593,7 +593,7 @@ export class LocationCardComponent {
   }
 
   getDisplayServices(): string[] {
-    return this.location.services;
+    return this.location.services.filter(service => service !== 'petshop' && service !== 'veterinary');
   }
 
   onImageError(event: Event): void {

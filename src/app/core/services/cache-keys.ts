@@ -1,5 +1,6 @@
 /** Chaves de cache compartilhadas entre serviços (permite invalidação cruzada, ex.: pet -> perfil do tutor). */
 export const CacheKeys = {
+  dashboard: 'dashboard:overview',
   petsPrefix: 'pets:',
   petsAll: (page: number, size: number) => `pets:all:${page}:${size}`,
   petsList: 'pets:list',

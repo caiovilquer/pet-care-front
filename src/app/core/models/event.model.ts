@@ -5,8 +5,8 @@ export type EventStatus = 'PENDING' | 'DONE';
 export interface Recurrence {
   frequency: RecurrenceFrequency;
   intervalCount: number;
-  repetitions?: number;
-  finalDate?: string; // format: date-time
+  repetitions?: number | null;
+  finalDate?: string | null; // format: date-time
 }
 
 export interface Event {
@@ -45,20 +45,20 @@ export interface EventCreateRequest {
   type: EventType;
   description: string;
   dateStart: string; // format: date-time
-  frequency?: RecurrenceFrequency;
+  frequency?: RecurrenceFrequency | null;
   intervalCount: number;
   repetitions?: number;
   finalDate?: string; // format: date-time
 }
 
 export interface EventUpdateRequest {
-    type?: EventType;
-    description?: string;
-    dateStart?: string; // format: date-time
-    frequency?: RecurrenceFrequency;
-    intervalCount?: number;
-    repetitions?: number;
-    finalDate?: string; // format: date-time
+    type: EventType;
+    description: string;
+    dateStart: string; // format: date-time
+    frequency: RecurrenceFrequency | null;
+    intervalCount: number;
+    repetitions: number | null;
+    finalDate: string | null; // format: date-time
 }
 
 // Helper functions for status conversion

@@ -6,6 +6,7 @@ import { Pet, PetCreateRequest, PetUpdateRequest, PetsPage, PetSummary } from '.
 import { environment } from '../../../environments/environment';
 import { CacheService } from './cache.service';
 import { CacheKeys } from './cache-keys';
+import { MediaService } from './media.service';
 
 const CACHE_TTL_MS = 60_000;
 
@@ -15,10 +16,12 @@ const CACHE_TTL_MS = 60_000;
 export class PetService {
   private apiUrl = `${environment.apiUrl}/pets`;
 
-  constructor(private http: HttpClient, private cache: CacheService) { }
+  constructor(private http: HttpClient, private cache: CacheService, private media: MediaService) { }
 
   getAll(page: number, size: number): Observable<PetsPage> {
-    return this.http.get<PetsPage>(`${this.apiUrl}?page=${page}&size=${size}`);
+    return this.http.get<PetsPage>(`${this.apiUrl}?page=${page}&size=${size}`).pipe(
+      map(result => ({ ...result, items: result.items.map(pet => this.withPhoto(pet)) }))
+    );
   }
 
   /** Versão cacheada de getAll — reaproveita a resposta ao trocar de aba/rota em vez de refazer a requisição. */
@@ -27,23 +30,23 @@ export class PetService {
   }
 
   getById(id: number): Observable<Pet> {
-    return this.http.get<Pet>(`${this.apiUrl}/${id}`);
+    return this.http.get<Pet>(`${this.apiUrl}/${id}`).pipe(map(pet => this.withPhoto(pet)));
   }
 
   getByIdCached(id: number): Observable<Pet> {
     return this.cache.get(CacheKeys.petById(id), () => this.getById(id), CACHE_TTL_MS);
   }
 
-  create(pet: PetCreateRequest): Observable<any> {
-    return this.http.post<any>(this.apiUrl, pet).pipe(tap(() => this.invalidateCache()));
+  create(pet: PetCreateRequest): Observable<{ petId: number }> {
+    return this.http.post<{ petId: number }>(this.apiUrl, pet).pipe(tap(() => this.invalidateCache()));
   }
 
-  update(id: number, pet: PetUpdateRequest): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/${id}`, pet).pipe(tap(() => this.invalidateCache()));
+  update(id: number, pet: PetUpdateRequest): Observable<Pet> {
+    return this.http.put<Pet>(`${this.apiUrl}/${id}`, pet).pipe(tap(() => this.invalidateCache()));
   }
 
-  delete(id: number): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl}/${id}`).pipe(tap(() => this.invalidateCache()));
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(tap(() => this.invalidateCache()));
   }
 
   getPets(): Observable<PetSummary[]> {
@@ -61,5 +64,14 @@ export class PetService {
   private invalidateCache(): void {
     this.cache.invalidatePrefix(CacheKeys.petsPrefix);
     this.cache.invalidate(CacheKeys.tutorMe);
+    this.cache.invalidate(CacheKeys.dashboard);
+  }
+
+  private withPhoto<T extends { photoUrl?: string; photoAssetId?: string }>(pet: T): T {
+    const normalized = { ...pet };
+    const photoUrl = this.media.contentUrl(pet.photoAssetId, pet.photoUrl);
+    if (photoUrl) normalized.photoUrl = photoUrl;
+    else delete normalized.photoUrl;
+    return normalized;
   }
 }

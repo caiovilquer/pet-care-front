@@ -122,7 +122,6 @@ export class ForgotPasswordComponent {
       },
       error: (error) => {
         this.isLoading = false;
-        console.error('Erro ao solicitar reset de senha:', error);
         this.toast.success(
           'Se este email estiver cadastrado, você receberá instruções para redefinir sua senha.',
           6000
