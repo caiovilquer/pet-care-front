@@ -1,0 +1,54 @@
+<article class="care-card" [class.completed]="isCompleted" [class.overdue]="isOverdue" [class.cancelled]="occurrence.status === 'CANCELLED'">
+  <button type="button" class="complete-button"
+          [class.checked]="isCompleted"
+          [disabled]="busy || occurrence.status === 'CANCELLED' || (isCompleted && !canUndo)"
+          (click)="isCompleted ? (canUndo && undo.emit(occurrence)) : complete.emit(occurrence)"
+          [attr.aria-label]="isCompleted ? (canUndo ? 'Desfazer conclusão de ' + occurrence.title : occurrence.title + ' concluído') : 'Concluir ' + occurrence.title">
+    @if (busy) {
+      <mat-spinner diameter="22"></mat-spinner>
+    } @else {
+      <mat-icon>{{ isCompleted ? 'check' : 'radio_button_unchecked' }}</mat-icon>
+    }
+  </button>
+
+  <div class="q-ev-icon q-ev-{{ occurrence.type.toLowerCase() }}" aria-hidden="true">
+    <mat-icon>{{ icon }}</mat-icon>
+  </div>
+
+  <div class="content">
+    <div class="title-row">
+      <strong>{{ occurrence.title }}</strong>
+      @if (isOverdue) { <span class="status overdue-label">Atrasado</span> }
+      @if (isCompleted) { <span class="status done-label">Concluído</span> }
+      @if (occurrence.status === 'CANCELLED') { <span class="status cancelled-label">Cancelado</span> }
+    </div>
+    <div class="meta">
+      @if (showDate) { <span>{{ date }}</span><span aria-hidden="true">·</span> }
+      <span>{{ time }}</span>
+      <span aria-hidden="true">·</span>
+      <span>{{ petName }}</span>
+      <span aria-hidden="true">·</span>
+      <span>{{ typeLabel }}</span>
+    </div>
+    @if (occurrence.instructions) { <p class="instructions">{{ occurrence.instructions }}</p> }
+    @if (isCompleted) {
+      <p class="audit"><mat-icon>verified_user</mat-icon> Confirmado às {{ completedTime }}</p>
+    }
+  </div>
+
+  <div class="actions">
+    @if (canUndo) {
+      <button mat-button type="button" (click)="undo.emit(occurrence)" [disabled]="busy">Desfazer</button>
+    }
+    @if (showPlanActions && occurrence.status !== 'CANCELLED') {
+      <button mat-icon-button type="button" (click)="editPlan.emit(occurrence)" [disabled]="busy"
+              matTooltip="Editar este plano" aria-label="Editar plano de cuidado">
+        <mat-icon>edit</mat-icon>
+      </button>
+      <button mat-icon-button type="button" (click)="endPlan.emit(occurrence)" [disabled]="busy"
+              matTooltip="Encerrar plano" aria-label="Encerrar plano de cuidado">
+        <mat-icon>event_busy</mat-icon>
+      </button>
+    }
+  </div>
+</article>

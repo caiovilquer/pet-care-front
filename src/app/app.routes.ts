@@ -36,9 +36,10 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       {
-        path: 'dashboard',
+        path: 'today',
         loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent)
       },
+      { path: 'dashboard', redirectTo: 'today', pathMatch: 'full' },
       {
         path: 'pets',
         loadComponent: () => import('./features/pets/pets.component').then(m => m.PetsComponent)
@@ -69,5 +70,5 @@ export const routes: Routes = [
       }
     ]
   },
-  { path: '**', redirectTo: '/dashboard' }
+  { path: '**', redirectTo: '/today' }
 ];

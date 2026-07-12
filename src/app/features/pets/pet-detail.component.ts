@@ -9,11 +9,11 @@ import { EmptyStateComponent } from '../../shared/components/ui/empty-state.comp
 import { SkeletonComponent } from '../../shared/components/ui/skeleton.component';
 import { ToastService } from '../../core/services/toast.service';
 import { PetService } from '../../core/services/pet.service';
-import { EventService } from '../../core/services/event.service';
+import { CareService } from '../../core/services/care.service';
 import { UserStateService } from '../../core/services/user-state.service';
 import { DateTimeService } from '../../core/services/datetime.service';
 import { Pet } from '../../core/models/pet.model';
-import { EventSummary } from '../../core/models/event.model';
+import { CareOccurrence } from '../../core/models/care.model';
 import { PetFormComponent } from './pet-form.component';
 
 @Component({
@@ -33,7 +33,7 @@ import { PetFormComponent } from './pet-form.component';
 })
 export class PetDetailComponent implements OnInit {
   pet: Pet | null = null;
-  recentEvents: EventSummary[] = [];
+  recentEvents: CareOccurrence[] = [];
   isLoading = true;
   petId: number = 0;
 
@@ -41,7 +41,7 @@ export class PetDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private petService: PetService,
-    private eventService: EventService,
+    private careService: CareService,
     private dateTimeService: DateTimeService,
     private dialog: MatDialog,
     private toast: ToastService,
@@ -78,16 +78,18 @@ export class PetDetailComponent implements OnInit {
   }
 
   private loadRecentEvents(): void {
-    this.eventService.listByPetCached(this.petId).subscribe({
-      next: (events) => {
-        // Pegar apenas os 5 eventos mais recentes
-        this.recentEvents = events
-          .sort((a, b) => new Date(b.dateStart).getTime() - new Date(a.dateStart).getTime())
-          .slice(0, 5)
-          .map(event => ({
-            ...event,
-            petId: this.petId
-          } as EventSummary));
+    const now = new Date();
+    const from = new Date(now); from.setDate(from.getDate() - 180);
+    const to = new Date(now); to.setDate(to.getDate() + 90);
+    this.careService.search({
+      from: this.dateTimeService.formatDateTimeForAPIWithoutTimezone(from),
+      to: this.dateTimeService.formatDateTimeForAPIWithoutTimezone(to),
+      petId: this.petId, page: 0, size: 100
+    }).subscribe({
+      next: (page) => {
+        this.recentEvents = page.items
+          .sort((a, b) => new Date(b.dueAt).getTime() - new Date(a.dueAt).getTime())
+          .slice(0, 5);
   
       },
       error: (err) => {
@@ -181,7 +183,7 @@ export class PetDetailComponent implements OnInit {
   }
 
   getEventStatus(dateStart: string, status: string): string {
-    if (status === 'DONE') {
+    if (status === 'COMPLETED') {
       return 'Concluído';
     }
     const now = new Date();
@@ -194,7 +196,7 @@ export class PetDetailComponent implements OnInit {
   }
 
   getStatusChipClass(dateStart: string, status: string): string {
-    if (status === 'DONE') {
+    if (status === 'COMPLETED') {
       return 'status-done';
     }
     const now = new Date();

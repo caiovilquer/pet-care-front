@@ -1,131 +1,113 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
-import { Subscription } from 'rxjs';
-import { StatCardComponent } from '../../shared/components/ui/stat-card.component';
-import { PetAvatarComponent } from '../../shared/components/ui/pet-avatar.component';
-import { EmptyStateComponent } from '../../shared/components/ui/empty-state.component';
-import { SkeletonComponent } from '../../shared/components/ui/skeleton.component';
+import { catchError, forkJoin, of, Subscription } from 'rxjs';
+import { CareOccurrence, TodayCare } from '../../core/models/care.model';
+import { DashboardOverview } from '../../core/models/dashboard.model';
+import { PetSummary } from '../../core/models/pet.model';
+import { ApiErrorService } from '../../core/services/api-error.service';
+import { CareService } from '../../core/services/care.service';
 import { DashboardService } from '../../core/services/dashboard.service';
 import { EventStateService } from '../../core/services/event-state.service';
-import { DateTimeService } from '../../core/services/datetime.service';
-import { EventSummary, EventType } from '../../core/models/event.model';
-import { PetSummary } from '../../core/models/pet.model';
+import { ToastService } from '../../core/services/toast.service';
+import { EventFormComponent } from '../events/event-form.component';
+import { CareOccurrenceCardComponent } from '../../shared/components/ui/care-occurrence-card.component';
+import { ConfirmDialogComponent } from '../../shared/components/ui/confirm-dialog.component';
+import { EmptyStateComponent } from '../../shared/components/ui/empty-state.component';
+import { PetAvatarComponent } from '../../shared/components/ui/pet-avatar.component';
+import { SkeletonComponent } from '../../shared/components/ui/skeleton.component';
+import { StatCardComponent } from '../../shared/components/ui/stat-card.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [
-    CommonModule,
-    RouterLink,
-    MatButtonModule,
-    MatIconModule,
-    StatCardComponent,
-    PetAvatarComponent,
-    EmptyStateComponent,
-    SkeletonComponent
+    CommonModule, RouterLink, MatButtonModule, MatIconModule, StatCardComponent, PetAvatarComponent,
+    EmptyStateComponent, SkeletonComponent, CareOccurrenceCardComponent
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit, OnDestroy {
-  currentUser: { firstName: string } | null = null;
-  totalPets = 0;
-  totalEvents = 0;
-  upcomingEvents = 0;
+  overview: DashboardOverview | null = null;
+  today: TodayCare | null = null;
   recentPets: PetSummary[] = [];
-  recentEvents: EventSummary[] = [];
   isLoading = true;
-  private eventUpdateSubscription?: Subscription;
+  hadError = false;
+  readonly busyIds = new Set<string>();
+  private updates?: Subscription;
 
   constructor(
-    private dashboardService: DashboardService,
-    private eventStateService: EventStateService,
-    private dateTimeService: DateTimeService
-  ) { }
+    private readonly dashboard: DashboardService,
+    private readonly care: CareService,
+    private readonly eventState: EventStateService,
+    private readonly toast: ToastService,
+    private readonly apiError: ApiErrorService,
+    private readonly dialog: MatDialog
+  ) {}
 
   ngOnInit(): void {
-    this.loadDashboardData();
-    // Se inscrever para atualizações de eventos
-    this.eventUpdateSubscription = this.eventStateService.eventUpdated$.subscribe(() => {
-      this.loadDashboardData(true);
+    this.load();
+    this.updates = this.eventState.eventUpdated$.subscribe(() => this.load(true));
+  }
+  ngOnDestroy(): void { this.updates?.unsubscribe(); }
+
+  load(force = false): void {
+    this.isLoading = true; this.hadError = false;
+    forkJoin({
+      overview: this.dashboard.getOverview(force).pipe(catchError(() => of(null))),
+      today: this.care.today(force).pipe(catchError(() => of(null)))
+    }).subscribe(({ overview, today }) => {
+      this.overview = overview; this.today = today;
+      this.recentPets = overview?.pets.slice(0, 5) || [];
+      this.hadError = !overview || !today;
+      this.isLoading = false;
     });
   }
 
-  ngOnDestroy(): void {
-    if (this.eventUpdateSubscription) {
-      this.eventUpdateSubscription.unsubscribe();
-    }
+  openPlan(planId?: string, petId?: number): void {
+    const ref = this.dialog.open(EventFormComponent, {
+      width: '680px', maxWidth: 'calc(100vw - 24px)', data: { planId, petId }
+    });
+    ref.afterClosed().subscribe(saved => { if (saved) this.load(true); });
   }
-
-  loadDashboardData(forceRefresh = false): void {
-    this.isLoading = true;
-    this.dashboardService.getOverview(forceRefresh).subscribe({
-      next: (overview) => {
-        this.currentUser = { firstName: overview.firstName };
-        this.totalPets = overview.totalPets;
-        this.totalEvents = overview.totalEvents;
-        this.recentPets = overview.pets.slice(0, 5);
-        this.upcomingEvents = overview.upcomingEvents.length;
-        this.recentEvents = overview.upcomingEvents.slice(0, 5);
-        this.isLoading = false;
-      },
-      error: (error) => {
-        this.currentUser = null;
-        this.totalPets = 0;
-        this.totalEvents = 0;
-        this.upcomingEvents = 0;
-        this.recentPets = [];
-        this.recentEvents = [];
-        this.isLoading = false;
-      }
+  complete(event: CareOccurrence): void {
+    if (this.busyIds.has(event.id)) return;
+    this.busyIds.add(event.id);
+    this.care.complete(event.id).subscribe({
+      next: () => { this.busyIds.delete(event.id); this.toast.success(`${event.title} concluído.`); this.eventState.notifyEventUpdated(); },
+      error: error => { this.busyIds.delete(event.id); this.load(true); this.toast.error(this.apiError.message(error, 'Não foi possível confirmar. A lista foi atualizada por segurança.')); }
     });
   }
-
-  getEventTypeName(type: EventType): string {
-    const names = {
-      VACCINE: 'Vacina',
-      MEDICINE: 'Remédio',
-      DIARY: 'Diário',
-      BREED: 'Cio',
-      SERVICE: 'Serviço'
-    };
-    return names[type] || 'Evento';
+  undo(event: CareOccurrence): void {
+    if (this.busyIds.has(event.id)) return;
+    this.busyIds.add(event.id);
+    this.care.undo(event.id).subscribe({
+      next: () => { this.busyIds.delete(event.id); this.toast.info('Conclusão desfeita.'); this.eventState.notifyEventUpdated(); },
+      error: error => { this.busyIds.delete(event.id); this.load(true); this.toast.error(this.apiError.message(error, 'Não foi possível desfazer.')); }
+    });
   }
-
-  getEventIcon(type: EventType): string {
-    const icons = {
-      VACCINE: 'vaccines',
-      MEDICINE: 'medication',
-      DIARY: 'book',
-      BREED: 'favorite',
-      SERVICE: 'content_cut'
-    };
-    return icons[type] || 'event';
+  endPlan(event: CareOccurrence): void {
+    const ref = this.dialog.open(ConfirmDialogComponent, { data: {
+      title: 'Encerrar este plano?', message: `As próximas ocorrências de “${event.title}” serão canceladas. O histórico fica preservado.`,
+      confirmLabel: 'Encerrar plano', danger: true
+    }});
+    ref.afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.busyIds.add(event.id);
+      this.care.deactivatePlan(event.planId).subscribe({
+        next: () => { this.toast.success('Plano encerrado com histórico preservado.'); this.eventState.notifyEventUpdated(); },
+        error: error => { this.busyIds.delete(event.id); this.toast.error(this.apiError.message(error, 'Não foi possível encerrar o plano.')); }
+      });
+    });
   }
-
-  formatDate(dateString: string): string {
-    if (!dateString) return 'N/A';
-    return this.dateTimeService.formatDateTimeForDisplay(dateString); // FIX: usar serviço centralizado
-  }
-
-  retryLoadData(): void {
-    this.loadDashboardData(true);
-  }
-
-  get greeting(): string {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'Bom dia';
-    if (hour < 18) return 'Boa tarde';
-    return 'Boa noite';
-  }
-
+  petName(id: number): string { return this.overview?.pets.find(pet => pet.id === id)?.name || `Pet #${id}`; }
+  get greeting(): string { const h = new Date().getHours(); return h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite'; }
   get todayLabel(): string {
-    const label = new Date().toLocaleDateString('pt-BR', {
-      weekday: 'long', day: 'numeric', month: 'long'
-    });
+    const label = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
     return label.charAt(0).toUpperCase() + label.slice(1);
   }
 }

@@ -54,14 +54,14 @@
                 <mat-icon>{{ getEventIcon(event.type) }}</mat-icon>
               </div>
               <div class="event-tx">
-                <span class="event-title">{{ event.description || getEventTypeName(event.type) }}</span>
-                <span class="event-when">{{ formatEventDate(event.dateStart) }}</span>
+                <span class="event-title">{{ event.title }}</span>
+                <span class="event-when">{{ formatEventDate(event.dueAt) }}</span>
               </div>
               <span class="q-status"
-                    [class.q-status-done]="getStatusChipClass(event.dateStart, event.status) === 'status-done'"
-                    [class.q-status-overdue]="getStatusChipClass(event.dateStart, event.status) === 'status-overdue'"
-                    [class.q-status-pending]="getStatusChipClass(event.dateStart, event.status) === 'status-pending'">
-                {{ getEventStatus(event.dateStart, event.status) }}
+                    [class.q-status-done]="getStatusChipClass(event.dueAt, event.status) === 'status-done'"
+                    [class.q-status-overdue]="getStatusChipClass(event.dueAt, event.status) === 'status-overdue'"
+                    [class.q-status-pending]="getStatusChipClass(event.dueAt, event.status) === 'status-pending'">
+                {{ getEventStatus(event.dueAt, event.status) }}
               </span>
             </div>
           }

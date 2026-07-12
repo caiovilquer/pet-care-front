@@ -14,7 +14,7 @@ import { EventStateService } from '../../core/services/event-state.service';
 import { DateTimeService } from '../../core/services/datetime.service';
 import { UserStateService } from '../../core/services/user-state.service';
 import { DashboardOverview } from '../../core/models/dashboard.model';
-import { EventSummary } from '../../core/models/event.model';
+import { CareOccurrence } from '../../core/models/care.model';
 import { FooterComponent } from './ui/footer.component';
 
 @Component({
@@ -36,12 +36,12 @@ import { FooterComponent } from './ui/footer.component';
     <a class="skip-link" href="#main-content">Pular para o conteúdo</a>
     <div class="shell">
       <header class="rp-header">
-        <a routerLink="/dashboard" class="wordmark" aria-label="RotinaPet — início">
+        <a routerLink="/today" class="wordmark" aria-label="RotinaPet — hoje">
           rotina<b>pet</b><span class="dot" aria-hidden="true"></span>
         </a>
 
         <nav class="desktop-nav" aria-label="Navegação principal">
-          <a routerLink="/dashboard" routerLinkActive="on">Início</a>
+          <a routerLink="/today" routerLinkActive="on">Hoje</a>
           <a routerLink="/pets" routerLinkActive="on">Pets</a>
           <a routerLink="/events" routerLinkActive="on">Agenda</a>
           <a routerLink="/petshops" [class.on]="isNearbyActive">Por perto</a>
@@ -83,8 +83,8 @@ import { FooterComponent } from './ui/footer.component';
       </main>
 
       <nav class="rp-bottom-nav" aria-label="Navegação principal">
-        <a routerLink="/dashboard" routerLinkActive="on">
-          <mat-icon>home</mat-icon><span>Início</span>
+        <a routerLink="/today" routerLinkActive="on">
+          <mat-icon>today</mat-icon><span>Hoje</span>
         </a>
         <a routerLink="/pets" routerLinkActive="on">
           <mat-icon>pets</mat-icon><span>Pets</span>
@@ -134,8 +134,8 @@ import { FooterComponent } from './ui/footer.component';
               <mat-icon>{{ getEventIcon(event.type) }}</mat-icon>
             </div>
             <div class="notif-tx">
-              <span class="notif-desc">{{ event.description }}</span>
-              <span class="notif-when">{{ formatEventDate(event.dateStart) }}
+              <span class="notif-desc">{{ event.title }}</span>
+              <span class="notif-when">{{ formatEventDate(event.dueAt) }}
                 @if (event.petName) { · {{ event.petName }} }
               </span>
             </div>
@@ -377,7 +377,7 @@ import { FooterComponent } from './ui/footer.component';
 export class LayoutComponent implements OnInit, OnDestroy {
   currentUser: Pick<DashboardOverview, 'firstName' | 'lastName' | 'email' | 'avatar'> | null = null;
   upcomingEventsCount = 0;
-  upcomingEventsList: Array<EventSummary & { petName?: string }> = [];
+  upcomingEventsList: Array<CareOccurrence & { petName?: string }> = [];
   avatarFailed = false;
   isDark = false;
   isProduction = environment.production;

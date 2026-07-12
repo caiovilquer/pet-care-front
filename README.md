@@ -10,13 +10,14 @@
 ## 🚀 Funcionalidades
 
 - ✅ **Autenticação completa** - Login/Signup com validação
-- ✅ **Dashboard moderno** - Interface limpa e responsiva
+- ✅ **Tela Hoje orientada à ação** - Atrasados, cuidados do dia, conclusão em um toque e desfazer seguro
 - ✅ **Gerenciamento de Pets** - CRUD completo de pets
-- ✅ **Sistema de Eventos** - Agendamento de consultas e cuidados
+- ✅ **Planos de cuidado** - Recorrência, orientações e lembretes com ocorrências independentes
+- ✅ **Agenda confiável** - Filtros por pet, período, tipo e status, com histórico auditável
 - ✅ **Integração Google Maps** - Localização de veterinárias e petshops
 - ✅ **Perfil de usuário** - Gerenciamento de dados pessoais
 - ✅ **Design responsivo** - Funciona em desktop e mobile
-- ✅ **Tema moderno** - Paleta azul/roxo minimalista
+- ✅ **Tema moderno** - Direção visual Quintal, modos claro e escuro
 
 ## 🛠️ Tecnologias
 

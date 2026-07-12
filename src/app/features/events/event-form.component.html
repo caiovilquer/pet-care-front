@@ -1,110 +1,127 @@
 <div class="form-header">
-  <p class="q-overline">Rotina de cuidados</p>
-  <h2 mat-dialog-title>{{isEdit ? 'Editar cuidado' : 'Adicionar cuidado'}}</h2>
+  <p class="q-overline">Plano de cuidado</p>
+  <h2 mat-dialog-title>{{ isEdit ? 'Editar rotina' : 'Novo cuidado' }}</h2>
+  <p>Defina uma vez; cada execução aparecerá separadamente na agenda.</p>
 </div>
 
 <mat-dialog-content>
-  <form id="event-form" [formGroup]="eventForm" (ngSubmit)="onSubmit()">
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Pet</mat-label>
-      <mat-select formControlName="petId" required>
-        <mat-option *ngFor="let pet of pets" [value]="pet.id">
-          {{pet.name}} ({{pet.species}})
-        </mat-option>
-      </mat-select>
-      <mat-error *ngIf="eventForm.get('petId')?.hasError('required')">
-        Pet é obrigatório
-      </mat-error>
-      <mat-hint *ngIf="isEdit">O pet não pode ser alterado depois que o cuidado é criado</mat-hint>
-    </mat-form-field>
+  @if (isLoadingPlan) {
+    <div class="loading" role="status"><mat-spinner diameter="32"></mat-spinner><span>Carregando plano…</span></div>
+  } @else {
+    <form id="care-plan-form" [formGroup]="eventForm" (ngSubmit)="onSubmit()">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Pet</mat-label>
+        <mat-select formControlName="petId" required>
+          @for (pet of pets; track pet.id) { <mat-option [value]="pet.id">{{ pet.name }} · {{ pet.species }}</mat-option> }
+        </mat-select>
+        <mat-error>Escolha um pet</mat-error>
+        @if (isEdit) { <mat-hint>O histórico permanece vinculado a este pet</mat-hint> }
+      </mat-form-field>
 
-    <div class="type-field">
-      <label class="type-label">Tipo de cuidado</label>
-      <div class="type-picker" role="radiogroup" aria-label="Tipo de cuidado">
-        @for (t of eventTypes; track t.value) {
-          <button type="button"
-                  class="type-chip tc-{{t.value.toLowerCase()}}"
-                  [class.selected]="eventForm.get('type')?.value === t.value"
-                  [attr.aria-pressed]="eventForm.get('type')?.value === t.value"
-                  (click)="selectType(t.value)">
-            <mat-icon>{{t.icon}}</mat-icon>
-            {{t.label}}
-          </button>
+      <fieldset class="type-field">
+        <legend>Tipo de cuidado</legend>
+        <div class="type-picker" role="radiogroup">
+          @for (type of eventTypes; track type.value) {
+            <button type="button" class="type-chip tc-{{ type.value.toLowerCase() }}"
+                    [class.selected]="eventForm.controls.type.value === type.value"
+                    [attr.aria-pressed]="eventForm.controls.type.value === type.value"
+                    (click)="selectType(type.value)">
+              <mat-icon>{{ type.icon }}</mat-icon>{{ type.label }}
+            </button>
+          }
+        </div>
+        @if (eventForm.controls.type.touched && eventForm.controls.type.invalid) {
+          <span class="field-error" role="alert">Escolha o tipo de cuidado</span>
         }
+      </fieldset>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Nome do cuidado</mat-label>
+        <input matInput formControlName="title" maxlength="120" placeholder="Ex.: Antibiótico · dose da manhã" required>
+        <mat-hint align="end">{{ eventForm.controls.title.value?.length || 0 }}/120</mat-hint>
+        <mat-error>Informe um nome de até 120 caracteres</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Orientações (opcional)</mat-label>
+        <textarea matInput formControlName="instructions" rows="2" maxlength="2000"
+                  placeholder="Dose, via, cuidados ou observações importantes"></textarea>
+      </mat-form-field>
+
+      @if (eventForm.controls.type.value === 'MEDICINE' || eventForm.controls.type.value === 'VACCINE') {
+        <div class="safety-note"><mat-icon>health_and_safety</mat-icon><span>Confira a prescrição antes de concluir. Cada dose terá registro próprio e proteção contra confirmação em dobro.</span></div>
+      }
+
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Primeira data</mat-label>
+          <input matInput [matDatepicker]="startPicker" formControlName="dateStart" required>
+          <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
+          <mat-datepicker #startPicker></mat-datepicker>
+          <mat-error>Informe uma data válida</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Horário</mat-label>
+          <input matInput type="time" formControlName="timeStart" required>
+          <mat-error>Informe o horário</mat-error>
+        </mat-form-field>
       </div>
-    </div>
+      @if (eventForm.hasError('startInPast')) { <span class="field-error block" role="alert">A primeira execução não pode estar no passado</span> }
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Descrição</mat-label>
-      <textarea matInput formControlName="description" rows="3" maxlength="255"
-                placeholder="Ex.: V10 — reforço anual" required></textarea>
-      <mat-error *ngIf="eventForm.get('description')?.hasError('required')">
-        Descrição é obrigatória
-      </mat-error>
-      <mat-error *ngIf="eventForm.get('description')?.hasError('maxlength')">Use no máximo 255 caracteres</mat-error>
-    </mat-form-field>
+      <section class="repeat-section">
+        <div class="section-title"><div><strong>Repetição</strong><span>As próximas execuções são criadas automaticamente.</span></div>
+          @if (eventForm.controls.frequency.value) { <button mat-button type="button" (click)="clearRecurrence()">Não repetir</button> }
+        </div>
+        <div class="form-row repeat-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Frequência</mat-label>
+            <mat-select formControlName="frequency">
+              <mat-option [value]="null">Não repetir</mat-option>
+              @for (frequency of frequencies; track frequency.value) { <mat-option [value]="frequency.value">{{ frequency.label }}</mat-option> }
+            </mat-select>
+          </mat-form-field>
+          @if (eventForm.controls.frequency.value) {
+            <mat-form-field appearance="outline">
+              <mat-label>A cada</mat-label>
+              <input matInput type="number" formControlName="intervalCount" min="1" max="365">
+              <span matTextSuffix>&nbsp;{{ frequencyUnit }}</span>
+              <mat-error>Use um intervalo entre 1 e 365</mat-error>
+            </mat-form-field>
+          }
+        </div>
+        @if (eventForm.controls.frequency.value) {
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Total de ocorrências (opcional)</mat-label>
+              <input matInput type="number" formControlName="repetitions" min="1" max="10000">
+              <mat-hint>Inclui a primeira</mat-hint>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Ou repetir até (opcional)</mat-label>
+              <input matInput [matDatepicker]="endPicker" formControlName="finalDate">
+              <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
+              <mat-datepicker #endPicker></mat-datepicker>
+              <mat-error>A data final deve vir depois da primeira</mat-error>
+            </mat-form-field>
+          </div>
+        }
+      </section>
 
-    <div class="form-row">
-      <mat-form-field appearance="outline" class="half-width">
-        <mat-label>Data</mat-label>
-        <input matInput [matDatepicker]="datePicker" formControlName="dateStart" required>
-        <mat-datepicker-toggle matSuffix [for]="datePicker"></mat-datepicker-toggle>
-        <mat-datepicker #datePicker></mat-datepicker>
-        <mat-error *ngIf="eventForm.get('dateStart')?.hasError('required')">
-          Data é obrigatória
-        </mat-error>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Lembrete</mat-label>
+        <mat-select formControlName="reminderMinutesBefore">
+          @for (reminder of reminders; track reminder.value) { <mat-option [value]="reminder.value">{{ reminder.label }}</mat-option> }
+        </mat-select>
+        <mat-icon matIconPrefix>notifications_active</mat-icon>
       </mat-form-field>
-
-      <mat-form-field appearance="outline" class="half-width">
-        <mat-label>Hora</mat-label>
-        <input matInput type="time" formControlName="timeStart" required>
-        <mat-error *ngIf="eventForm.get('timeStart')?.hasError('required')">
-          Hora é obrigatória
-        </mat-error>
-      </mat-form-field>
-    </div>
-
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Frequência de Repetição</mat-label>
-      <mat-select formControlName="frequency">
-        <mat-option value="">Não repetir</mat-option>
-        <mat-option *ngFor="let freq of frequencies" [value]="freq.value">
-          {{freq.viewValue}}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
-
-    <div *ngIf="eventForm.get('frequency')?.value" class="form-row">
-      <mat-form-field appearance="outline" class="half-width">
-        <mat-label>A cada</mat-label>
-        <input matInput type="number" min="1" formControlName="intervalCount">
-        <mat-error *ngIf="eventForm.get('intervalCount')?.hasError('min')">O intervalo mínimo é 1</mat-error>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="half-width">
-        <mat-label>Repetições (opcional)</mat-label>
-        <input matInput type="number" min="1" formControlName="repetitions">
-        <mat-error *ngIf="eventForm.get('repetitions')?.hasError('min')">Use ao menos 1 repetição</mat-error>
-      </mat-form-field>
-    </div>
-
-    <mat-form-field *ngIf="eventForm.get('frequency')?.value" appearance="outline" class="full-width">
-      <mat-label>Data Final (opcional)</mat-label>
-      <input matInput [matDatepicker]="finalDatePicker" formControlName="finalDate">
-      <mat-datepicker-toggle matSuffix [for]="finalDatePicker"></mat-datepicker-toggle>
-      <mat-datepicker #finalDatePicker></mat-datepicker>
-      <mat-error *ngIf="eventForm.hasError('finalDateBeforeStart')">A data final deve ser igual ou posterior à data inicial</mat-error>
-    </mat-form-field>
-  </form>
+    </form>
+  }
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-button (click)="onCancel()">Cancelar</button>
-  <button mat-flat-button
-          type="submit"
-          form="event-form"
-          [disabled]="eventForm.invalid || isLoading"
-          >
-    {{isLoading ? 'Salvando...' : (isEdit ? 'Salvar' : 'Adicionar')}}
+  <button mat-button type="button" (click)="onCancel()" [disabled]="isLoading">Cancelar</button>
+  <button mat-flat-button type="submit" form="care-plan-form" [disabled]="isLoading || isLoadingPlan">
+    @if (isLoading) { <mat-spinner diameter="18"></mat-spinner> }
+    {{ isLoading ? 'Salvando…' : (isEdit ? 'Salvar alterações' : 'Criar plano') }}
   </button>
 </mat-dialog-actions>

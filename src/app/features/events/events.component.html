@@ -1,91 +1,67 @@
 <div class="events-page">
   <rp-page-header overline="Rotina de cuidados"
-                  [title]="petId ? 'Agenda de ' + (petName || 'pet') : 'Agenda'"
-                  [subtitle]="petId ? undefined : 'Tudo o que seus pets precisam, organizado por dia.'">
-    @if (petId) {
-      <button mat-stroked-button (click)="goBackToAllEvents()">
-        <mat-icon>arrow_back</mat-icon>
-        Agenda completa
-      </button>
-    }
-    <button mat-flat-button (click)="openEventForm()">
-      <mat-icon>add</mat-icon>
-      Adicionar cuidado
-    </button>
+                  [title]="routePetId ? 'Agenda de ' + (routePetName || 'pet') : 'Agenda'"
+                  subtitle="Execuções concretas, histórico confiável e tudo que vem pela frente.">
+    @if (routePetId) { <button mat-stroked-button (click)="goBack()"><mat-icon>arrow_back</mat-icon>Agenda completa</button> }
+    <button mat-flat-button (click)="openPlan(undefined, routePetId || undefined)"><mat-icon>add</mat-icon>Novo cuidado</button>
   </rp-page-header>
+
+  <section class="filters" aria-label="Filtros da agenda">
+    @if (!routePetId) {
+      <mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-label>Pet</mat-label>
+        <mat-select [(ngModel)]="selectedPetId" (selectionChange)="applyFilters()"><mat-option [value]="null">Todos os pets</mat-option>
+          @for (pet of pets; track pet.id) { <mat-option [value]="pet.id">{{ pet.name }}</mat-option> }
+        </mat-select>
+      </mat-form-field>
+    }
+    <mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-label>Período</mat-label>
+      <mat-select [(ngModel)]="selectedPeriod" (selectionChange)="applyFilters()">
+        <mat-option value="PAST_30">Últimos 30 dias</mat-option><mat-option value="NEXT_7">Próximos 7 dias</mat-option>
+        <mat-option value="NEXT_30">Próximos 30 dias</mat-option><mat-option value="NEXT_90">Próximos 90 dias</mat-option>
+        <mat-option value="YEAR">Visão anual</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-label>Tipo</mat-label>
+      <mat-select [(ngModel)]="selectedType" (selectionChange)="applyFilters()"><mat-option [value]="null">Todos os tipos</mat-option>
+        @for (type of eventTypes; track type.value) { <mat-option [value]="type.value">{{ type.label }}</mat-option> }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-label>Status</mat-label>
+      <mat-select [(ngModel)]="selectedStatus" (selectionChange)="applyFilters()"><mat-option [value]="null">Todos</mat-option>
+        <mat-option value="SCHEDULED">Pendentes</mat-option><mat-option value="COMPLETED">Concluídos</mat-option><mat-option value="CANCELLED">Cancelados</mat-option>
+      </mat-select>
+    </mat-form-field>
+    @if (hasFilters) { <button mat-button class="clear" (click)="clearFilters()"><mat-icon>filter_alt_off</mat-icon>Limpar</button> }
+  </section>
+
+  <div class="result-summary" aria-live="polite">
+    @if (!isLoading) { <span>{{ totalItems }} {{ totalItems === 1 ? 'ocorrência encontrada' : 'ocorrências encontradas' }}</span> }
+  </div>
 
   @if (isLoading) {
     <rp-skeleton variant="list" [count]="5"></rp-skeleton>
-  } @else if (events.length > 0) {
-    @for (group of eventGroups; track group.label) {
+  } @else if (events.length) {
+    @for (group of groups; track group.key) {
       <section class="day-group">
-        <h2 class="day-label" [class.today]="group.isToday">{{ group.label }}</h2>
+        <h2 [class.today]="group.isToday">{{ group.label }}</h2>
         <div class="day-events">
           @for (event of group.events; track event.id) {
-            <article class="event-item" [class.done]="event.status === 'DONE'">
-              <button mat-icon-button class="check-btn"
-                      (click)="toggleEventStatus(event)"
-                      [matTooltip]="getToggleTooltip(event.status)">
-                <mat-icon>{{ event.status === 'DONE' ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
-              </button>
-
-              <div class="q-ev-icon q-ev-{{ event.type.toLowerCase() }}">
-                <mat-icon>{{ getEventIcon(event.type) }}</mat-icon>
-              </div>
-
-              <div class="ev-tx">
-                <div class="ev-title">
-                  {{ event.description || getEventTypeName(event.type) }}
-                </div>
-                <div class="ev-meta">
-                  <span>{{ formatTime(event.dateStart) }}</span>
-                  <span class="sep">·</span>
-                  <span class="q-ev-chip q-ev-{{ event.type.toLowerCase() }}">{{ getEventTypeName(event.type) }}</span>
-                  @if (!petId) {
-                    <span class="sep">·</span>
-                    <span class="ev-pet">{{ getPetData(event.petId).name }}</span>
-                  }
-                  @if (getEventStatus(event.dateStart, event.status) !== 'Pendente') {
-                    <span class="q-status"
-                          [class.q-status-done]="event.status === 'DONE'"
-                          [class.q-status-overdue]="event.status !== 'DONE'">
-                      {{ getEventStatus(event.dateStart, event.status) }}
-                    </span>
-                  }
-                </div>
-              </div>
-
-              <div class="ev-actions">
-                <button mat-icon-button (click)="editEvent(event)" matTooltip="Editar">
-                  <mat-icon>edit</mat-icon>
-                </button>
-                <button mat-icon-button (click)="deleteEvent(event)" matTooltip="Remover" class="danger">
-                  <mat-icon>delete_outline</mat-icon>
-                </button>
-              </div>
-            </article>
+            <rp-care-occurrence-card [occurrence]="event" [petName]="petName(event.petId)" [busy]="busyIds.has(event.id)"
+              (complete)="complete($event)" (undo)="undo($event)" (editPlan)="openPlan($event.planId, $event.petId)"
+              (endPlan)="endPlan($event)"></rp-care-occurrence-card>
           }
         </div>
       </section>
     }
-
-    @if (!petId && totalItems > pageSize) {
-      <mat-paginator
-        [length]="totalItems"
-        [pageSize]="pageSize"
-        [pageSizeOptions]="[5, 10, 20]"
-        [pageIndex]="currentPage"
-        (page)="onPageChange($event)"
-        showFirstLastButtons>
-      </mat-paginator>
+    @if (totalItems > pageSize) {
+      <mat-paginator [length]="totalItems" [pageIndex]="currentPage" [pageSize]="pageSize"
+        [pageSizeOptions]="[10, 20, 50]" showFirstLastButtons (page)="onPageChange($event)"></mat-paginator>
     }
   } @else {
-    <rp-empty-state icon="event_available" title="Por aqui está tranquilo"
-                    message="Nenhum cuidado agendado. Adicione vacinas, remédios ou serviços e a gente lembra você.">
-      <button mat-flat-button (click)="openEventForm()">
-        <mat-icon>add</mat-icon>
-        Adicionar cuidado
-      </button>
+    <rp-empty-state icon="event_available" [title]="hasFilters ? 'Nada com estes filtros' : 'Agenda tranquila'"
+      [message]="hasFilters ? 'Ajuste os filtros para encontrar outros cuidados.' : 'Crie um plano e as execuções aparecerão aqui automaticamente.'">
+      @if (hasFilters) { <button mat-stroked-button (click)="clearFilters()">Limpar filtros</button> }
+      <button mat-flat-button (click)="openPlan(undefined, routePetId || undefined)"><mat-icon>add</mat-icon>Novo cuidado</button>
     </rp-empty-state>
   }
 </div>

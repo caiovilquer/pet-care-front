@@ -1,428 +1,210 @@
-import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MatDialogModule, MatDialog } from '@angular/material/dialog';
-import { ToastService } from '../../core/services/toast.service';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { map } from 'rxjs/operators';
-import { PageHeaderComponent } from '../../shared/components/ui/page-header.component';
-import { EmptyStateComponent } from '../../shared/components/ui/empty-state.component';
-import { SkeletonComponent } from '../../shared/components/ui/skeleton.component';
-import { ConfirmDialogComponent } from '../../shared/components/ui/confirm-dialog.component';
-import { EventService } from '../../core/services/event.service';
-import { EventStateService } from '../../core/services/event-state.service';
+import { MatSelectModule } from '@angular/material/select';
+import { CareOccurrence, CareOccurrenceStatus } from '../../core/models/care.model';
+import { EventType } from '../../core/models/event.model';
+import { PetSummary } from '../../core/models/pet.model';
+import { ApiErrorService } from '../../core/services/api-error.service';
+import { CareService } from '../../core/services/care.service';
 import { DateTimeService } from '../../core/services/datetime.service';
+import { EventStateService } from '../../core/services/event-state.service';
 import { PetService } from '../../core/services/pet.service';
-import { Event, EventSummary, EventsPage, EventType, isEventDone } from '../../core/models/event.model';
+import { ToastService } from '../../core/services/toast.service';
+import { CareOccurrenceCardComponent } from '../../shared/components/ui/care-occurrence-card.component';
+import { ConfirmDialogComponent } from '../../shared/components/ui/confirm-dialog.component';
+import { EmptyStateComponent } from '../../shared/components/ui/empty-state.component';
+import { PageHeaderComponent } from '../../shared/components/ui/page-header.component';
+import { SkeletonComponent } from '../../shared/components/ui/skeleton.component';
 import { EventFormComponent } from './event-form.component';
+
+type Period = 'PAST_30' | 'NEXT_7' | 'NEXT_30' | 'NEXT_90' | 'YEAR';
+interface CareGroup { key: string; label: string; isToday: boolean; events: CareOccurrence[] }
 
 @Component({
   selector: 'app-events',
   standalone: true,
   imports: [
-    CommonModule,
-    MatButtonModule,
-    MatIconModule,
-    MatPaginatorModule,
-    MatDialogModule,
-    MatTooltipModule,
-    PageHeaderComponent,
-    EmptyStateComponent,
-    SkeletonComponent
+    CommonModule, FormsModule, MatButtonModule, MatIconModule, MatPaginatorModule, MatDialogModule,
+    MatFormFieldModule, MatSelectModule, PageHeaderComponent, EmptyStateComponent, SkeletonComponent,
+    CareOccurrenceCardComponent
   ],
   templateUrl: './events.component.html',
   styleUrls: ['./events.component.css']
 })
 export class EventsComponent implements OnInit {
-  events: EventSummary[] = [];
-  eventGroups: { label: string; isToday: boolean; events: EventSummary[] }[] = [];
+  events: CareOccurrence[] = [];
+  groups: CareGroup[] = [];
+  pets: PetSummary[] = [];
   totalItems = 0;
   currentPage = 0;
-  pageSize = 10;
-  petId: number | null = null;
-  petName: string = '';
-  petNamesMap: { [key: number]: string } = {};
-  petsMap: { [key: number]: { name: string; species: string; photoUrl?: string } } = {};
+  pageSize = 20;
+  routePetId: number | null = null;
+  selectedPetId: number | null = null;
+  selectedType: EventType | null = null;
+  selectedStatus: CareOccurrenceStatus | null = null;
+  selectedPeriod: Period = 'NEXT_30';
   isLoading = true;
+  readonly busyIds = new Set<string>();
+  readonly eventTypes: Array<{ value: EventType; label: string }> = [
+    { value: 'VACCINE', label: 'Vacinas' }, { value: 'MEDICINE', label: 'Remédios' },
+    { value: 'DIARY', label: 'Rotinas' }, { value: 'BREED', label: 'Reprodução' },
+    { value: 'SERVICE', label: 'Serviços' }
+  ];
 
   constructor(
-    private eventService: EventService,
-    private eventStateService: EventStateService,
-    private dateTimeService: DateTimeService,
-    private petService: PetService,
-    private dialog: MatDialog,
-    private toast: ToastService,
-    private route: ActivatedRoute,
-    private router: Router
-  ) { }
+    private readonly care: CareService,
+    private readonly petService: PetService,
+    private readonly dateTime: DateTimeService,
+    private readonly dialog: MatDialog,
+    private readonly toast: ToastService,
+    private readonly apiError: ApiErrorService,
+    private readonly eventState: EventStateService,
+    private readonly route: ActivatedRoute,
+    private readonly router: Router
+  ) {}
 
   ngOnInit(): void {
-    this.route.paramMap.subscribe(params => {
-      const id = params.get('petId');
-      if (id) {
-        this.petId = +id;
-        this.loadPetName();
-        this.loadEventsByPet();
-      } else {
-        this.petName = '';
-        this.loadPetsMap();
-        this.loadAllEvents();
-      }
-    });
-  }
-
-  private loadPetName(): void {
-    if (this.petId) {
-      this.petService.getByIdCached(this.petId).subscribe({
-        next: (pet) => {
-          this.petName = pet.name;
-        },
-        error: (err) => {
-          this.petName = `Pet #${this.petId}`;
-        }
-      });
-    }
-  }
-
-  private loadPetsMap(): void {
     this.petService.getPetsCached().subscribe({
-      next: (pets) => {
-        this.petNamesMap = {};
-        this.petsMap = {};
-        pets.forEach(pet => {
-          this.petNamesMap[pet.id] = pet.name;
-          this.petsMap[pet.id] = {
-            name: pet.name,
-            species: pet.species,
-            photoUrl: pet.photoUrl
-          };
-        });
-      },
-      error: (err) => {
-        // Em caso de erro, o mapa ficará vazio e mostrará o ID
-      }
+      next: pets => { this.pets = pets; },
+      error: () => this.toast.error('Não foi possível carregar os nomes dos pets.')
+    });
+    this.route.paramMap.subscribe(params => {
+      const raw = params.get('petId');
+      this.routePetId = raw ? Number(raw) : null;
+      this.selectedPetId = this.routePetId;
+      this.currentPage = 0;
+      this.load();
     });
   }
 
-  loadAllEvents(): void {
+  load(): void {
     this.isLoading = true;
-    this.eventService.getAllCached(this.currentPage, this.pageSize).subscribe({
-      next: (page: EventsPage) => {
-        this.events = this.sortEventsByDate(page.items);
-        this.buildGroups();
+    const { from, to } = this.periodRange();
+    this.care.search({
+      from: this.dateTime.formatDateTimeForAPIWithoutTimezone(from),
+      to: this.dateTime.formatDateTimeForAPIWithoutTimezone(to),
+      petId: this.selectedPetId, type: this.selectedType, status: this.selectedStatus,
+      page: this.currentPage, size: this.pageSize
+    }).subscribe({
+      next: page => {
+        this.events = page.items;
         this.totalItems = page.total;
+        this.groups = this.groupByDay(page.items);
         this.isLoading = false;
       },
-      error: (err) => {
-        // Definir dados padrão em caso de erro
-        this.events = [];
-        this.totalItems = 0;
-        this.toast.error('Erro ao carregar eventos. Tente novamente mais tarde.');
-        this.isLoading = false;
+      error: error => {
+        this.events = []; this.groups = []; this.totalItems = 0; this.isLoading = false;
+        this.toast.error(this.apiError.message(error, 'Não foi possível carregar a agenda.'));
       }
     });
   }
 
-  loadEventsByPet(): void {
-    if (this.petId) {
-      this.isLoading = true;
-      this.eventService.listByPetCached(this.petId).pipe(
-        map((events: Event[]): EventSummary[] => {
-          return events.map(event => {
-            const eventWithPetId: EventSummary = {
-              ...event,
-              petId: this.petId as number
-            };
-            return eventWithPetId;
-          });
-        })
-      ).subscribe({
-        next: (summaries: EventSummary[]) => {
-          this.events = this.sortEventsByDate(summaries);
-          this.buildGroups();
-          this.totalItems = summaries.length;
-          this.isLoading = false;
-        },
-        error: (err) => {
-          // Definir dados padrão em caso de erro
-          this.events = [];
-          this.totalItems = 0;
-          this.toast.error('Erro ao carregar eventos do pet. Tente novamente mais tarde.');
-          this.isLoading = false;
-        }
-      });
-    }
+  applyFilters(): void { this.currentPage = 0; this.load(); }
+  clearFilters(): void {
+    this.selectedPetId = this.routePetId;
+    this.selectedType = null; this.selectedStatus = null; this.selectedPeriod = 'NEXT_30';
+    this.applyFilters();
   }
-
-  onPageChange(event: PageEvent): void {
-    this.currentPage = event.pageIndex;
-    this.pageSize = event.pageSize;
-    if (this.petId) {
-      // Pagination for listByPet is not implemented on the backend for this example
-      // For a real app, you'd need backend support for paginating this endpoint
-      this.loadEventsByPet();
-    } else {
-      this.loadAllEvents();
-    }
+  onPageChange(page: PageEvent): void {
+    this.currentPage = page.pageIndex; this.pageSize = page.pageSize; this.load();
   }
-
-  openEventForm(): void {
-    const dialogRef = this.dialog.open(EventFormComponent, {
-      width: '500px',
-      data: { petId: this.petId }
+  openPlan(planId?: string, petId?: number): void {
+    const ref = this.dialog.open(EventFormComponent, {
+      width: '680px', maxWidth: 'calc(100vw - 24px)',
+      data: { planId, petId: petId || this.routePetId }
     });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.petId ? this.loadEventsByPet() : this.loadAllEvents();
+    ref.afterClosed().subscribe(saved => { if (saved) this.load(); });
+  }
+  complete(event: CareOccurrence): void {
+    if (this.busyIds.has(event.id)) return;
+    this.busyIds.add(event.id);
+    this.care.complete(event.id).subscribe({
+      next: updated => {
+        this.replace(updated); this.toast.success(`${event.title} concluído.`); this.eventState.notifyEventUpdated();
+      },
+      error: error => {
+        this.busyIds.delete(event.id); this.load();
+        this.toast.error(this.apiError.message(error, 'Não foi possível confirmar. A agenda foi atualizada por segurança.'));
       }
     });
   }
-
-  editEvent(event: EventSummary): void {
-    const dialogRef = this.dialog.open(EventFormComponent, {
-      width: '500px',
-      data: { 
-        ...event, 
-        eventId: event.id,
-        petId: event.petId
-      }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.petId ? this.loadEventsByPet() : this.loadAllEvents();
+  undo(event: CareOccurrence): void {
+    if (this.busyIds.has(event.id)) return;
+    this.busyIds.add(event.id);
+    this.care.undo(event.id).subscribe({
+      next: updated => {
+        this.replace(updated); this.toast.info('Conclusão desfeita.'); this.eventState.notifyEventUpdated();
+      },
+      error: error => {
+        this.busyIds.delete(event.id); this.load();
+        this.toast.error(this.apiError.message(error, 'Não foi possível desfazer.'));
       }
     });
   }
-
-  deleteEvent(event: EventSummary): void {
-    const confirmRef = this.dialog.open(ConfirmDialogComponent, {
-      data: {
-        title: 'Remover este cuidado?',
-        message: `"${event.description || this.getEventTypeName(event.type)}" sai da agenda. Essa ação não pode ser desfeita.`,
-        confirmLabel: 'Remover',
-        danger: true
-      }
-    });
-
-    confirmRef.afterClosed().subscribe(confirmed => {
+  endPlan(event: CareOccurrence): void {
+    const ref = this.dialog.open(ConfirmDialogComponent, { data: {
+      title: 'Encerrar este plano?',
+      message: `As próximas ocorrências de “${event.title}” sairão da agenda. O histórico concluído será preservado.`,
+      confirmLabel: 'Encerrar plano', danger: true
+    }});
+    ref.afterClosed().subscribe(confirmed => {
       if (!confirmed) return;
-      this.eventService.delete(event.id).subscribe({
-        next: () => {
-          this.eventStateService.notifyEventUpdated();
-          this.toast.success('Cuidado removido da agenda.');
-          this.petId ? this.loadEventsByPet() : this.loadAllEvents();
-        },
-        error: () => {
-          this.toast.error('Erro ao remover o cuidado.');
-        }
+      this.busyIds.add(event.id);
+      this.care.deactivatePlan(event.planId).subscribe({
+        next: () => { this.toast.success('Plano encerrado. O histórico foi mantido.'); this.eventState.notifyEventUpdated(); this.load(); },
+        error: error => { this.busyIds.delete(event.id); this.toast.error(this.apiError.message(error, 'Não foi possível encerrar o plano.')); }
       });
     });
   }
+  goBack(): void { this.router.navigate(['/events']); }
+  petName(id: number): string { return this.pets.find(pet => pet.id === id)?.name || `Pet #${id}`; }
+  get routePetName(): string { return this.routePetId ? this.petName(this.routePetId) : ''; }
+  get hasFilters(): boolean {
+    return !!this.selectedType || !!this.selectedStatus || this.selectedPeriod !== 'NEXT_30' || this.selectedPetId !== this.routePetId;
+  }
 
-  toggleEventStatus(event: EventSummary): void {
-    // Fazer update otimista temporário para feedback imediato
-    const originalState = event.status;
-    event.status = event.status === 'DONE' ? 'PENDING' : 'DONE';
-    
-    this.eventService.toggleDone(event.id).subscribe({
-      next: (response) => {
-        this.toast.success(
-          `Evento ${event.status === 'DONE' ? 'concluído' : 'reativado'} com sucesso!`
-        );
-        
-        // Recarregar os dados para garantir sincronização
-        setTimeout(() => {
-          if (this.petId) {
-            this.loadEventsByPet();
-          } else {
-            this.loadAllEvents();
-          }
-        }, 500);
-        
-        // Notificar outros componentes sobre a atualização
-        this.eventStateService.notifyEventUpdated();
-      },
-      error: (err) => {
-        // Reverter o estado em caso de erro
-        event.status = originalState;
-        
-        this.toast.error('Erro ao atualizar status do evento.');
+  private replace(updated: CareOccurrence): void {
+    this.busyIds.delete(updated.id);
+    this.events = this.events.map(item => item.id === updated.id ? updated : item);
+    this.groups = this.groupByDay(this.events);
+  }
+  private periodRange(): { from: Date; to: Date } {
+    const now = new Date();
+    const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const days = (amount: number) => new Date(startToday.getTime() + amount * 86_400_000);
+    switch (this.selectedPeriod) {
+      case 'PAST_30': return { from: days(-30), to: new Date(startToday.getTime() + 86_400_000) };
+      case 'NEXT_7': return { from: days(-1), to: days(8) };
+      case 'NEXT_90': return { from: days(-1), to: days(91) };
+      case 'YEAR': return { from: days(-180), to: days(186) };
+      default: return { from: days(-1), to: days(31) };
+    }
+  }
+  private groupByDay(events: CareOccurrence[]): CareGroup[] {
+    const groups = new Map<string, CareGroup>();
+    events.forEach(event => {
+      const date = this.dateTime.parseAPIDate(event.dueAt) || new Date(event.dueAt);
+      const key = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+      if (!groups.has(key)) {
+        const today = new Date();
+        const isToday = date.toDateString() === today.toDateString();
+        const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1);
+        const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
+        let label = isToday ? 'Hoje' : date.toDateString() === tomorrow.toDateString() ? 'Amanhã'
+          : date.toDateString() === yesterday.toDateString() ? 'Ontem'
+          : date.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' });
+        label = label.charAt(0).toUpperCase() + label.slice(1);
+        groups.set(key, { key, label, isToday, events: [] });
       }
+      groups.get(key)!.events.push(event);
     });
-  }
-
-  goBackToAllEvents(): void {
-    this.router.navigate(['/events']);
-  }
-
-  // UI Helper methods
-  getEventTypeName(type: EventType): string {
-    const names = {
-      VACCINE: 'Vacina',
-      MEDICINE: 'Remédio',
-      DIARY: 'Diário',
-      BREED: 'Cio',
-      SERVICE: 'Serviço'
-    };
-    return names[type] || 'Evento';
-  }
-
-  getEventIcon(type: EventType): string {
-    const icons = {
-      VACCINE: 'vaccines',
-      MEDICINE: 'medication',
-      DIARY: 'book',
-      BREED: 'favorite',
-      SERVICE: 'content_cut'
-    };
-    return icons[type] || 'event';
-  }
-
-  formatDate(dateString: string): string {
-    if (!dateString) return 'N/A';
-    return this.dateTimeService.formatDateTimeForDisplay(dateString); // FIX: usar serviço centralizado
-  }
-
-  formatTime(dateString: string): string {
-    const date = this.dateTimeService.parseAPIDate(dateString);
-    if (!date) return 'N/A';
-    return date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-  }
-
-  /** Agrupa os eventos (já ordenados) por dia, com rótulos relativos. */
-  private buildGroups(): void {
-    const groups: { label: string; isToday: boolean; events: EventSummary[] }[] = [];
-    let lastLabel = '';
-
-    for (const event of this.events) {
-      const { label, isToday } = this.dayLabel(event.dateStart);
-      if (label !== lastLabel) {
-        groups.push({ label, isToday, events: [] });
-        lastLabel = label;
-      }
-      groups[groups.length - 1].events.push(event);
-    }
-
-    this.eventGroups = groups;
-  }
-
-  private dayLabel(dateString: string): { label: string; isToday: boolean } {
-    const date = this.dateTimeService.parseAPIDate(dateString) || new Date(dateString);
-    const now = new Date();
-    const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
-    const diffDays = Math.round(
-      (startOfDay(date).getTime() - startOfDay(now).getTime()) / 86400000
-    );
-
-    if (diffDays === 0) return { label: 'Hoje', isToday: true };
-    if (diffDays === 1) return { label: 'Amanhã', isToday: false };
-    if (diffDays === -1) return { label: 'Ontem', isToday: false };
-
-    const label = date.toLocaleDateString('pt-BR', {
-      weekday: 'long', day: '2-digit', month: 'short',
-      year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
-    });
-    return { label: label.charAt(0).toUpperCase() + label.slice(1), isToday: false };
-  }
-
-  getEventStatus(dateStart: string, status: string): string {
-    if (status === 'DONE') {
-      return 'Concluído';
-    }
-    const now = new Date();
-    const eventDate = new Date(dateStart);
-    if (eventDate < now) {
-      return 'Atrasado';
-    }
-    return 'Pendente';
-  }
-
-  getStatusChipClass(dateStart: string, status: string): string {
-    if (status === 'DONE') {
-      return 'status-chip-done';
-    }
-    const now = new Date();
-    const eventDate = new Date(dateStart);
-    if (eventDate < now) {
-      return 'status-chip-overdue';
-    }
-    return 'status-chip-pending';
-  }
-
-  getToggleTooltip(status: string): string {
-    return status === 'DONE' ? 'Marcar como pendente' : 'Marcar como concluído';
-  }
-
-  getPetName(petId: number): string {
-    return this.petNamesMap[petId] || `Pet #${petId}`;
-  }
-
-  getPetData(petId: number): { name: string; species: string; photoUrl?: string } {
-    return this.petsMap[petId] || { name: `Pet #${petId}`, species: 'Desconhecido' };
-  }
-
-  getDefaultPetImage(species: string): string {
-    const specieIcons: { [key: string]: string } = {
-      'Cão': '🐕',
-      'Gato': '🐱',
-      'Pássaro': '🐦',
-      'Peixe': '🐠',
-      'Hamster': '🐹',
-      'Coelho': '🐰'
-    };
-    return specieIcons[species] || '🐾';
-  }
-
-  onImageError(event: any, species: string): void {
-    // Substituir a imagem por um canvas com emoji quando falhar
-    const img = event.target;
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    if (ctx) {
-      canvas.width = 64;
-      canvas.height = 64;
-      
-      // Background gradient
-      const gradient = ctx.createLinearGradient(0, 0, 64, 64);
-      gradient.addColorStop(0, '#f3f4f6');
-      gradient.addColorStop(1, '#e5e7eb');
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, 64, 64);
-      
-      // Emoji
-      ctx.font = '28px Arial';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillStyle = '#374151';
-      ctx.fillText(this.getDefaultPetImage(species), 32, 32);
-      
-      img.src = canvas.toDataURL();
-      img.classList.add('fallback-image');
-    }
-  }
-
-  // Ordenar eventos por data (mais próximos primeiro)
-  private sortEventsByDate(events: EventSummary[]): EventSummary[] {
-    return events.sort((a, b) => {
-      const dateA = new Date(a.dateStart).getTime();
-      const dateB = new Date(b.dateStart).getTime();
-      return dateA - dateB; // Ordem crescente (mais próximos primeiro)
-    });
-  }
-
-  // Verificar se evento está próximo (7 dias)
-  isUpcomingEvent(dateStart: string, status: string): boolean {
-    if (status === 'DONE') return false;
-    
-    const now = new Date();
-    const eventDate = new Date(dateStart);
-    const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-    
-    return eventDate >= now && eventDate <= nextWeek;
+    return [...groups.values()];
   }
 }

@@ -1,0 +1,43 @@
+.care-card {
+  display: grid;
+  grid-template-columns: 42px 42px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--q-space-3);
+  padding: var(--q-space-3) var(--q-space-4);
+  background: var(--q-surface);
+  border: 1px solid var(--q-border);
+  border-radius: var(--q-radius-md);
+  box-shadow: var(--q-shadow-sm);
+  transition: border-color .16s ease, transform .16s ease, box-shadow .16s ease;
+}
+.care-card:hover { transform: translateY(-1px); box-shadow: var(--q-shadow-md); }
+.care-card.overdue { border-left: 4px solid var(--q-error); }
+.care-card.completed { opacity: .72; }
+.care-card.cancelled { opacity: .6; border-style: dashed; }
+.cancelled .title-row strong { text-decoration: line-through; }
+.complete-button {
+  width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--q-border-2);
+  display: grid; place-items: center; background: var(--q-surface); color: var(--q-text-3); cursor: pointer;
+}
+.complete-button:hover:not(:disabled) { color: var(--q-success); border-color: var(--q-success); background: var(--q-success-bg); }
+.complete-button.checked { color: var(--q-surface); background: var(--q-success); border-color: var(--q-success); }
+.complete-button:disabled { cursor: default; opacity: .7; }
+.content { min-width: 0; }
+.title-row { display: flex; align-items: center; flex-wrap: wrap; gap: var(--q-space-2); }
+.title-row strong { color: var(--q-ink); font-size: .95rem; }
+.completed .title-row strong { text-decoration: line-through; }
+.meta { display: flex; flex-wrap: wrap; gap: 6px; color: var(--q-text-2); font-size: .79rem; margin-top: 2px; }
+.instructions { color: var(--q-text-2); font-size: .82rem; margin: 5px 0 0; line-height: 1.4; }
+.status { padding: 2px 8px; border-radius: var(--q-radius-pill); font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+.overdue-label { color: var(--q-error); background: var(--q-error-bg); }
+.done-label { color: var(--q-success); background: var(--q-success-bg); }
+.cancelled-label { color: var(--q-text-2); background: var(--q-surface-3); }
+.audit { display: flex; align-items: center; gap: 5px; color: var(--q-success); font-size: .75rem; margin: 5px 0 0; }
+.audit mat-icon { width: 16px; height: 16px; font-size: 16px; }
+.actions { display: flex; align-items: center; }
+.actions .mat-mdc-icon-button { color: var(--q-text-3); }
+@media (max-width: 620px) {
+  .care-card { grid-template-columns: 38px 38px minmax(0, 1fr); padding: var(--q-space-3); }
+  .actions { grid-column: 2 / -1; justify-content: flex-end; border-top: 1px solid var(--q-border); padding-top: var(--q-space-2); }
+}
+@media (prefers-reduced-motion: reduce) { .care-card { transition: none; } }

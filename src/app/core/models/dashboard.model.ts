@@ -1,4 +1,4 @@
-import { EventSummary } from './event.model';
+import { CareOccurrence } from './care.model';
 import { PetSummary } from './pet.model';
 
 export interface DashboardOverview {
@@ -10,5 +10,5 @@ export interface DashboardOverview {
   totalPets: number;
   totalEvents: number;
   pets: PetSummary[];
-  upcomingEvents: EventSummary[];
+  upcomingEvents: CareOccurrence[];
 }
