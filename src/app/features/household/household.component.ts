@@ -19,6 +19,8 @@ import { AuthService } from '../../core/services/auth.service';
 import { ConfirmDialogComponent } from '../../shared/components/ui/confirm-dialog.component';
 import { HintComponent } from '../../shared/components/ui/hint.component';
 
+type TimezoneOption = { id: string; region: string; country: string; city: string };
+
 @Component({
   selector: 'app-household', standalone: true,
   imports: [CommonModule, ReactiveFormsModule, MatButtonModule, MatDialogModule, MatFormFieldModule, MatIconModule, MatInputModule, MatProgressSpinnerModule, MatSelectModule, MatTooltipModule, HintComponent],
@@ -36,7 +38,7 @@ export class HouseholdComponent implements OnInit {
   readonly inviteForm;
   readonly handoffForm;
   readonly timezoneForm;
-  readonly timezones = this.supportedTimezones();
+  readonly timezoneOptions = this.supportedTimezones();
 
   constructor(
     private fb: FormBuilder,
@@ -49,7 +51,11 @@ export class HouseholdComponent implements OnInit {
   ) {
     this.inviteForm = this.fb.nonNullable.group({ email: ['', [Validators.required, Validators.email, Validators.maxLength(255)]], role: ['CAREGIVER' as HouseholdRole, Validators.required] });
     this.handoffForm = this.fb.group({ toTutorId: this.fb.control<number | null>(null), note: this.fb.nonNullable.control('', [Validators.required, Validators.maxLength(1000)]) });
-    this.timezoneForm = this.fb.nonNullable.group({ timezone: ['', [Validators.required, Validators.maxLength(64)]] });
+    this.timezoneForm = this.fb.nonNullable.group({
+      region: ['', Validators.required],
+      country: ['', Validators.required],
+      timezone: ['', [Validators.required, Validators.maxLength(64)]],
+    });
   }
   ngOnInit(): void {
     this.auth.currentUser$.pipe(take(1)).subscribe(user => {
@@ -61,6 +67,15 @@ export class HouseholdComponent implements OnInit {
   get isOwner(): boolean { return this.overview?.household.role === 'OWNER'; }
   get canCare(): boolean { return this.overview?.household.role !== 'VIEWER'; }
   get isInvitingOwner(): boolean { return this.inviteForm.controls.role.value === 'OWNER'; }
+  get regions(): string[] { return [...new Set(this.timezoneOptions.map(item => item.region))]; }
+  get countries(): string[] {
+    const region = this.timezoneForm.controls.region.value;
+    return [...new Set(this.timezoneOptions.filter(item => item.region === region).map(item => item.country))];
+  }
+  get cities(): TimezoneOption[] {
+    const { region, country } = this.timezoneForm.getRawValue();
+    return this.timezoneOptions.filter(item => item.region === region && item.country === country);
+  }
   label(role: HouseholdRole): string { return roleLabel(role); }
   initials(member: HouseholdMember): string { return `${member.firstName[0] || ''}${member.lastName?.[0] || ''}`.toUpperCase(); }
   private readonly failedAvatars = new Set<string>();
@@ -117,21 +132,32 @@ export class HouseholdComponent implements OnInit {
     });
   }
   useBrowserTimezone(): void {
-    this.timezoneForm.controls.timezone.setValue(Intl.DateTimeFormat().resolvedOptions().timeZone);
+    this.selectTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone);
+  }
+  selectRegion(region: string): void {
+    this.timezoneForm.patchValue({ region, country: '', timezone: '' });
+  }
+  selectCountry(country: string): void {
+    this.timezoneForm.patchValue({ country, timezone: '' });
+  }
+  selectTimezone(timezone: string): void {
+    const option = this.timezoneOptions.find(item => item.id === timezone);
+    if (option) this.timezoneForm.patchValue({ region: option.region, country: option.country, timezone: option.id });
   }
   saveTimezone(): void {
     if (!this.overview || this.timezoneForm.invalid) { this.timezoneForm.markAllAsTouched(); return; }
     this.saving = true;
-    this.households.updateTimezone(this.overview.household, this.timezoneForm.controls.timezone.value.trim()).subscribe({
+    this.households.updateTimezone(this.overview.household, this.timezoneForm.controls.timezone.value).subscribe({
       next: household => { this.overview = { ...this.overview!, household }; this.saving = false; this.toast.success('Fuso horário da família atualizado.'); },
       error: error => this.fail(error, 'Não foi possível atualizar o fuso horário.')
     });
   }
   private reload(): void {
     this.loading = true;
-    this.households.overview().subscribe({ next: value => { this.overview = value; this.timezoneForm.patchValue({ timezone: value.household.timezone || '' }); this.loading = false; this.saving = false; }, error: e => { this.loading = false; this.fail(e, 'Não foi possível carregar a família.'); } });
+    this.households.overview().subscribe({ next: value => { this.overview = value; this.selectTimezone(value.household.timezone || ''); this.loading = false; this.saving = false; }, error: e => { this.loading = false; this.fail(e, 'Não foi possível carregar a família.'); } });
   }
-  private supportedTimezones(): string[] {
+  regionLabel(region: string): string { return REGION_LABELS[region] || region; }
+  private supportedTimezones(): TimezoneOption[] {
     const fallback = [
       'America/Sao_Paulo', 'America/New_York', 'America/Chicago', 'America/Denver', 'America/Los_Angeles',
       'Europe/London', 'Europe/Lisbon', 'Europe/Madrid', 'Europe/Paris', 'Asia/Tokyo', 'Australia/Sydney', 'UTC',
@@ -139,7 +165,41 @@ export class HouseholdComponent implements OnInit {
     const supported = typeof Intl.supportedValuesOf === 'function'
       ? Intl.supportedValuesOf('timeZone')
       : fallback;
-    return [...new Set([...supported, ...fallback])].sort();
+    return [...new Set([...supported, ...fallback])].sort().map(id => this.toTimezoneOption(id));
+  }
+  private toTimezoneOption(id: string): TimezoneOption {
+    const parts = id.split('/');
+    const region = parts[0];
+    const city = displayName(parts.at(-1) || id);
+    const country = parts.length > 2
+      ? displayName(parts[1])
+      : TIMEZONE_COUNTRIES[id] || 'Outras localidades';
+    return { id, region, country, city };
   }
   private fail(error: unknown, fallback: string): void { this.saving = false; this.toast.error(this.apiError.message(error, fallback)); }
 }
+
+const displayName = (value: string): string => value.replaceAll('_', ' ');
+
+const REGION_LABELS: Record<string, string> = {
+  Africa: 'África', America: 'Américas', Antarctica: 'Antártida', Arctic: 'Ártico',
+  Asia: 'Ásia', Atlantic: 'Atlântico', Australia: 'Austrália', Europe: 'Europa',
+  Indian: 'Oceano Índico', Pacific: 'Pacífico', Etc: 'Outros',
+};
+
+const TIMEZONE_COUNTRIES: Record<string, string> = {
+  'America/Sao_Paulo': 'Brasil', 'America/Rio_Branco': 'Brasil', 'America/Manaus': 'Brasil',
+  'America/Cuiaba': 'Brasil', 'America/Belem': 'Brasil', 'America/Fortaleza': 'Brasil',
+  'America/Recife': 'Brasil', 'America/Bahia': 'Brasil', 'America/New_York': 'Estados Unidos',
+  'America/Chicago': 'Estados Unidos', 'America/Denver': 'Estados Unidos', 'America/Los_Angeles': 'Estados Unidos',
+  'America/Anchorage': 'Estados Unidos', 'America/Phoenix': 'Estados Unidos', 'America/Toronto': 'Canadá',
+  'America/Vancouver': 'Canadá', 'America/Mexico_City': 'México', 'America/Bogota': 'Colômbia',
+  'America/Lima': 'Peru', 'America/Santiago': 'Chile', 'America/Montevideo': 'Uruguai',
+  'Europe/London': 'Reino Unido', 'Europe/Lisbon': 'Portugal', 'Europe/Madrid': 'Espanha',
+  'Europe/Paris': 'França', 'Europe/Berlin': 'Alemanha', 'Europe/Rome': 'Itália',
+  'Europe/Amsterdam': 'Países Baixos', 'Europe/Zurich': 'Suíça', 'Europe/Stockholm': 'Suécia',
+  'Asia/Tokyo': 'Japão', 'Asia/Shanghai': 'China', 'Asia/Hong_Kong': 'Hong Kong',
+  'Asia/Singapore': 'Singapura', 'Asia/Seoul': 'Coreia do Sul', 'Asia/Kolkata': 'Índia',
+  'Australia/Sydney': 'Austrália', 'Australia/Melbourne': 'Austrália', 'Pacific/Auckland': 'Nova Zelândia',
+  UTC: 'Universal',
+};

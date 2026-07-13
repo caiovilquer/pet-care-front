@@ -54,7 +54,9 @@
         <p class="q-overline">Horário da família</p><h2>Fuso horário da rotina</h2>
         <p class="helper">Cuidados, “hoje” e lembretes seguem este fuso IANA, inclusive durante o horário de verão.</p>
         <form [formGroup]="timezoneForm" (ngSubmit)="saveTimezone()">
-          <mat-form-field appearance="outline"><mat-label>Fuso horário</mat-label><mat-select formControlName="timezone">@for (timezone of timezones; track timezone) { <mat-option [value]="timezone">{{ timezone }}</mat-option> }</mat-select><mat-error>Escolha um fuso horário</mat-error></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Região</mat-label><mat-select formControlName="region" (selectionChange)="selectRegion($event.value)">@for (region of regions; track region) { <mat-option [value]="region">{{ regionLabel(region) }}</mat-option> }</mat-select></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>País ou área</mat-label><mat-select formControlName="country" (selectionChange)="selectCountry($event.value)" [disabled]="!timezoneForm.controls.region.value">@for (country of countries; track country) { <mat-option [value]="country">{{ country }}</mat-option> }</mat-select></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Cidade</mat-label><mat-select formControlName="timezone" [disabled]="!timezoneForm.controls.country.value">@for (timezone of cities; track timezone.id) { <mat-option [value]="timezone.id">{{ timezone.city }}</mat-option> }</mat-select><mat-error>Escolha uma cidade</mat-error></mat-form-field>
           <button mat-button type="button" (click)="useBrowserTimezone()" [disabled]="saving"><mat-icon>my_location</mat-icon>Usar fuso deste dispositivo</button>
           <button mat-flat-button type="submit" [disabled]="saving || timezoneForm.invalid"><mat-icon>schedule</mat-icon>Salvar fuso</button>
         </form>
