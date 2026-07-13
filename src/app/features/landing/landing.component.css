@@ -57,7 +57,7 @@
 .preview-progress-copy { margin-top: 17px; display: flex; justify-content: space-between; color: var(--q-text-2); font-size: .7rem; }
 .preview-progress-copy strong { color: var(--q-green-700); }
 .preview-progress { height: 6px; margin: 7px 0 13px; overflow: hidden; border-radius: 999px; background: var(--q-surface-3); }
-.preview-progress span { width: 67%; height: 100%; display: block; border-radius: inherit; background: var(--q-ipe-500); }
+.preview-progress span { width: 33%; height: 100%; display: block; border-radius: inherit; background: var(--q-ipe-500); }
 .preview-care { min-width: 0; padding: 9px 0; display: grid; grid-template-columns: 34px minmax(0,1fr) auto; align-items: center; gap: 10px; border-top: 1px solid var(--q-border); }
 .preview-care>span:nth-child(2) { min-width: 0; display: grid; }
 .preview-care strong { font-size: .78rem; }
