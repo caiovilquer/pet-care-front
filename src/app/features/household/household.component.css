@@ -18,6 +18,7 @@
 .member-row { min-height: 68px; display: flex; align-items: center; gap: 12px; padding: 13px 0; border-bottom: 1px solid var(--q-border); }
 .member-row:last-child { border: 0; }
 .member-avatar { width: 44px; height: 44px; display: grid; place-items: center; flex: none; border-radius: var(--q-organic-1); background: var(--q-green-100); color: var(--q-green-700); font-weight: 800; }
+.member-avatar-img { display: block; object-fit: cover; background: var(--q-surface-2); }
 .member-copy { min-width: 0; display: grid; flex: 1; }
 .member-copy span { overflow: hidden; text-overflow: ellipsis; color: var(--q-text-2); font-size: .78rem; }
 .role-select { width: 150px; }

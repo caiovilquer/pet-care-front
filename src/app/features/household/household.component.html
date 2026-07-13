@@ -20,7 +20,11 @@
       <div class="member-list">
         @for (member of overview.members; track member.id) {
           <article class="member-row">
-            <span class="member-avatar" aria-hidden="true">{{ initials(member) }}</span>
+            @if (avatarUrl(member); as avatar) {
+              <img class="member-avatar member-avatar-img" [src]="avatar" alt="" (error)="avatarFailed(member)">
+            } @else {
+              <span class="member-avatar" aria-hidden="true">{{ initials(member) }}</span>
+            }
             <div class="member-copy"><strong>{{ member.firstName }} {{ member.lastName }}</strong><span>{{ member.email }}</span></div>
             @if (isOwner) {
               <mat-form-field appearance="outline" subscriptSizing="dynamic" class="role-select">
@@ -46,6 +50,16 @@
 
     <div class="family-col">
     @if (isOwner) {
+      <section class="panel invite-panel">
+        <p class="q-overline">Horário da família</p><h2>Fuso horário da rotina</h2>
+        <p class="helper">Cuidados, “hoje” e lembretes seguem este fuso IANA, inclusive durante o horário de verão.</p>
+        <form [formGroup]="timezoneForm" (ngSubmit)="saveTimezone()">
+          <mat-form-field appearance="outline"><mat-label>Timezone IANA</mat-label><input matInput formControlName="timezone" placeholder="America/New_York" autocomplete="off"><mat-error>Informe um timezone válido</mat-error></mat-form-field>
+          <button mat-button type="button" (click)="useBrowserTimezone()" [disabled]="saving"><mat-icon>my_location</mat-icon>Usar fuso deste dispositivo</button>
+          <button mat-flat-button type="submit" [disabled]="saving || timezoneForm.invalid"><mat-icon>schedule</mat-icon>Salvar fuso</button>
+        </form>
+      </section>
+
       <section class="panel invite-panel">
         <p class="q-overline">Convites seguros</p><h2>Trazer alguém para a rotina</h2>
         <p class="helper">O link é pessoal, expira em 7 dias e só pode ser usado pelo e-mail convidado.</p>

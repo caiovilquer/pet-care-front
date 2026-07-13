@@ -13,6 +13,7 @@ import { take } from 'rxjs';
 import { HouseholdMember, HouseholdOverview, HouseholdRole, roleLabel } from '../../core/models/household.model';
 import { ApiErrorService } from '../../core/services/api-error.service';
 import { HouseholdService } from '../../core/services/household.service';
+import { MediaService } from '../../core/services/media.service';
 import { ToastService } from '../../core/services/toast.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ConfirmDialogComponent } from '../../shared/components/ui/confirm-dialog.component';
@@ -34,6 +35,7 @@ export class HouseholdComponent implements OnInit {
   ];
   readonly inviteForm;
   readonly handoffForm;
+  readonly timezoneForm;
 
   constructor(
     private fb: FormBuilder,
@@ -42,9 +44,11 @@ export class HouseholdComponent implements OnInit {
     private apiError: ApiErrorService,
     private auth: AuthService,
     private dialog: MatDialog,
+    private media: MediaService,
   ) {
     this.inviteForm = this.fb.nonNullable.group({ email: ['', [Validators.required, Validators.email, Validators.maxLength(255)]], role: ['CAREGIVER' as HouseholdRole, Validators.required] });
     this.handoffForm = this.fb.group({ toTutorId: this.fb.control<number | null>(null), note: this.fb.nonNullable.control('', [Validators.required, Validators.maxLength(1000)]) });
+    this.timezoneForm = this.fb.nonNullable.group({ timezone: ['', [Validators.required, Validators.maxLength(64)]] });
   }
   ngOnInit(): void {
     this.auth.currentUser$.pipe(take(1)).subscribe(user => {
@@ -58,6 +62,12 @@ export class HouseholdComponent implements OnInit {
   get isInvitingOwner(): boolean { return this.inviteForm.controls.role.value === 'OWNER'; }
   label(role: HouseholdRole): string { return roleLabel(role); }
   initials(member: HouseholdMember): string { return `${member.firstName[0] || ''}${member.lastName?.[0] || ''}`.toUpperCase(); }
+  private readonly failedAvatars = new Set<string>();
+  avatarUrl(member: HouseholdMember): string | null {
+    if (!member.avatarAssetId || this.failedAvatars.has(member.avatarAssetId)) { return null; }
+    return this.media.contentUrl(member.avatarAssetId);
+  }
+  avatarFailed(member: HouseholdMember): void { if (member.avatarAssetId) { this.failedAvatars.add(member.avatarAssetId); } }
   isLastOwner(member: HouseholdMember): boolean {
     return member.role === 'OWNER' && this.overview?.members.filter(item => item.role === 'OWNER').length === 1;
   }
@@ -105,9 +115,20 @@ export class HouseholdComponent implements OnInit {
       error: e => this.fail(e, 'Não foi possível registrar a passagem de turno.')
     });
   }
+  useBrowserTimezone(): void {
+    this.timezoneForm.controls.timezone.setValue(Intl.DateTimeFormat().resolvedOptions().timeZone);
+  }
+  saveTimezone(): void {
+    if (!this.overview || this.timezoneForm.invalid) { this.timezoneForm.markAllAsTouched(); return; }
+    this.saving = true;
+    this.households.updateTimezone(this.overview.household, this.timezoneForm.controls.timezone.value.trim()).subscribe({
+      next: household => { this.overview = { ...this.overview!, household }; this.saving = false; this.toast.success('Fuso horário da família atualizado.'); },
+      error: error => this.fail(error, 'Não foi possível atualizar o fuso horário.')
+    });
+  }
   private reload(): void {
     this.loading = true;
-    this.households.overview().subscribe({ next: value => { this.overview = value; this.loading = false; this.saving = false; }, error: e => { this.loading = false; this.fail(e, 'Não foi possível carregar a família.'); } });
+    this.households.overview().subscribe({ next: value => { this.overview = value; this.timezoneForm.patchValue({ timezone: value.household.timezone || '' }); this.loading = false; this.saving = false; }, error: e => { this.loading = false; this.fail(e, 'Não foi possível carregar a família.'); } });
   }
   private fail(error: unknown, fallback: string): void { this.saving = false; this.toast.error(this.apiError.message(error, fallback)); }
 }
