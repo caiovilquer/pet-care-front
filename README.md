@@ -14,6 +14,9 @@
 - ✅ **Gerenciamento de Pets** - CRUD completo de pets
 - ✅ **Planos de cuidado** - Recorrência, orientações e lembretes com ocorrências independentes
 - ✅ **Agenda confiável** - Filtros por pet, período, tipo e status, com histórico auditável
+- ✅ **Caderneta de saúde** - Linha do tempo clínica, registro rápido e formulários progressivos
+- ✅ **Evolução de saúde** - Peso, temperatura e condição corporal em gráfico e tabela acessíveis
+- ✅ **Anexos privados** - Exames, receitas e fotos com upload direto e download autenticado
 - ✅ **Integração Google Maps** - Localização de veterinárias e petshops
 - ✅ **Perfil de usuário** - Gerenciamento de dados pessoais
 - ✅ **Design responsivo** - Funciona em desktop e mobile
@@ -96,6 +99,7 @@ src/
 │   │   ├── auth/             # Login/Signup
 │   │   ├── dashboard/        # Dashboard principal
 │   │   ├── pets/             # Gerenciamento de pets
+│   │   ├── health/           # Linha do tempo, formulários e gráficos clínicos
 │   │   ├── events/           # Sistema de eventos
 │   │   └── profile/          # Perfil do usuário
 │   ├── shared/               # Componentes compartilhados
