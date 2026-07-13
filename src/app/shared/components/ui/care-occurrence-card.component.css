@@ -1,6 +1,8 @@
+:host { display: block; min-width: 0; }
+
 .care-card {
   display: grid;
-  grid-template-columns: 88px 42px minmax(0, 1fr) auto;
+  grid-template-columns: auto 42px minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--q-space-3);
   min-height: 82px;
@@ -8,6 +10,7 @@
   border: 1px solid var(--q-border);
   border-radius: var(--q-radius-md);
   background: var(--q-surface);
+  overflow: visible;
   transition: border-color .16s ease, background .16s ease;
 }
 .care-card:hover { border-color: var(--q-border-2); background: color-mix(in srgb, var(--q-surface) 86%, var(--q-green-50)); }
@@ -17,21 +20,25 @@
 .cancelled .title-row strong { text-decoration: line-through; }
 
 .complete-button {
-  min-width: 84px;
+  min-width: 104px;
   min-height: 44px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 0 10px;
+  padding: 0 12px;
   border: 1px solid var(--q-green-500);
   border-radius: var(--q-radius-pill);
   background: transparent;
   color: var(--q-green-700);
   font: 700 .75rem var(--q-font-body);
+  white-space: nowrap;
+  flex-shrink: 0;
+  justify-self: start;
+  overflow: visible;
   cursor: pointer;
 }
-.complete-button mat-icon { width: 19px; height: 19px; font-size: 19px; }
+.complete-button mat-icon { width: 19px; height: 19px; font-size: 19px; flex-shrink: 0; }
 .complete-button:hover:not(:disabled) { background: var(--q-green-50); }
 .complete-button.checked { border-color: transparent; background: var(--q-success-bg); color: var(--q-success); }
 .complete-button:disabled { cursor: default; opacity: .7; }
