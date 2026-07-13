@@ -5,6 +5,17 @@ import { Injectable } from '@angular/core';
 })
 export class DateTimeService {
 
+  browserTimezone(): string {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+  }
+
+  /** Agenda accepts local household wall-clock or an absolute instant with offset/Z. */
+  formatCareDateTimeForAPI(date: Date, householdTimezone: string): string {
+    return householdTimezone === this.browserTimezone()
+      ? this.formatDateTimeForAPIWithoutTimezone(date)
+      : date.toISOString();
+  }
+
   /**
    * Formata uma data para envio à API no formato correto do timezone local
    * Resolve problema de diferença de 3 horas
@@ -98,11 +109,11 @@ export class DateTimeService {
    * Converte string de data da API para Date local
    * Resolve problemas de interpretação de timezone
    */
-  parseAPIDate(dateString: string): Date | null {
+  parseAPIDate(dateString: string, householdTimezone?: string): Date | null {
     if (!dateString) return null;
 
     // Se a string tem timezone (Z ou +/-), usar parsing normal
-    if (dateString.includes('Z') || dateString.includes('+') || (dateString.includes('-') && dateString.length > 10)) {
+    if (/Z$/i.test(dateString) || /[+-]\d{2}:\d{2}$/.test(dateString)) {
       return new Date(dateString);
     }
 
@@ -117,11 +128,35 @@ export class DateTimeService {
       const [datePart, timePart] = dateString.split('T');
       const [year, month, day] = datePart.split('-').map(Number);
       const [hours, minutes, seconds = 0] = timePart.split(':').map(Number);
-      return new Date(year, month - 1, day, hours, minutes, seconds);
+      return householdTimezone
+        ? this.householdWallClockToDate(year, month, day, hours, minutes, seconds, householdTimezone)
+        : new Date(year, month - 1, day, hours, minutes, seconds);
     }
 
     // Fallback para parsing normal
     return new Date(dateString);
+  }
+
+  private householdWallClockToDate(
+    year: number, month: number, day: number, hours: number, minutes: number, seconds: number, timezone: string
+  ): Date {
+    const desired = Date.UTC(year, month - 1, day, hours, minutes, seconds);
+    let instant = desired;
+    const formatter = new Intl.DateTimeFormat('en-CA', {
+      timeZone: timezone, year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'
+    });
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const values = Object.fromEntries(formatter.formatToParts(new Date(instant)).map(part => [part.type, part.value]));
+      const rendered = Date.UTC(
+        Number(values['year']), Number(values['month']) - 1, Number(values['day']),
+        Number(values['hour']), Number(values['minute']), Number(values['second'])
+      );
+      const adjustment = desired - rendered;
+      instant += adjustment;
+      if (!adjustment) break;
+    }
+    return new Date(instant);
   }
 
   /**

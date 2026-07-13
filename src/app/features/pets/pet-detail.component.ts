@@ -36,6 +36,7 @@ import { PetAvatarComponent } from '../../shared/components/ui/pet-avatar.compon
 import { SkeletonComponent } from '../../shared/components/ui/skeleton.component';
 import { PetFormComponent } from './pet-form.component';
 import { HouseholdService } from '../../core/services/household.service';
+import { DEFAULT_HOUSEHOLD_TIMEZONE } from '../../core/models/household.model';
 
 type QuickAction = { label: string; helper: string; icon: string; recordType?: HealthRecordType; measurementType?: HealthMeasurementType };
 
@@ -80,6 +81,7 @@ export class PetDetailComponent implements OnInit {
   selectedMeasurementType: HealthMeasurementType = 'WEIGHT';
   canManagePet = false;
   canRecordHealth = false;
+  householdTimezone = DEFAULT_HOUSEHOLD_TIMEZONE;
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -100,6 +102,8 @@ export class PetDetailComponent implements OnInit {
     this.householdService.current$.subscribe(item => {
       this.canManagePet = item?.role === 'OWNER';
       this.canRecordHealth = !!item && item.role !== 'VIEWER';
+      this.householdTimezone = item?.timezone || DEFAULT_HOUSEHOLD_TIMEZONE;
+      if (item && this.petId > 0) this.loadRecentEvents();
     });
     this.route.paramMap.subscribe(params => {
       const rawId = Number(params.get('id'));
@@ -216,6 +220,10 @@ export class PetDetailComponent implements OnInit {
   formatDateTime(value: string): string {
     return new Date(value).toLocaleString('pt-BR', { dateStyle: 'medium', timeStyle: 'short' });
   }
+  formatCareDateTime(event: CareOccurrence): string {
+    return (this.dateTime.parseAPIDate(event.dueAt, event.timezone || this.householdTimezone) || new Date(event.dueAt))
+      .toLocaleString('pt-BR', { dateStyle: 'medium', timeStyle: 'short' });
+  }
   formatMoney(record: HealthRecord): string {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: record.currency || 'BRL' }).format(record.costAmount || 0);
   }
@@ -231,7 +239,7 @@ export class PetDetailComponent implements OnInit {
   }
   eventStatus(event: CareOccurrence): string {
     if (event.status === 'COMPLETED') return 'Concluído';
-    return new Date(event.dueAt) < new Date() ? 'Atrasado' : 'Pendente';
+    return (this.dateTime.parseAPIDate(event.dueAt, event.timezone || this.householdTimezone)?.getTime() || 0) < Date.now() ? 'Atrasado' : 'Pendente';
   }
 
   private loadPetDetails(): void {
@@ -250,10 +258,13 @@ export class PetDetailComponent implements OnInit {
     const now = new Date(); const from = new Date(now); from.setDate(from.getDate() - 30);
     const to = new Date(now); to.setDate(to.getDate() + 90);
     this.careService.search({
-      from: this.dateTime.formatDateTimeForAPIWithoutTimezone(from),
-      to: this.dateTime.formatDateTimeForAPIWithoutTimezone(to), petId: this.petId, page: 0, size: 20
+      from: this.dateTime.formatCareDateTimeForAPI(from, this.householdTimezone),
+      to: this.dateTime.formatCareDateTimeForAPI(to, this.householdTimezone), petId: this.petId, page: 0, size: 20
     }).subscribe({
-      next: page => this.recentEvents = page.items.sort((a, b) => new Date(a.dueAt).getTime() - new Date(b.dueAt).getTime()).slice(0, 4),
+      next: page => this.recentEvents = page.items.sort((a, b) =>
+        (this.dateTime.parseAPIDate(a.dueAt, a.timezone || this.householdTimezone)?.getTime() || 0) -
+        (this.dateTime.parseAPIDate(b.dueAt, b.timezone || this.householdTimezone)?.getTime() || 0)
+      ).slice(0, 4),
       error: () => this.recentEvents = []
     });
   }

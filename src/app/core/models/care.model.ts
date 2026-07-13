@@ -24,6 +24,7 @@ export interface CarePlan {
   estimatedCostAmount?: number | null;
   estimatedCostCurrency?: string | null;
   active: boolean;
+  timezone?: string;
 }
 
 export interface CarePlanRequest {
@@ -65,6 +66,7 @@ export interface CareOccurrence {
   estimatedCostAmount?: number | null;
   estimatedCostCurrency?: string | null;
   canUndoUntil?: string;
+  timezone?: string;
 }
 
 export interface CareOccurrencesPage {
@@ -87,6 +89,7 @@ export interface TodayCare {
   today: CareOccurrence[];
   completedToday: CareOccurrence[];
   upcomingSevenDays: number;
+  timezone?: string;
 }
 
 export interface CareSearch {

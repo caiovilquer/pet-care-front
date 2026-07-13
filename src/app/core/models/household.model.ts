@@ -1,7 +1,7 @@
 export type HouseholdRole = 'OWNER' | 'CAREGIVER' | 'VIEWER';
 
 export interface HouseholdSummary {
-  id: string; version?: number; name: string; role: HouseholdRole; isDefault: boolean; memberCount: number;
+  id: string; version?: number; name: string; role: HouseholdRole; isDefault: boolean; memberCount: number; timezone?: string;
 }
 export interface HouseholdMember {
   id: string; version?: number; tutorId: number; firstName: string; lastName?: string; email: string;
@@ -19,4 +19,5 @@ export interface HouseholdOverview {
 }
 
 export const HOUSEHOLD_STORAGE_KEY = 'rp-household-id';
+export const DEFAULT_HOUSEHOLD_TIMEZONE = 'America/Sao_Paulo';
 export const roleLabel = (role: HouseholdRole): string => ({ OWNER: 'Proprietário', CAREGIVER: 'Cuidador', VIEWER: 'Visualizador' })[role];

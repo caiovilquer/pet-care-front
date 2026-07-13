@@ -38,7 +38,14 @@
   overflow: visible;
   cursor: pointer;
 }
-.complete-button mat-icon { width: 19px; height: 19px; font-size: 19px; flex-shrink: 0; }
+.complete-button mat-icon {
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+  line-height: 20px;
+  flex-shrink: 0;
+  overflow: visible;
+}
 .complete-button:hover:not(:disabled) { background: var(--q-green-50); }
 .complete-button.checked { border-color: transparent; background: var(--q-success-bg); color: var(--q-success); }
 .complete-button:disabled { cursor: default; opacity: .7; }
@@ -53,11 +60,11 @@
 .overdue-label { color: var(--q-error); background: var(--q-error-bg); }
 .cancelled-label { color: var(--q-text-2); background: var(--q-surface-3); }
 .critical-label { display: inline-flex; align-items: center; gap: 2px; color: var(--q-error); background: var(--q-error-bg); }
-.critical-label mat-icon { width: 14px; height: 14px; font-size: 14px; }
+.critical-label mat-icon { width: 14px; height: 14px; font-size: 14px; line-height: 14px; overflow: visible; }
 .meta span:has(.meta-icon) { display: inline-flex; align-items: center; gap: 3px; }
-.meta-icon { width: 14px; height: 14px; font-size: 14px; }
+.meta-icon { width: 14px; height: 14px; font-size: 14px; line-height: 14px; overflow: visible; }
 .audit { display: flex; align-items: center; gap: 5px; margin: 5px 0 0; color: var(--q-success); font-size: .75rem; }
-.audit mat-icon { width: 16px; height: 16px; font-size: 16px; }
+.audit mat-icon { width: 16px; height: 16px; font-size: 16px; line-height: 16px; overflow: visible; }
 .actions { display: flex; align-items: center; }
 .actions .mat-mdc-icon-button { color: var(--q-text-3); }
 

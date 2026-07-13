@@ -100,7 +100,7 @@
 
         <section class="agenda-panel" aria-labelledby="agenda-title">
           <div class="panel-head compact"><div><p class="q-overline">Próximos passos</p><h2 id="agenda-title">Agenda de cuidados</h2></div><button mat-button (click)="viewAllEvents()">Ver agenda</button></div>
-          @if (recentEvents.length) { <ul class="agenda-list">@for (event of recentEvents; track event.id) { <li><span><mat-icon>{{ eventIcon(event.type) }}</mat-icon></span><div><strong>{{ event.title }}</strong><small>{{ formatDateTime(event.dueAt) }}</small></div><em [class.overdue]="eventStatus(event) === 'Atrasado'">{{ eventStatus(event) }}</em></li> }</ul> }
+          @if (recentEvents.length) { <ul class="agenda-list">@for (event of recentEvents; track event.id) { <li><span><mat-icon>{{ eventIcon(event.type) }}</mat-icon></span><div><strong>{{ event.title }}</strong><small>{{ formatCareDateTime(event) }}</small></div><em [class.overdue]="eventStatus(event) === 'Atrasado'">{{ eventStatus(event) }}</em></li> }</ul> }
           @else { <p class="agenda-empty">Nenhum cuidado próximo. Use a agenda para planejar doses e compromissos futuros.</p> }
         </section>
       </aside>

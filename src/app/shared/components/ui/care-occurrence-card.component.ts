@@ -6,6 +6,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { CareOccurrence } from '../../../core/models/care.model';
 import { EventType } from '../../../core/models/event.model';
+import { DateTimeService } from '../../../core/services/datetime.service';
 
 @Component({
   selector: 'rp-care-occurrence-card',
@@ -15,6 +16,7 @@ import { EventType } from '../../../core/models/event.model';
   styleUrl: './care-occurrence-card.component.css'
 })
 export class CareOccurrenceCardComponent {
+  constructor(private readonly dates: DateTimeService) {}
   @Input({ required: true }) occurrence!: CareOccurrence;
   @Input() petName = 'Pet';
   @Input() busy = false;
@@ -29,15 +31,15 @@ export class CareOccurrenceCardComponent {
   @Output() endPlan = new EventEmitter<CareOccurrence>();
 
   get isCompleted(): boolean { return this.occurrence.status === 'COMPLETED'; }
-  get isOverdue(): boolean { return !this.isCompleted && new Date(this.occurrence.dueAt).getTime() < Date.now(); }
+  get isOverdue(): boolean { return !this.isCompleted && this.dueDate().getTime() < Date.now(); }
   get canUndo(): boolean {
     return this.isCompleted && !!this.occurrence.canUndoUntil && new Date(this.occurrence.canUndoUntil).getTime() >= Date.now();
   }
   get time(): string {
-    return new Date(this.occurrence.dueAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    return this.dueDate().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   }
   get date(): string {
-    return new Date(this.occurrence.dueAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+    return this.dueDate().toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
   }
   get completedTime(): string {
     return this.occurrence.completedAt
@@ -50,6 +52,7 @@ export class CareOccurrenceCardComponent {
   }
   get typeLabel(): string { return TYPE_LABELS[this.occurrence.type]; }
   get icon(): string { return TYPE_ICONS[this.occurrence.type]; }
+  private dueDate(): Date { return this.dates.parseAPIDate(this.occurrence.dueAt, this.occurrence.timezone) || new Date(this.occurrence.dueAt); }
 }
 
 const TYPE_LABELS: Record<EventType, string> = {

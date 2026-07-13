@@ -71,7 +71,7 @@
           </div>
           <div class="hero-actions">
             @if (pendingCount) {
-              <a mat-flat-button href="#care-focus"><mat-icon>arrow_downward</mat-icon>Ver o próximo cuidado</a>
+              <button mat-flat-button type="button" (click)="scrollToNextCare()"><mat-icon>arrow_downward</mat-icon>Ver o próximo cuidado</button>
             } @else {
               <a mat-stroked-button routerLink="/events">Ver próximos dias</a>
             }
@@ -83,7 +83,7 @@
       </header>
 
       <div class="day-layout">
-        <div class="day-flow" id="care-focus">
+        <div class="day-flow" id="care-focus" #careFocus tabindex="-1">
           @if (today?.overdue?.length) {
             <section class="care-section attention" aria-labelledby="overdue-title">
               <div class="section-head">

@@ -70,5 +70,14 @@ export class HouseholdService {
   rename(household: HouseholdSummary, name: string): Observable<HouseholdSummary> {
     return this.http.patch<HouseholdSummary>(`${this.url}/${encodeURIComponent(household.id)}`, { expectedVersion: household.version, name });
   }
+  updateTimezone(household: HouseholdSummary, timezone: string): Observable<HouseholdSummary> {
+    return this.http.patch<HouseholdSummary>(`${this.url}/${encodeURIComponent(household.id)}/timezone`, {
+      expectedVersion: household.version, timezone
+    }).pipe(tap(updated => {
+      this.currentSubject.next(updated);
+      this.householdsSubject.next(this.householdsSubject.value.map(item => item.id === updated.id ? updated : item));
+      this.cache.invalidateAll();
+    }));
+  }
   selectedId(): string | null { try { return localStorage.getItem(HOUSEHOLD_STORAGE_KEY); } catch { return null; } }
 }

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
@@ -33,6 +33,7 @@ import { UserStateService } from '../../core/services/user-state.service';
   styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit, OnDestroy {
+  @ViewChild('careFocus') private careFocus?: ElementRef<HTMLElement>;
   overview: DashboardOverview | null = null;
   today: TodayCare | null = null;
   recentPets: PetSummary[] = [];
@@ -80,6 +81,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
       width: '680px', maxWidth: 'calc(100vw - 24px)', data: { planId, petId }
     });
     ref.afterClosed().subscribe(saved => { if (saved) this.load(true); });
+  }
+  scrollToNextCare(): void {
+    const target = this.careFocus?.nativeElement;
+    if (!target) return;
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    target.focus({ preventScroll: true });
   }
   openPetSetup(): void {
     const ref = this.dialog.open(PetFormComponent, {

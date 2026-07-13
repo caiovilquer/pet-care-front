@@ -7,7 +7,7 @@
     @if (busy) {
       <mat-spinner diameter="22"></mat-spinner>
     } @else {
-      <mat-icon>{{ isCompleted ? 'check_circle' : 'check_circle_outline' }}</mat-icon>
+      <mat-icon>{{ isCompleted ? 'check_circle' : 'check' }}</mat-icon>
       <span>{{ isCompleted ? (canUndo ? 'Desfazer' : 'Concluído') : 'Concluir' }}</span>
     }
   </button>

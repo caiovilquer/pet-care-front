@@ -149,7 +149,7 @@ import { FooterComponent } from './ui/footer.component';
             <div class="q-ev-icon q-ev-{{ event.type.toLowerCase() }}"><mat-icon>{{ getEventIcon(event.type) }}</mat-icon></div>
             <div class="notif-tx">
               <span class="notif-desc">{{ event.title }}</span>
-              <span class="notif-when">{{ formatEventDate(event.dueAt) }} @if (event.petName) { · {{ event.petName }} }</span>
+              <span class="notif-when">{{ formatEventDate(event.dueAt, event.timezone) }} @if (event.petName) { · {{ event.petName }} }</span>
             </div>
           </div>
         }
@@ -402,10 +402,10 @@ export class LayoutComponent implements OnInit, OnDestroy {
     return icons[type] || 'event';
   }
 
-  formatEventDate(dateString: string): string {
+  formatEventDate(dateString: string, timezone?: string): string {
     if (!dateString) return 'Data inválida';
 
-    const eventDate = this.dateTimeService.parseAPIDate(dateString);
+    const eventDate = this.dateTimeService.parseAPIDate(dateString, timezone || this.currentHousehold?.timezone);
     if (!eventDate) return 'Data inválida';
 
     const now = new Date();

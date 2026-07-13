@@ -25,6 +25,7 @@ import { PageHeaderComponent } from '../../shared/components/ui/page-header.comp
 import { SkeletonComponent } from '../../shared/components/ui/skeleton.component';
 import { EventFormComponent } from './event-form.component';
 import { HouseholdService } from '../../core/services/household.service';
+import { DEFAULT_HOUSEHOLD_TIMEZONE } from '../../core/models/household.model';
 
 type Period = 'PAST_30' | 'NEXT_7' | 'NEXT_30' | 'NEXT_90' | 'YEAR';
 interface CareGroup { key: string; label: string; isToday: boolean; events: CareOccurrence[] }
@@ -57,6 +58,7 @@ export class EventsComponent implements OnInit {
   readonly memberNames = new Map<number, string>();
   canManagePlans = false;
   canCompleteCare = false;
+  householdTimezone = DEFAULT_HOUSEHOLD_TIMEZONE;
   readonly eventTypes: Array<{ value: EventType; label: string }> = [
     { value: 'VACCINE', label: 'Vacinas' }, { value: 'MEDICINE', label: 'Remédios' },
     { value: 'DIARY', label: 'Rotinas' }, { value: 'BREED', label: 'Reprodução' },
@@ -77,7 +79,7 @@ export class EventsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.households.overview().subscribe({ next: value => { this.canManagePlans = value.household.role === 'OWNER'; this.canCompleteCare = value.household.role !== 'VIEWER'; value.members.forEach(member => this.memberNames.set(member.tutorId, member.firstName)); } });
+    this.households.overview().subscribe({ next: value => { this.canManagePlans = value.household.role === 'OWNER'; this.canCompleteCare = value.household.role !== 'VIEWER'; this.householdTimezone = value.household.timezone || DEFAULT_HOUSEHOLD_TIMEZONE; value.members.forEach(member => this.memberNames.set(member.tutorId, member.firstName)); if (!this.isLoading) this.load(); } });
     this.petService.getPetsCached().subscribe({
       next: pets => { this.pets = pets; },
       error: () => this.toast.error('Não foi possível carregar os nomes dos pets.')
@@ -95,8 +97,8 @@ export class EventsComponent implements OnInit {
     this.isLoading = true;
     const { from, to } = this.periodRange();
     this.care.search({
-      from: this.dateTime.formatDateTimeForAPIWithoutTimezone(from),
-      to: this.dateTime.formatDateTimeForAPIWithoutTimezone(to),
+      from: this.dateTime.formatCareDateTimeForAPI(from, this.householdTimezone),
+      to: this.dateTime.formatCareDateTimeForAPI(to, this.householdTimezone),
       petId: this.selectedPetId, type: this.selectedType, status: this.selectedStatus,
       page: this.currentPage, size: this.pageSize
     }).subscribe({
@@ -198,7 +200,7 @@ export class EventsComponent implements OnInit {
   private groupByDay(events: CareOccurrence[]): CareGroup[] {
     const groups = new Map<string, CareGroup>();
     events.forEach(event => {
-      const date = this.dateTime.parseAPIDate(event.dueAt) || new Date(event.dueAt);
+      const date = this.dateTime.parseAPIDate(event.dueAt, event.timezone || this.householdTimezone) || new Date(event.dueAt);
       const key = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
       if (!groups.has(key)) {
         const today = new Date();

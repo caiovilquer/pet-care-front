@@ -192,4 +192,6 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 
 ---
 
-⭐ Se este projeto te ajudou, considere dar uma estrela no repositório!
+# Timezones da agenda
+
+O frontend lê `household.timezone` (IANA) da API. Datetimes naive de cuidados representam wall-clock nesse fuso; quando o navegador está em outro timezone, o cliente envia ISO com `Z`, e a API converte para o wall-clock da família. Respostas naive são convertidas do timezone do household para exibição no relógio local do navegador. Saúde e despesas continuam usando `toISOString()` e UTC. O fallback compatível fica centralizado em `DEFAULT_HOUSEHOLD_TIMEZONE` e permanece `America/Sao_Paulo`.

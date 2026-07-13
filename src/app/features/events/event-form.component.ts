@@ -20,7 +20,7 @@ import { EventStateService } from '../../core/services/event-state.service';
 import { PetService } from '../../core/services/pet.service';
 import { ToastService } from '../../core/services/toast.service';
 import { HouseholdService } from '../../core/services/household.service';
-import { HouseholdMember } from '../../core/models/household.model';
+import { DEFAULT_HOUSEHOLD_TIMEZONE, HouseholdMember } from '../../core/models/household.model';
 import { CURRENCY_OPTIONS, currencySymbol, isListedCurrency, normalizeCurrency } from '../../core/models/currency.model';
 
 export interface CarePlanFormData { planId?: string; petId?: number }
@@ -42,6 +42,7 @@ export class EventFormComponent implements OnInit {
   isLoadingPlan = false;
   pets: PetSummary[] = [];
   members: HouseholdMember[] = [];
+  householdTimezone = DEFAULT_HOUSEHOLD_TIMEZONE;
 
   readonly frequencies: Array<{ value: RecurrenceFrequency; label: string }> = [
     { value: 'DAILY', label: 'Dia(s)' }, { value: 'WEEKLY', label: 'Semana(s)' },
@@ -99,6 +100,7 @@ export class EventFormComponent implements OnInit {
     this.loadPets();
     this.households.overview().subscribe({ next: value => {
       this.members = value.members;
+      this.householdTimezone = value.household.timezone || DEFAULT_HOUSEHOLD_TIMEZONE;
       const caregiver = value.members.find(member => member.role !== 'VIEWER');
       const owner = value.members.find(member => member.role === 'OWNER');
       if (!this.isEdit && caregiver) this.eventForm.patchValue({ responsibleTutorId: caregiver.tutorId, escalationTutorId: owner?.tutorId || null });
@@ -132,12 +134,12 @@ export class EventFormComponent implements OnInit {
     const request: CarePlanRequest = {
       petId: value.petId!, type: value.type!, title: value.title!.trim(),
       instructions: value.instructions?.trim() || null,
-      startAt: this.dateTime.formatDateTimeForAPIWithoutTimezone(starts),
+      startAt: this.dateTime.formatCareDateTimeForAPI(starts, this.householdTimezone),
       frequency: value.frequency || null,
       intervalCount: value.frequency ? Number(value.intervalCount) : 1,
       repetitions: value.frequency && value.repetitions ? Number(value.repetitions) : null,
       finalDate: value.frequency && finalDate
-        ? this.dateTime.formatDateTimeForAPIWithoutTimezone(finalDate)
+        ? this.dateTime.formatCareDateTimeForAPI(finalDate, this.householdTimezone)
         : null,
       reminderMinutesBefore: Number(value.reminderMinutesBefore),
       responsibleTutorId: value.responsibleTutorId,
@@ -178,14 +180,15 @@ export class EventFormComponent implements OnInit {
     this.isLoadingPlan = true;
     this.care.getPlan(this.data!.planId!).subscribe({
       next: plan => {
-        const start = this.dateTime.parseAPIDate(plan.startAt);
+        this.householdTimezone = plan.timezone || this.householdTimezone;
+        const start = this.dateTime.parseAPIDate(plan.startAt, this.householdTimezone);
         this.eventForm.patchValue({
           petId: plan.petId, type: plan.type, title: plan.title, instructions: plan.instructions || '',
           dateStart: start, timeStart: this.dateTime.extractTime(plan.startAt),
           frequency: plan.recurrence?.frequency || null,
           intervalCount: plan.recurrence?.intervalCount || 1,
           repetitions: plan.recurrence?.repetitions || null,
-          finalDate: plan.recurrence?.finalDate ? this.dateTime.parseAPIDate(plan.recurrence.finalDate) : null,
+          finalDate: plan.recurrence?.finalDate ? this.dateTime.parseAPIDate(plan.recurrence.finalDate, this.householdTimezone) : null,
           reminderMinutesBefore: plan.reminderMinutesBefore,
           responsibleTutorId: plan.responsibleTutorId,
           critical: plan.critical,

@@ -52,7 +52,7 @@
 .section-head h2 { margin: 4px 0 0; font-size: clamp(1.55rem, 3vw, 2rem); }
 .section-head p { margin: 5px 0 0; color: var(--q-text-2); font-size: .86rem; }
 .section-kicker { display: flex; align-items: center; gap: 6px; color: var(--q-text-3); font-size: .7rem; font-weight: 800; letter-spacing: .075em; text-transform: uppercase; }
-.section-kicker mat-icon { width: 18px; height: 18px; font-size: 18px; }
+.section-kicker mat-icon { width: 18px; height: 18px; font-size: 18px; line-height: 18px; overflow: visible; }
 .attention .section-kicker { color: var(--q-error); }
 .section-count { min-width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; background: var(--q-error-bg); color: var(--q-error); font-weight: 800; }
 .section-count.calm { background: var(--q-green-50); color: var(--q-green-700); }
