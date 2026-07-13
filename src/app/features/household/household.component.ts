@@ -36,6 +36,7 @@ export class HouseholdComponent implements OnInit {
   readonly inviteForm;
   readonly handoffForm;
   readonly timezoneForm;
+  readonly timezones = this.supportedTimezones();
 
   constructor(
     private fb: FormBuilder,
@@ -129,6 +130,16 @@ export class HouseholdComponent implements OnInit {
   private reload(): void {
     this.loading = true;
     this.households.overview().subscribe({ next: value => { this.overview = value; this.timezoneForm.patchValue({ timezone: value.household.timezone || '' }); this.loading = false; this.saving = false; }, error: e => { this.loading = false; this.fail(e, 'Não foi possível carregar a família.'); } });
+  }
+  private supportedTimezones(): string[] {
+    const fallback = [
+      'America/Sao_Paulo', 'America/New_York', 'America/Chicago', 'America/Denver', 'America/Los_Angeles',
+      'Europe/London', 'Europe/Lisbon', 'Europe/Madrid', 'Europe/Paris', 'Asia/Tokyo', 'Australia/Sydney', 'UTC',
+    ];
+    const supported = typeof Intl.supportedValuesOf === 'function'
+      ? Intl.supportedValuesOf('timeZone')
+      : fallback;
+    return [...new Set([...supported, ...fallback])].sort();
   }
   private fail(error: unknown, fallback: string): void { this.saving = false; this.toast.error(this.apiError.message(error, fallback)); }
 }

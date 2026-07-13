@@ -50,10 +50,18 @@
   .invite-panel { order: 2; }
   .handoff-panel { order: 3; }
   .activity-panel { order: 4; }
-  .member-row { flex-wrap: wrap; }
-  .role-select { margin-left: 56px; flex: 1; }
+  .member-row {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px 12px;
+  }
+  .member-avatar { grid-column: 1; grid-row: 1; }
+  .member-copy { grid-column: 2 / -1; grid-row: 1; }
+  .role-select { grid-column: 2; grid-row: 2; width: 100%; margin: 0; }
+  .member-row > button { grid-column: 3; grid-row: 2; }
+  .role-small { grid-column: 2 / -1; grid-row: 2; }
 }
 @media (max-width: 480px) {
   .invite-panel, .handoff-panel { padding: 18px; border-radius: 18px; }
-  .role-select { width: calc(100% - 56px); }
 }

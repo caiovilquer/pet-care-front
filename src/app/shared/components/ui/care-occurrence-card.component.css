@@ -70,10 +70,20 @@
 
 @media (max-width: 680px) {
   .care-card { grid-template-columns: 42px minmax(0, 1fr) auto; min-height: 0; padding: 13px 12px; }
-  .complete-button { grid-column: 2 / -1; grid-row: 2; justify-self: stretch; width: 100%; }
+  .complete-button {
+    grid-column: 3;
+    grid-row: 1;
+    align-self: start;
+    justify-self: end;
+    min-width: 42px;
+    width: 42px;
+    min-height: 42px;
+    padding: 0;
+  }
+  .complete-button span { display: none; }
   .q-ev-icon { grid-column: 1; grid-row: 1; }
-  .content { grid-column: 2 / -1; grid-row: 1; }
-  .actions { grid-column: 1; grid-row: 2; }
+  .content { grid-column: 2; grid-row: 1; }
+  .actions { grid-column: 2 / -1; grid-row: 2; justify-content: flex-end; }
   .actions .mat-mdc-button { display: none; }
 }
 @media (max-width: 420px) {
