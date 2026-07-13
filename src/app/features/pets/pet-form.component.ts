@@ -91,6 +91,7 @@ export class PetFormComponent implements OnInit {
 
   onSubmit(): void {
     if (this.petForm.invalid) {
+      this.petForm.markAllAsTouched();
       return;
     }
 

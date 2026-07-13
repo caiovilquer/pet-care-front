@@ -7,7 +7,8 @@
     @if (busy) {
       <mat-spinner diameter="22"></mat-spinner>
     } @else {
-      <mat-icon>{{ isCompleted ? 'check' : 'radio_button_unchecked' }}</mat-icon>
+      <mat-icon>{{ isCompleted ? 'check_circle' : 'check_circle_outline' }}</mat-icon>
+      <span>{{ isCompleted ? (canUndo ? 'Desfazer' : 'Concluído') : 'Concluir' }}</span>
     }
   </button>
 
@@ -19,7 +20,6 @@
     <div class="title-row">
       <strong>{{ occurrence.title }}</strong>
       @if (isOverdue) { <span class="status overdue-label">Atrasado</span> }
-      @if (isCompleted) { <span class="status done-label">Concluído</span> }
       @if (occurrence.status === 'CANCELLED') { <span class="status cancelled-label">Cancelado</span> }
       @if (occurrence.critical) { <span class="status critical-label"><mat-icon>priority_high</mat-icon>Crítico</span> }
     </div>

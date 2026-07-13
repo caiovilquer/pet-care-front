@@ -1,1 +1,48 @@
-:host{display:block}.family-hero{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;margin-bottom:28px}.family-hero h1{margin:6px 0}.family-hero p:last-child,.helper{color:var(--q-text-2);max-width:650px}.role-badge{display:flex;align-items:center;gap:7px;background:var(--q-green-50);color:var(--q-green-600);padding:8px 13px;border-radius:999px;font-weight:700;white-space:nowrap}.role-badge mat-icon{font-size:19px;width:19px;height:19px}.loading{min-height:45vh;display:grid;place-content:center;justify-items:center;gap:12px;color:var(--q-text-2)}.summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px}.summary-grid article{background:var(--q-surface);border:1px solid var(--q-border);border-radius:16px;padding:18px;display:grid;grid-template-columns:auto 1fr;column-gap:12px;align-items:center}.summary-grid mat-icon{grid-row:1/3;color:var(--q-green-600)}.summary-grid strong{font-size:1.35rem}.summary-grid span{color:var(--q-text-2);font-size:.82rem}.family-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:18px;align-items:start}.panel{background:var(--q-surface);border:1px solid var(--q-border);border-radius:20px;padding:24px;box-shadow:var(--q-shadow-sm)}.panel h2{margin:5px 0 16px}.member-list{display:grid}.member-row{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--q-border)}.member-row:last-child{border:0}.member-avatar{width:42px;height:42px;border-radius:var(--q-organic-1);background:var(--q-green-100);color:var(--q-green-700);display:grid;place-items:center;font-weight:800}.member-copy{display:grid;min-width:0;flex:1}.member-copy span{font-size:.78rem;color:var(--q-text-2);overflow:hidden;text-overflow:ellipsis}.role-select{width:150px}.role-small{color:var(--q-text-2);font-size:.8rem}.invite-panel form,.handoff-panel form{display:grid;gap:2px;margin-top:16px}.pending{border-top:1px solid var(--q-border);margin-top:20px;padding-top:16px}.pending h3{font-size:.9rem}.pending>div{display:flex;align-items:center;justify-content:space-between}.pending span{display:grid;font-size:.8rem}.pending small{color:var(--q-text-2)}.timeline{list-style:none;display:grid}.timeline li{display:flex;gap:12px;padding:11px 0}.timeline-dot{width:30px;height:30px;display:grid;place-items:center;border-radius:50%;background:var(--q-green-50);color:var(--q-green-600)}.timeline-dot mat-icon{font-size:17px;width:17px;height:17px}.timeline li div{display:grid}.timeline li strong{font-size:.87rem}.timeline li span{font-size:.74rem;color:var(--q-text-2)}@media(max-width:800px){.family-hero{align-items:flex-start;flex-direction:column}.summary-grid{grid-template-columns:1fr}.family-grid{grid-template-columns:1fr}.panel{padding:18px}.member-row{flex-wrap:wrap}.role-select{margin-left:54px;flex:1}}@media(prefers-reduced-motion:no-preference){.panel{animation:rise .3s ease both}@keyframes rise{from{opacity:0;transform:translateY(6px)}}}
+:host { display: block; max-width: 1080px; margin: 0 auto; }
+.family-hero { display: flex; justify-content: space-between; align-items: end; gap: 24px; margin-bottom: 38px; }
+.family-hero h1 { margin: 8px 0 10px; font-size: clamp(2.2rem, 5vw, 4rem); line-height: 1; letter-spacing: -.04em; }
+.family-hero p:last-child, .helper { max-width: 650px; color: var(--q-text-2); }
+.role-badge { display: flex; align-items: center; gap: 7px; padding: 8px 13px; border-radius: var(--q-radius-pill); background: var(--q-green-50); color: var(--q-green-700); font-size: .78rem; font-weight: 750; white-space: nowrap; }
+.role-badge mat-icon { width: 19px; height: 19px; font-size: 19px; }
+.loading { min-height: 45vh; display: grid; place-content: center; justify-items: center; gap: 12px; color: var(--q-text-2); }
+
+.family-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(300px, .85fr); gap: 32px 42px; align-items: start; }
+.panel { padding: 0 0 28px; border-bottom: 1px solid var(--q-border); }
+.panel h2 { margin: 5px 0 16px; }
+.members-panel, .activity-panel { grid-column: 1; }
+.invite-panel, .handoff-panel { grid-column: 2; }
+.invite-panel { grid-row: 1; padding: 24px; border: 1px solid var(--q-border); border-radius: 22px; background: var(--q-surface); }
+.handoff-panel { padding: 24px; border: 1px solid var(--q-border); border-radius: 22px; background: var(--q-green-50); }
+.member-list { display: grid; }
+.member-row { min-height: 68px; display: flex; align-items: center; gap: 12px; padding: 13px 0; border-bottom: 1px solid var(--q-border); }
+.member-row:last-child { border: 0; }
+.member-avatar { width: 44px; height: 44px; display: grid; place-items: center; flex: none; border-radius: var(--q-organic-1); background: var(--q-green-100); color: var(--q-green-700); font-weight: 800; }
+.member-copy { min-width: 0; display: grid; flex: 1; }
+.member-copy span { overflow: hidden; text-overflow: ellipsis; color: var(--q-text-2); font-size: .78rem; }
+.role-select { width: 150px; }
+.role-small { color: var(--q-text-2); font-size: .8rem; }
+.invite-panel form, .handoff-panel form { display: grid; gap: 14px; margin-top: 16px; }
+.pending { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--q-border); }
+.pending h3 { font-size: .9rem; }
+.pending > div { display: flex; align-items: center; justify-content: space-between; }
+.pending span { display: grid; font-size: .8rem; }
+.pending small { color: var(--q-text-2); }
+.timeline { list-style: none; display: grid; }
+.timeline li { display: flex; gap: 12px; padding: 11px 0; }
+.timeline-dot { width: 30px; height: 30px; display: grid; place-items: center; flex: none; border-radius: 50%; background: var(--q-green-50); color: var(--q-green-600); }
+.timeline-dot mat-icon { width: 17px; height: 17px; font-size: 17px; }
+.timeline li div { display: grid; }
+.timeline li strong { font-size: .87rem; }
+.timeline li span { color: var(--q-text-2); font-size: .74rem; }
+
+@media (max-width: 800px) {
+  .family-hero { align-items: start; flex-direction: column; margin-bottom: 28px; }
+  .family-grid { grid-template-columns: 1fr; gap: 28px; }
+  .members-panel, .activity-panel, .invite-panel, .handoff-panel { grid-column: 1; grid-row: auto; }
+  .member-row { flex-wrap: wrap; }
+  .role-select { margin-left: 56px; flex: 1; }
+}
+@media (max-width: 480px) {
+  .invite-panel, .handoff-panel { padding: 18px; border-radius: 18px; }
+  .role-select { width: calc(100% - 56px); }
+}

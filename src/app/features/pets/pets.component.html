@@ -1,6 +1,6 @@
 <div class="pets-page">
-  <rp-page-header overline="Seu quintal" title="Meus pets"
-                  subtitle="Todos os companheiros sob seus cuidados.">
+  <rp-page-header overline="Seu quintal" title="Seus companheiros"
+                  subtitle="Abra um pet para ver a rotina, a saúde e tudo que vocês já viveram juntos.">
     @if (canManagePets) { <button mat-flat-button (click)="openPetForm()">
       <mat-icon>add</mat-icon>
       Adicionar pet
@@ -15,22 +15,22 @@
         <article class="pet-card">
           <a class="pet-link" [routerLink]="['/pets', pet.id]">
             <rp-pet-avatar [name]="pet.name" [species]="pet.species"
-                           [photoUrl]="pet.photoUrl" size="lg" [seed]="i">
+                           [photoUrl]="pet.photoUrl" size="xl" [seed]="i">
             </rp-pet-avatar>
             <div class="pet-tx">
-              <h3>{{ pet.name }}</h3>
               <span class="pet-species">{{ pet.species }}</span>
+              <h2>{{ pet.name }}</h2>
+              <p>Rotina, saúde e histórico em um só lugar.</p>
+              <span class="open-pet">Abrir perfil <mat-icon>arrow_forward</mat-icon></span>
             </div>
           </a>
           <div class="pet-actions">
-            <button mat-icon-button [routerLink]="['/events/pet', pet.id]"
-                    matTooltip="Agenda de {{ pet.name }}">
-              <mat-icon>calendar_month</mat-icon>
-            </button>
+            <a [routerLink]="['/events/pet', pet.id]"><mat-icon>calendar_month</mat-icon>Ver agenda de {{ pet.name }}</a>
+            <span></span>
             @if (canManagePets) { <button mat-icon-button (click)="editPet(pet)" matTooltip="Editar">
-              <mat-icon>edit</mat-icon>
+              <mat-icon>edit</mat-icon><span class="sr-only">Editar {{ pet.name }}</span>
             </button>
-            <button mat-icon-button (click)="deletePet(pet)" matTooltip="Remover" class="danger">
+            <button mat-icon-button (click)="deletePet(pet)" matTooltip="Remover" class="danger" [attr.aria-label]="'Remover ' + pet.name">
               <mat-icon>delete_outline</mat-icon>
             </button> }
           </div>
@@ -49,8 +49,8 @@
       </mat-paginator>
     }
   } @else {
-    <rp-empty-state icon="pets" title="Nenhum pet por aqui ainda"
-                    message="Cadastre seu primeiro companheiro e comece a cuidar da rotina dele.">
+    <rp-empty-state icon="pets" title="Vamos começar pelo seu pet"
+                    message="Depois do cadastro, você poderá planejar cuidados e acompanhar a saúde em um só lugar.">
       @if (canManagePets) { <button mat-flat-button (click)="openPetForm()">
         <mat-icon>add</mat-icon>
         Adicionar pet

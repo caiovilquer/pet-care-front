@@ -61,13 +61,17 @@
     </mat-form-field>
 
     <div class="form-row cost-row">
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="outline" floatLabel="always">
         <mat-label>Custo (opcional)</mat-label>
-        <input matInput type="number" min="0" max="9999999999.99" step="0.01" inputmode="decimal" formControlName="costAmount">
+        <span matTextPrefix>{{ costCurrencySymbol }}&nbsp;</span>
+        <input matInput type="number" min="0" max="9999999999.99" step="0.01" inputmode="decimal" formControlName="costAmount" placeholder="0,00">
         <mat-error>Informe um valor positivo com até 2 casas decimais</mat-error>
       </mat-form-field>
       @if (form.controls.costAmount.value !== null) {
-        <mat-form-field appearance="outline" class="currency"><mat-label>Moeda</mat-label><input matInput formControlName="currency" maxlength="3"></mat-form-field>
+        <mat-form-field appearance="outline" class="currency"><mat-label>Moeda</mat-label><mat-select formControlName="currency">
+          @for (currency of currencies; track currency.code) { <mat-option [value]="currency.code">{{ currency.code }}</mat-option> }
+          @if (hasUnlistedCurrency) { <mat-option [value]="form.controls.currency.value">{{ form.controls.currency.value }}</mat-option> }
+        </mat-select></mat-form-field>
       }
     </div>
 

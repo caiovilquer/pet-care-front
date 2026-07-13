@@ -16,10 +16,11 @@ import { HouseholdService } from '../../core/services/household.service';
 import { ToastService } from '../../core/services/toast.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ConfirmDialogComponent } from '../../shared/components/ui/confirm-dialog.component';
+import { HintComponent } from '../../shared/components/ui/hint.component';
 
 @Component({
   selector: 'app-household', standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatButtonModule, MatDialogModule, MatFormFieldModule, MatIconModule, MatInputModule, MatProgressSpinnerModule, MatSelectModule, MatTooltipModule],
+  imports: [CommonModule, ReactiveFormsModule, MatButtonModule, MatDialogModule, MatFormFieldModule, MatIconModule, MatInputModule, MatProgressSpinnerModule, MatSelectModule, MatTooltipModule, HintComponent],
   templateUrl: './household.component.html', styleUrl: './household.component.css'
 })
 export class HouseholdComponent implements OnInit {

@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 /**
@@ -53,7 +53,7 @@ import { CommonModule } from '@angular/common';
     .size-xl .initial { font-size: 2.6rem; }
   `]
 })
-export class PetAvatarComponent {
+export class PetAvatarComponent implements OnChanges {
   @Input() name = '';
   @Input() species = '';
   @Input() photoUrl?: string | null;
@@ -62,6 +62,10 @@ export class PetAvatarComponent {
   @Input() seed = 0;
 
   imageFailed = false;
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['photoUrl']) this.imageFailed = false;
+  }
 
   private static readonly GRADIENTS: Record<string, string> = {
     'Cão': 'linear-gradient(140deg, #35705A, #1B4033)',

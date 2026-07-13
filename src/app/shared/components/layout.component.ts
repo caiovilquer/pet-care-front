@@ -1,13 +1,13 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
+import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialog } from '@angular/material/dialog';
 import { Subscription } from 'rxjs';
-import { environment } from '../../../environments/environment';
 import { AuthService } from '../../core/services/auth.service';
 import { DashboardService } from '../../core/services/dashboard.service';
 import { EventStateService } from '../../core/services/event-state.service';
@@ -15,9 +15,10 @@ import { DateTimeService } from '../../core/services/datetime.service';
 import { UserStateService } from '../../core/services/user-state.service';
 import { DashboardOverview } from '../../core/models/dashboard.model';
 import { CareOccurrence } from '../../core/models/care.model';
-import { FooterComponent } from './ui/footer.component';
 import { HouseholdService } from '../../core/services/household.service';
 import { HouseholdSummary } from '../../core/models/household.model';
+import { EventFormComponent } from '../../features/events/event-form.component';
+import { PetFormComponent } from '../../features/pets/pet-form.component';
 
 @Component({
   selector: 'app-layout',
@@ -31,40 +32,38 @@ import { HouseholdSummary } from '../../core/models/household.model';
     MatIconModule,
     MatMenuModule,
     MatDividerModule,
-    MatTooltipModule,
-    FooterComponent
+    MatTooltipModule
   ],
   template: `
     <a class="skip-link" href="#main-content">Pular para o conteúdo</a>
     <div class="shell">
       <header class="rp-header">
-        <a routerLink="/today" class="wordmark" aria-label="RotinaPet — hoje">
+        <a routerLink="/today" class="wordmark" aria-label="RotinaPet — abrir o dia de hoje">
           rotina<b>pet</b><span class="dot" aria-hidden="true"></span>
         </a>
 
         <nav class="desktop-nav" aria-label="Navegação principal">
-          <a routerLink="/today" routerLinkActive="on">Hoje</a>
-          <a routerLink="/pets" routerLinkActive="on">Pets</a>
-          <a routerLink="/events" routerLinkActive="on">Agenda</a>
-          <a routerLink="/care-center" routerLinkActive="on">Central</a>
-          <a routerLink="/family" routerLinkActive="on">Família</a>
-          <a routerLink="/petshops" [class.on]="isNearbyActive">Por perto</a>
+          <a routerLink="/today" routerLinkActive="on"><mat-icon>wb_sunny</mat-icon>Hoje</a>
+          <a routerLink="/pets" routerLinkActive="on"><mat-icon>pets</mat-icon>Pets</a>
+          <a routerLink="/events" routerLinkActive="on"><mat-icon>calendar_month</mat-icon>Agenda</a>
+          <button mat-button [matMenuTriggerFor]="exploreMenu" [class.on]="isMoreActive">
+            <span>Mais</span><mat-icon>expand_more</mat-icon>
+          </button>
         </nav>
 
         <span class="spacer"></span>
 
         <div class="header-actions">
+          @if (canAddContent) {
+            <button mat-flat-button class="primary-action" (click)="startPrimaryAction()">
+              <mat-icon>add</mat-icon><span>{{ hasPets ? 'Planejar cuidado' : 'Cadastrar pet' }}</span>
+            </button>
+          }
           @if (currentHousehold) {
             <button mat-button [matMenuTriggerFor]="householdMenu" class="household-switch" aria-label="Trocar família">
               <mat-icon>home</mat-icon><span>{{ currentHousehold.name }}</span><mat-icon>expand_more</mat-icon>
             </button>
           }
-          <button mat-icon-button (click)="toggleTheme()"
-                  [matTooltip]="isDark ? 'Tema claro' : 'Tema escuro'"
-                  [attr.aria-label]="isDark ? 'Ativar tema claro' : 'Ativar tema escuro'">
-            <mat-icon>{{ isDark ? 'light_mode' : 'dark_mode' }}</mat-icon>
-          </button>
-
           <button mat-icon-button [matMenuTriggerFor]="notificationMenu"
                   class="bell" matTooltip="Cuidados próximos"
                   [attr.aria-label]="'Notificações: ' + upcomingEventsCount + ' cuidados próximos'">
@@ -73,12 +72,9 @@ import { HouseholdSummary } from '../../core/models/household.model';
               <span class="badge">{{ upcomingEventsCount > 9 ? '9+' : upcomingEventsCount }}</span>
             }
           </button>
-
-          <button mat-icon-button [matMenuTriggerFor]="userMenu" class="avatar-btn"
-                  aria-label="Menu do usuário">
+          <button mat-icon-button [matMenuTriggerFor]="userMenu" class="avatar-btn" aria-label="Abrir menu da conta">
             @if (currentUser?.avatar && !avatarFailed) {
-              <img [src]="currentUser!.avatar" alt="" class="avatar-img"
-                   (error)="avatarFailed = true">
+              <img [src]="currentUser!.avatar" alt="" class="avatar-img" (error)="avatarFailed = true">
             } @else {
               <span class="avatar-fallback">{{ userInitial }}</span>
             }
@@ -88,29 +84,30 @@ import { HouseholdSummary } from '../../core/models/household.model';
 
       <main class="rp-main" id="main-content" tabindex="-1">
         <router-outlet></router-outlet>
-        <rp-footer [isDark]="isDark" (themeToggle)="toggleTheme()"></rp-footer>
       </main>
 
       <nav class="rp-bottom-nav" aria-label="Navegação principal">
-        <a routerLink="/today" routerLinkActive="on">
-          <mat-icon>today</mat-icon><span>Hoje</span>
-        </a>
-        <a routerLink="/pets" routerLinkActive="on">
-          <mat-icon>pets</mat-icon><span>Pets</span>
-        </a>
-        <a routerLink="/events" routerLinkActive="on">
-          <mat-icon>calendar_month</mat-icon><span>Agenda</span>
-        </a>
-        <a routerLink="/petshops" [class.on]="isNearbyActive">
-          <mat-icon>near_me</mat-icon><span>Por perto</span>
-        </a>
-        <a routerLink="/family" routerLinkActive="on">
-          <mat-icon>group</mat-icon><span>Família</span>
-        </a>
+        <a routerLink="/today" routerLinkActive="on"><mat-icon>wb_sunny</mat-icon><span>Hoje</span></a>
+        <a routerLink="/pets" routerLinkActive="on"><mat-icon>pets</mat-icon><span>Pets</span></a>
+        @if (canAddContent) {
+          <button type="button" class="bottom-create" (click)="startPrimaryAction()" [attr.aria-label]="hasPets ? 'Planejar cuidado' : 'Cadastrar pet'">
+            <mat-icon>add</mat-icon><span>Adicionar</span>
+          </button>
+        }
+        <a routerLink="/events" routerLinkActive="on"><mat-icon>calendar_month</mat-icon><span>Agenda</span></a>
+        <button type="button" [matMenuTriggerFor]="exploreMenu" [class.on]="isMoreActive" aria-label="Abrir mais opções">
+          <mat-icon>more_horiz</mat-icon><span>Mais</span>
+        </button>
       </nav>
     </div>
 
-    <!-- Menu do usuário -->
+    <mat-menu #exploreMenu="matMenu" xPosition="before">
+      <div class="menu-section-title" (click)="$event.stopPropagation()">Outros espaços</div>
+      <button mat-menu-item routerLink="/care-center"><mat-icon>assignment</mat-icon><span>Saúde e finanças</span></button>
+      <button mat-menu-item routerLink="/family"><mat-icon>group</mat-icon><span>Quem cuida</span></button>
+      <button mat-menu-item routerLink="/petshops"><mat-icon>near_me</mat-icon><span>Por perto</span></button>
+    </mat-menu>
+
     <mat-menu #householdMenu="matMenu" xPosition="before">
       <div class="family-menu-title" (click)="$event.stopPropagation()"><span>Rotina compartilhada</span><small>Selecione onde você está cuidando</small></div>
       <mat-divider></mat-divider>
@@ -124,7 +121,6 @@ import { HouseholdSummary } from '../../core/models/household.model';
       <button mat-menu-item routerLink="/family"><mat-icon>manage_accounts</mat-icon><span>Gerenciar família</span></button>
     </mat-menu>
 
-    <!-- Menu do usuário -->
     <mat-menu #userMenu="matMenu" xPosition="before">
       @if (currentUser) {
         <div class="menu-user-info" (click)="$event.stopPropagation()">
@@ -133,288 +129,125 @@ import { HouseholdSummary } from '../../core/models/household.model';
         </div>
         <mat-divider></mat-divider>
       }
-      <button mat-menu-item routerLink="/profile">
-        <mat-icon>person_outline</mat-icon>
-        <span>Meu perfil</span>
-      </button>
-      <button mat-menu-item routerLink="/care-center">
-        <mat-icon>clinical_notes</mat-icon>
-        <span>Central de cuidado</span>
-      </button>
-      <button mat-menu-item (click)="logout()">
-        <mat-icon>logout</mat-icon>
-        <span>Sair</span>
-      </button>
+      <button mat-menu-item routerLink="/profile"><mat-icon>person_outline</mat-icon><span>Meu perfil</span></button>
+      <button mat-menu-item (click)="toggleTheme()"><mat-icon>{{ isDark ? 'light_mode' : 'dark_mode' }}</mat-icon><span>{{ isDark ? 'Usar tema claro' : 'Usar tema escuro' }}</span></button>
+      <mat-divider></mat-divider>
+      <button mat-menu-item (click)="logout()"><mat-icon>logout</mat-icon><span>Sair</span></button>
     </mat-menu>
 
-    <!-- Menu de notificações -->
     <mat-menu #notificationMenu="matMenu" xPosition="before" class="rp-notif-menu">
       <div class="notif-head" (click)="$event.stopPropagation()">
-        <span class="q-overline">Próximos 7 dias</span>
-        <h4>Cuidados próximos</h4>
+        <span class="q-overline">Próximos 7 dias</span><h4>Cuidados próximos</h4>
       </div>
       <mat-divider></mat-divider>
       @if (upcomingEventsCount > 0) {
         @for (event of upcomingEventsList; track event.id) {
           <div class="notif-item" (click)="$event.stopPropagation()">
-            <div class="q-ev-icon q-ev-{{ event.type.toLowerCase() }}">
-              <mat-icon>{{ getEventIcon(event.type) }}</mat-icon>
-            </div>
+            <div class="q-ev-icon q-ev-{{ event.type.toLowerCase() }}"><mat-icon>{{ getEventIcon(event.type) }}</mat-icon></div>
             <div class="notif-tx">
               <span class="notif-desc">{{ event.title }}</span>
-              <span class="notif-when">{{ formatEventDate(event.dueAt) }}
-                @if (event.petName) { · {{ event.petName }} }
-              </span>
+              <span class="notif-when">{{ formatEventDate(event.dueAt) }} @if (event.petName) { · {{ event.petName }} }</span>
             </div>
           </div>
         }
         <mat-divider></mat-divider>
-        <button mat-menu-item routerLink="/events" class="notif-all">
-          <span>Ver agenda completa</span>
-        </button>
+        <button mat-menu-item routerLink="/events" class="notif-all"><span>Ver agenda completa</span></button>
       } @else {
-        <div class="notif-empty" (click)="$event.stopPropagation()">
-          <p>Por aqui está tranquilo — nenhum cuidado nos próximos dias.</p>
-        </div>
-        <button mat-menu-item routerLink="/events" class="notif-all">
-          <span>Abrir agenda</span>
-        </button>
+        <div class="notif-empty" (click)="$event.stopPropagation()"><p>Por aqui está tranquilo — nenhum cuidado nos próximos dias.</p></div>
+        <button mat-menu-item routerLink="/events" class="notif-all"><span>Abrir agenda</span></button>
       }
     </mat-menu>
   `,
   styles: [`
-    .shell {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      background: var(--q-bg);
-    }
-
-    .skip-link {
-      position: fixed;
-      top: 8px;
-      left: 8px;
-      z-index: 1000;
-      transform: translateY(-160%);
-      padding: 10px 14px;
-      border-radius: var(--q-radius-md);
-      background: var(--q-ink);
-      color: var(--q-bg);
-      font-weight: 700;
-    }
+    .shell { min-height: 100vh; display: flex; flex-direction: column; background: var(--q-bg); }
+    .skip-link { position: fixed; top: 8px; left: 8px; z-index: 1000; transform: translateY(-160%); padding: 10px 14px; border-radius: var(--q-radius-md); background: var(--q-ink); color: var(--q-bg); font-weight: 700; }
     .skip-link:focus { transform: translateY(0); }
 
-    /* ---------- header ---------- */
-    .rp-header {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      gap: var(--q-space-5);
-      padding: 0 var(--q-space-5);
-      height: 64px;
-      background: color-mix(in srgb, var(--q-bg) 88%, transparent);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--q-border);
-    }
+    .rp-header { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; gap: var(--q-space-5); height: 68px; padding: 0 max(var(--q-space-5), calc((100vw - 1240px) / 2)); background: color-mix(in srgb, var(--q-bg) 90%, transparent); backdrop-filter: blur(16px); border-bottom: 1px solid color-mix(in srgb, var(--q-border) 76%, transparent); }
+    .wordmark { display: inline-flex; align-items: baseline; flex: none; color: var(--q-ink); font: 700 1.35rem var(--q-font-display); letter-spacing: -.02em; text-decoration: none; }
+    .wordmark b { color: var(--q-green-600); }
+    .wordmark .dot { width: 7px; height: 7px; margin: 7px 0 0 3px; align-self: flex-start; border-radius: 50%; background: var(--q-ipe-500); }
 
-    .wordmark {
-      font-family: var(--q-font-display);
-      font-size: 1.35rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      color: var(--q-ink);
-      text-decoration: none;
-      display: inline-flex;
-      align-items: baseline;
-    }
-    .wordmark b { color: var(--q-green-600); font-weight: 700; }
-    .wordmark .dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--q-ipe-500);
-      margin-left: 3px;
-      align-self: flex-start;
-      margin-top: 7px;
-    }
-
-    .desktop-nav {
-      display: flex;
-      gap: var(--q-space-1);
-    }
-    .desktop-nav a {
-      font-size: 0.9063rem;
-      font-weight: 600;
-      color: var(--q-text-2);
-      text-decoration: none;
-      padding: 7px 14px;
-      border-radius: var(--q-radius-pill);
-      transition: color 0.15s ease, background 0.15s ease;
-    }
-    .desktop-nav a:hover { color: var(--q-ink); background: var(--q-surface-2); }
-    .desktop-nav a.on { color: var(--q-green-600); background: var(--q-green-50); }
-
+    .desktop-nav { display: flex; align-items: center; gap: 2px; }
+    .desktop-nav a, .desktop-nav button { min-height: 40px; display: inline-flex; align-items: center; gap: 7px; padding-inline: 13px; border-radius: var(--q-radius-pill); color: var(--q-text-2); font-size: .875rem; font-weight: 650; text-decoration: none; transition: color .15s ease, background .15s ease; }
+    .desktop-nav a mat-icon { width: 18px; height: 18px; font-size: 18px; }
+    .desktop-nav a:hover, .desktop-nav button:hover { color: var(--q-ink); background: var(--q-surface-2); }
+    .desktop-nav .on { color: var(--q-green-700); background: var(--q-green-50); }
+    .desktop-nav button mat-icon { margin: 0; }
     .spacer { flex: 1; }
 
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: var(--q-space-1);
-    }
+    .header-actions { display: flex; align-items: center; gap: 3px; }
     .header-actions .mat-mdc-icon-button { color: var(--q-text-2); }
-    .household-switch{max-width:220px;color:var(--q-text-2);border:1px solid var(--q-border);border-radius:999px}.household-switch span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.household-switch mat-icon:last-child{font-size:18px}
-    .family-menu-title{display:grid;padding:13px 16px}.family-menu-title span{font-weight:700}.family-menu-title small{color:var(--q-text-2)}
+    .primary-action { margin-right: var(--q-space-2); white-space: nowrap; }
+    .household-switch { max-width: 190px; margin-right: 2px; color: var(--q-text-2); border-radius: var(--q-radius-pill); }
+    .household-switch span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .household-switch mat-icon:last-child { font-size: 18px; }
+    .family-menu-title { display: grid; padding: 13px 16px; }
+    .family-menu-title span { font-weight: 700; }
+    .family-menu-title small { color: var(--q-text-2); }
+    .menu-section-title { padding: 12px 16px 6px; color: var(--q-text-3); font-size: .7rem; font-weight: 750; letter-spacing: .07em; text-transform: uppercase; }
 
     .bell { position: relative; }
-    .badge {
-      position: absolute;
-      top: 5px;
-      right: 4px;
-      min-width: 17px;
-      height: 17px;
-      padding: 0 4px;
-      display: grid;
-      place-items: center;
-      background: var(--q-ipe-500);
-      color: #3A2D00;
-      font-size: 0.6563rem;
-      font-weight: 700;
-      border-radius: 9px;
-      pointer-events: none;
-    }
+    .badge { position: absolute; top: 5px; right: 4px; min-width: 17px; height: 17px; padding: 0 4px; display: grid; place-items: center; border-radius: 9px; background: var(--q-ipe-500); color: #3A2D00; font-size: .6563rem; font-weight: 800; pointer-events: none; }
+    .avatar-btn { width: 40px; height: 40px; padding: 0; flex: none; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; }
+    .avatar-img, .avatar-fallback { width: 32px; height: 32px; aspect-ratio: 1; border-radius: var(--q-organic-1); flex: none; }
+    .avatar-img { display: block; object-fit: cover; }
+    .avatar-fallback { display: grid; place-items: center; background: var(--q-green-600); color: var(--q-surface); font: 700 .9rem var(--q-font-display); }
 
-    .avatar-btn {
-      width: 40px;
-      height: 40px;
-      padding: 0;
-      flex-shrink: 0;
-      overflow: hidden;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .avatar-img {
-      width: 32px;
-      height: 32px;
-      aspect-ratio: 1 / 1;
-      border-radius: 50%;
-      object-fit: cover;
-      display: block;
-      flex-shrink: 0;
-    }
-    .avatar-fallback {
-      width: 32px;
-      height: 32px;
-      aspect-ratio: 1 / 1;
-      border-radius: 50%;
-      display: grid;
-      place-items: center;
-      flex-shrink: 0;
-      background: var(--q-green-600);
-      color: var(--q-surface);
-      font-family: var(--q-font-display);
-      font-weight: 700;
-      font-size: 0.9rem;
-    }
+    .rp-main { flex: 1; width: 100%; max-width: 1240px; margin: 0 auto; padding: var(--q-space-6) var(--q-space-5) var(--q-space-7); }
 
-    /* ---------- conteúdo ---------- */
-    .rp-main {
-      flex: 1;
-      width: 100%;
-      max-width: 1120px;
-      margin: 0 auto;
-      padding: var(--q-space-6) var(--q-space-5) var(--q-space-7);
-    }
+    .rp-bottom-nav { display: none; position: fixed; inset: auto 0 0; z-index: 100; justify-content: space-around; padding: 6px 8px calc(6px + env(safe-area-inset-bottom)); background: color-mix(in srgb, var(--q-surface) 94%, transparent); backdrop-filter: blur(16px); border-top: 1px solid var(--q-border); }
+    .rp-bottom-nav a, .rp-bottom-nav button { min-width: 0; max-width: 84px; min-height: 52px; display: grid; flex: 1; justify-items: center; align-content: center; gap: 2px; padding: 4px 8px; border: 0; border-radius: var(--q-radius-md); background: transparent; color: var(--q-text-3); font: 650 .65rem var(--q-font-body); text-decoration: none; }
+    .rp-bottom-nav mat-icon { width: 22px; height: 22px; font-size: 22px; }
+    .rp-bottom-nav .on { color: var(--q-green-700); background: var(--q-green-50); }
+    .rp-bottom-nav .bottom-create { position: relative; color: var(--q-green-700); font-weight: 750; }
+    .rp-bottom-nav .bottom-create mat-icon { width: 34px; height: 34px; display: grid; place-items: center; margin-top: -14px; border: 4px solid var(--q-surface); border-radius: 50%; background: var(--q-green-600); color: var(--q-surface); font-size: 22px; line-height: 26px; box-sizing: content-box; }
 
-    /* ---------- bottom nav (mobile) ---------- */
-    .rp-bottom-nav {
-      display: none;
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      z-index: 100;
-      background: var(--q-surface);
-      border-top: 1px solid var(--q-border);
-      padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
-      justify-content: space-around;
-    }
-    .rp-bottom-nav a {
-      display: grid;
-      justify-items: center;
-      gap: 2px;
-      min-width: 56px;
-      padding: 4px 8px;
-      border-radius: var(--q-radius-sm);
-      font-size: 0.625rem;
-      font-weight: 600;
-      color: var(--q-text-3);
-      text-decoration: none;
-    }
-    .rp-bottom-nav a mat-icon { font-size: 22px; width: 22px; height: 22px; }
-    .rp-bottom-nav a.on { color: var(--q-green-600); }
-
-    @media (max-width: 959px) {
-      .desktop-nav { display: none; }
-      .rp-bottom-nav { display: flex; }
-      .rp-header { height: 56px; padding: 0 var(--q-space-3) 0 var(--q-space-4); }
-      .rp-main {
-        padding: var(--q-space-4) var(--q-space-4) calc(76px + env(safe-area-inset-bottom));
-      }
-      .household-switch span,.household-switch mat-icon:last-child{display:none}.household-switch{min-width:42px;padding:0}
-    }
-
-    /* ---------- menus ---------- */
-    .menu-user-info { padding: 12px 16px 10px; min-width: 220px; }
-    .menu-user-name { margin: 0; font-weight: 600; font-size: 0.9375rem; color: var(--q-ink); }
-    .menu-user-email {
-      margin: 2px 0 0;
-      font-size: 0.7813rem;
-      color: var(--q-text-3);
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
+    .menu-user-info { min-width: 220px; padding: 12px 16px 10px; }
+    .menu-user-name { margin: 0; color: var(--q-ink); font-size: .9375rem; font-weight: 650; }
+    .menu-user-email { margin: 2px 0 0; overflow: hidden; text-overflow: ellipsis; color: var(--q-text-3); font-size: .7813rem; }
     .notif-head { padding: 14px 16px 10px; }
     .notif-head h4 { margin: 4px 0 0; font-size: 1rem; }
-    .notif-item {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      padding: 10px 16px;
-      max-width: 340px;
-    }
+    .notif-item { max-width: 340px; display: flex; align-items: center; gap: 12px; padding: 10px 16px; }
     .notif-tx { min-width: 0; display: grid; }
-    .notif-desc {
-      font-size: 0.8438rem;
-      font-weight: 600;
-      color: var(--q-ink);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+    .notif-desc { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--q-ink); font-size: .8438rem; font-weight: 650; }
+    .notif-when { color: var(--q-text-2); font-size: .75rem; }
+    .notif-all span { color: var(--q-green-600); font-weight: 650; }
+    .notif-empty { max-width: 300px; padding: 18px 16px; }
+    .notif-empty p { margin: 0; color: var(--q-text-2); font-size: .8438rem; }
+
+    @media (max-width: 1080px) {
+      .desktop-nav a mat-icon { display: none; }
+      .household-switch { display: none; }
     }
-    .notif-when { font-size: 0.75rem; color: var(--q-text-2); }
-    .notif-all span { color: var(--q-green-600); font-weight: 600; }
-    .notif-empty {
-      padding: 18px 16px;
-      max-width: 300px;
+    @media (max-width: 820px) {
+      .desktop-nav { display: none; }
+      .rp-bottom-nav { display: flex; }
+      .rp-header { height: 60px; padding: 0 var(--q-space-3) 0 var(--q-space-4); gap: var(--q-space-2); }
+      .rp-main { padding: var(--q-space-4) var(--q-space-4) calc(84px + env(safe-area-inset-bottom)); }
+      .primary-action { width: 40px; min-width: 40px; height: 40px; margin: 0; padding: 0; border-radius: 50%; }
+      .primary-action span { display: none; }
+      .primary-action mat-icon { margin: 0; }
     }
-    .notif-empty p { margin: 0; font-size: 0.8438rem; color: var(--q-text-2); }
+    @media (max-width: 430px) {
+      .rp-header { padding-left: var(--q-space-3); }
+      .wordmark { font-size: 1.18rem; }
+      .header-actions { gap: 0; }
+      .header-actions .mat-mdc-icon-button { width: 38px; }
+    }
   `]
 })
 export class LayoutComponent implements OnInit, OnDestroy {
-  currentUser: Pick<DashboardOverview, 'firstName' | 'lastName' | 'email' | 'avatar'> | null = null;
+  currentUser: DashboardOverview | null = null;
   upcomingEventsCount = 0;
   upcomingEventsList: Array<CareOccurrence & { petName?: string }> = [];
   avatarFailed = false;
   isDark = false;
-  isProduction = environment.production;
   private eventUpdateSubscription?: Subscription;
   private userUpdateSubscription?: Subscription;
   private householdSubscription?: Subscription;
   private householdListSubscription?: Subscription;
+  private routerSubscription?: Subscription;
   currentHousehold: HouseholdSummary | null = null;
   householdList: HouseholdSummary[] = [];
 
@@ -425,7 +258,8 @@ export class LayoutComponent implements OnInit, OnDestroy {
     private dateTimeService: DateTimeService,
     private userStateService: UserStateService,
     private householdService: HouseholdService,
-    private router: Router
+    private router: Router,
+    private dialog: MatDialog
   ) {
     this.isDark = this.resolveIsDark();
   }
@@ -443,6 +277,12 @@ export class LayoutComponent implements OnInit, OnDestroy {
     this.userUpdateSubscription = this.userStateService.userUpdated$.subscribe(() => {
       this.loadOverview(true);
     });
+
+    this.routerSubscription = this.router.events.subscribe(event => {
+      if (!(event instanceof NavigationEnd)) return;
+      document.title = `${this.pageTitle(event.urlAfterRedirects)} · RotinaPet`;
+      window.setTimeout(() => document.getElementById('main-content')?.focus({ preventScroll: true }), 0);
+    });
   }
 
   ngOnDestroy(): void {
@@ -450,12 +290,17 @@ export class LayoutComponent implements OnInit, OnDestroy {
     this.userUpdateSubscription?.unsubscribe();
     this.householdSubscription?.unsubscribe();
     this.householdListSubscription?.unsubscribe();
+    this.routerSubscription?.unsubscribe();
   }
 
-  get isNearbyActive(): boolean {
+  get isMoreActive(): boolean {
     const url = this.router.url;
-    return url.startsWith('/petshops') || url.startsWith('/veterinaries');
+    return url.startsWith('/care-center') || url.startsWith('/family') ||
+      url.startsWith('/petshops') || url.startsWith('/veterinaries');
   }
+
+  get canAddContent(): boolean { return this.currentHousehold?.role === 'OWNER'; }
+  get hasPets(): boolean { return (this.currentUser?.totalPets || 0) > 0; }
 
   get userInitial(): string {
     return (this.currentUser?.firstName || '?').charAt(0).toUpperCase();
@@ -506,6 +351,32 @@ export class LayoutComponent implements OnInit, OnDestroy {
     });
   }
 
+  openPlan(): void {
+    const ref = this.dialog.open(EventFormComponent, {
+      width: '680px',
+      maxWidth: 'calc(100vw - 24px)'
+    });
+    ref.afterClosed().subscribe(saved => {
+      if (saved) this.eventStateService.notifyEventUpdated();
+    });
+  }
+
+  startPrimaryAction(): void {
+    if (this.hasPets) {
+      this.openPlan();
+      return;
+    }
+    const ref = this.dialog.open(PetFormComponent, {
+      width: '520px',
+      maxWidth: 'calc(100vw - 24px)'
+    });
+    ref.afterClosed().subscribe(saved => {
+      if (!saved) return;
+      this.userStateService.notifyUserUpdated();
+      this.loadOverview(true);
+    });
+  }
+
   selectHousehold(item: HouseholdSummary): void {
     if (item.id === this.currentHousehold?.id) return;
     this.householdService.select(item).subscribe({ next: () => { this.eventStateService.notifyEventUpdated(); void this.router.navigate(['/today']); } });
@@ -543,6 +414,17 @@ export class LayoutComponent implements OnInit, OnDestroy {
     const a = new Date(from.getFullYear(), from.getMonth(), from.getDate());
     const b = new Date(to.getFullYear(), to.getMonth(), to.getDate());
     return Math.round((b.getTime() - a.getTime()) / 86400000);
+  }
+
+  private pageTitle(url: string): string {
+    if (url.startsWith('/pets/')) return 'Perfil do pet';
+    if (url.startsWith('/pets')) return 'Pets';
+    if (url.startsWith('/events')) return 'Agenda';
+    if (url.startsWith('/care-center')) return 'Saúde e finanças';
+    if (url.startsWith('/family')) return 'Quem cuida';
+    if (url.startsWith('/petshops') || url.startsWith('/veterinaries')) return 'Por perto';
+    if (url.startsWith('/profile')) return 'Meu perfil';
+    return 'Hoje';
   }
 
 }

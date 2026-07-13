@@ -112,7 +112,7 @@ import { PasswordResetService } from '../../core/services/password-reset.service
                 <mat-error *ngIf="resetForm.get('confirmPassword')?.hasError('required')">
                   Confirmação de senha é obrigatória
                 </mat-error>
-                <mat-error *ngIf="resetForm.hasError('passwordsMismatch') && resetForm.get('confirmPassword')?.touched">
+                <mat-error *ngIf="resetForm.get('confirmPassword')?.hasError('passwordsMismatch')">
                   As senhas não coincidem
                 </mat-error>
               </mat-form-field>
@@ -121,7 +121,7 @@ import { PasswordResetService } from '../../core/services/password-reset.service
                 mat-flat-button
                 type="submit"
                 class="auth-button full-width"
-                [disabled]="resetForm.invalid || isLoading"
+                [disabled]="isLoading"
               >
                 <mat-spinner *ngIf="isLoading" diameter="20"></mat-spinner>
                 <span *ngIf="!isLoading">Redefinir senha</span>
@@ -230,12 +230,21 @@ export class ResetPasswordComponent implements OnInit {
   private passwordsMatchValidator(group: FormGroup) {
     const password = group.get('password');
     const confirmPassword = group.get('confirmPassword');
-    
+
     if (!password || !confirmPassword) {
       return null;
     }
-    
-    return password.value === confirmPassword.value ? null : { passwordsMismatch: true };
+
+    // O erro precisa morar no próprio controle para o mat-error aparecer
+    if (password.value !== confirmPassword.value) {
+      confirmPassword.setErrors({ ...confirmPassword.errors, passwordsMismatch: true });
+      return { passwordsMismatch: true };
+    }
+    if (confirmPassword.hasError('passwordsMismatch')) {
+      const { passwordsMismatch, ...rest } = confirmPassword.errors || {};
+      confirmPassword.setErrors(Object.keys(rest).length ? rest : null);
+    }
+    return null;
   }
 
   private markFormGroupTouched(): void {

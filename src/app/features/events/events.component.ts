@@ -20,6 +20,7 @@ import { ToastService } from '../../core/services/toast.service';
 import { CareOccurrenceCardComponent } from '../../shared/components/ui/care-occurrence-card.component';
 import { ConfirmDialogComponent } from '../../shared/components/ui/confirm-dialog.component';
 import { EmptyStateComponent } from '../../shared/components/ui/empty-state.component';
+import { HintComponent } from '../../shared/components/ui/hint.component';
 import { PageHeaderComponent } from '../../shared/components/ui/page-header.component';
 import { SkeletonComponent } from '../../shared/components/ui/skeleton.component';
 import { EventFormComponent } from './event-form.component';
@@ -34,7 +35,7 @@ interface CareGroup { key: string; label: string; isToday: boolean; events: Care
   imports: [
     CommonModule, FormsModule, MatButtonModule, MatIconModule, MatPaginatorModule, MatDialogModule,
     MatFormFieldModule, MatSelectModule, PageHeaderComponent, EmptyStateComponent, SkeletonComponent,
-    CareOccurrenceCardComponent
+    CareOccurrenceCardComponent, HintComponent
   ],
   templateUrl: './events.component.html',
   styleUrls: ['./events.component.css']

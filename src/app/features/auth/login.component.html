@@ -42,7 +42,7 @@
         </mat-form-field>
 
         <button mat-flat-button type="submit" class="auth-button full-width"
-                [disabled]="loginForm.invalid || isLoading">
+                [disabled]="isLoading">
           {{ isLoading ? 'Entrando...' : 'Entrar' }}
         </button>
 

@@ -1,85 +1,178 @@
-<div class="dashboard-page">
+<div class="today-page">
   @if (isLoading) {
-    <rp-skeleton variant="stats"></rp-skeleton><div class="sk-gap"></div><rp-skeleton variant="list" [count]="4"></rp-skeleton>
+    <div class="hero-skeleton"><rp-skeleton variant="stats"></rp-skeleton></div>
+    <rp-skeleton variant="list" [count]="4"></rp-skeleton>
   } @else {
-    <header class="greeting">
-      <div><p class="q-overline">{{ todayLabel }}</p><h1>{{ greeting }}{{ overview ? ', ' + overview.firstName : '' }}</h1>
-        <p>Veja o que precisa de atenção e registre cada cuidado no momento certo.</p></div>
-      @if (canManagePlans) { <button mat-flat-button (click)="openPlan()"><mat-icon>add</mat-icon>Novo cuidado</button> }
-    </header>
-
     @if (hadError) {
-      <div class="load-error" role="alert"><mat-icon>cloud_off</mat-icon><span>Parte dos dados não pôde ser carregada.</span>
-        <button mat-button (click)="load(true)">Tentar novamente</button></div>
+      <div class="load-error" role="alert">
+        <mat-icon>cloud_off</mat-icon>
+        <span>Parte da rotina não pôde ser carregada.</span>
+        <button mat-button (click)="load(true)">Tentar novamente</button>
+      </div>
     }
 
-    @if (today) {
-      @if (today.overdue.length) {
-        <section class="care-section attention">
-          <div class="section-head"><div><span class="section-kicker"><mat-icon>warning_amber</mat-icon>Atenção</span><h2>Cuidados atrasados</h2></div>
-            <a routerLink="/events">Ver na agenda</a></div>
-          <div class="care-list">
-            @for (event of today.overdue; track event.id) {
-              <rp-care-occurrence-card [occurrence]="event" [petName]="petName(event.petId)" [busy]="busyIds.has(event.id)" [responsibleName]="memberName(event.responsibleTutorId)" [completedByName]="memberName(event.completedByTutorId)" [canComplete]="canCompleteCare"
-                [showDate]="true" [showPlanActions]="canManagePlans" (complete)="complete($event)" (undo)="undo($event)"
-                (editPlan)="openPlan($event.planId, $event.petId)" (endPlan)="endPlan($event)"></rp-care-occurrence-card>
-            }
+    @if (overview?.totalPets === 0) {
+      <section class="first-run" aria-labelledby="first-run-title">
+        <div class="first-run-copy">
+          <p class="q-overline">Seu primeiro passo</p>
+          <h1 id="first-run-title">Vamos montar a rotina do seu pet</h1>
+          <p>Comece contando quem é seu companheiro. Depois, o RotinaPet ajuda você a planejar o primeiro cuidado sem deixar nada importante passar.</p>
+          @if (canManagePlans) {
+            <button mat-flat-button (click)="openPetSetup()"><mat-icon>pets</mat-icon>Cadastrar meu pet</button>
+          } @else {
+            <p class="viewer-note"><mat-icon>info</mat-icon>Um proprietário da família precisa cadastrar o primeiro pet.</p>
+          }
+        </div>
+        <ol class="setup-steps" aria-label="Etapas para começar">
+          <li class="current"><span>1</span><div><strong>Cadastre o pet</strong><small>Nome, espécie e uma foto, se quiser.</small></div></li>
+          <li><span>2</span><div><strong>Planeje um cuidado</strong><small>Remédio, vacina, consulta ou rotina.</small></div></li>
+          <li><span>3</span><div><strong>Cuide no dia a dia</strong><small>A lista de hoje mostra o próximo passo.</small></div></li>
+        </ol>
+      </section>
+    } @else if (overview?.totalEvents === 0) {
+      <section class="first-care" aria-labelledby="first-care-title">
+        <div class="first-care-heading">
+          <div>
+            <p class="q-overline">Pet cadastrado — falta só um passo</p>
+            <h1 id="first-care-title">Qual cuidado você quer lembrar primeiro?</h1>
+            <p>Planeje algo que ainda vai acontecer. Quando chegar a hora, ele aparece aqui para você confirmar.</p>
           </div>
-        </section>
-      }
-
-      <section class="care-section">
-        <div class="section-head"><div><span class="section-kicker">Foco de hoje</span><h2>Cuidados de hoje</h2></div>
-          <a routerLink="/events">Agenda completa</a></div>
-        @if (today.today.length) {
-          <div class="care-list">
-            @for (event of today.today; track event.id) {
-              <rp-care-occurrence-card [occurrence]="event" [petName]="petName(event.petId)" [busy]="busyIds.has(event.id)" [responsibleName]="memberName(event.responsibleTutorId)" [completedByName]="memberName(event.completedByTutorId)" [canComplete]="canCompleteCare"
-                [showPlanActions]="canManagePlans" (complete)="complete($event)" (undo)="undo($event)" (editPlan)="openPlan($event.planId, $event.petId)"
-                (endPlan)="endPlan($event)"></rp-care-occurrence-card>
-            }
-          </div>
-        } @else {
-          <rp-empty-state icon="wb_sunny" title="Tudo em dia por agora" message="Nenhum cuidado pendente para hoje. Aproveite o tempo com seus pets.">
-            <button mat-stroked-button routerLink="/events">Ver próximos cuidados</button>
-          </rp-empty-state>
+          @if (canManagePlans) {
+            <button mat-flat-button (click)="openPlan()"><mat-icon>add</mat-icon>Planejar primeiro cuidado</button>
+          }
+        </div>
+        <div class="care-examples" aria-label="Exemplos de cuidados">
+          <article><span class="q-ev-icon q-ev-medicine"><mat-icon>medication</mat-icon></span><strong>Remédio</strong><small>Dose e horário certos</small></article>
+          <article><span class="q-ev-icon q-ev-vaccine"><mat-icon>vaccines</mat-icon></span><strong>Vacina</strong><small>Aplicação e reforços</small></article>
+          <article><span class="q-ev-icon q-ev-service"><mat-icon>event</mat-icon></span><strong>Consulta</strong><small>Compromissos futuros</small></article>
+          <article><span class="q-ev-icon q-ev-diary"><mat-icon>task_alt</mat-icon></span><strong>Rotina</strong><small>Passeio, banho e mais</small></article>
+        </div>
+        @if (!canManagePlans) {
+          <p class="viewer-note"><mat-icon>info</mat-icon>Um proprietário da família precisa planejar o primeiro cuidado.</p>
         }
       </section>
+    } @else {
+      <header class="day-hero">
+        <div class="day-copy">
+          <p class="q-overline">{{ todayLabel }}</p>
+          <p class="greeting-line">{{ greeting }}{{ overview ? ', ' + overview.firstName : '' }}</p>
+          <h1>{{ dayHeadline }}</h1>
+          <p class="day-support">{{ daySupportingText }}</p>
+        </div>
 
-      @if (today.completedToday.length) {
-        <details class="completed-section">
-          <summary><span><mat-icon>verified</mat-icon>Concluídos hoje</span><strong>{{ today.completedToday.length }}</strong></summary>
-          <div class="care-list">
-            @for (event of today.completedToday; track event.id) {
-              <rp-care-occurrence-card [occurrence]="event" [petName]="petName(event.petId)" [busy]="busyIds.has(event.id)" [responsibleName]="memberName(event.responsibleTutorId)" [completedByName]="memberName(event.completedByTutorId)" [canComplete]="canCompleteCare"
-                [showPlanActions]="false" (undo)="undo($event)"></rp-care-occurrence-card>
+        <div class="day-progress" aria-label="Progresso dos cuidados">
+          <div class="progress-copy">
+            <span>Ritmo do dia</span>
+            <strong>{{ completedCount }} de {{ totalCareCount }} concluídos</strong>
+          </div>
+          <div class="progress-track" role="progressbar" aria-label="Cuidados concluídos"
+               [attr.aria-valuenow]="progressPercent" aria-valuemin="0" aria-valuemax="100">
+            <span [style.width.%]="progressPercent"></span>
+          </div>
+          <div class="hero-actions">
+            @if (pendingCount) {
+              <a mat-flat-button href="#care-focus"><mat-icon>arrow_downward</mat-icon>Ver o próximo cuidado</a>
+            } @else {
+              <a mat-stroked-button routerLink="/events">Ver próximos dias</a>
+            }
+            @if (canManagePlans) {
+              <button mat-button (click)="openPlan()"><mat-icon>add</mat-icon>Planejar cuidado</button>
             }
           </div>
-        </details>
-      }
-    }
-
-    <section class="overview-section" aria-labelledby="overview-title">
-      <div class="section-head"><div><span class="section-kicker">Visão geral</span><h2 id="overview-title">Sua rotina</h2></div></div>
-      <div class="stats-row">
-        <rp-stat-card [value]="overview?.totalPets || 0" label="pets no quintal" link="/pets" linkLabel="Ver pets"></rp-stat-card>
-        <rp-stat-card [value]="today?.upcomingSevenDays || 0" label="cuidados nos próximos 7 dias" link="/events" linkLabel="Ver agenda"></rp-stat-card>
-        <rp-stat-card [value]="today?.overdue?.length || 0" label="precisam de atenção" link="/events" linkLabel="Revisar" [accent]="!!today?.overdue?.length"></rp-stat-card>
-      </div>
-    </section>
-
-    <section class="pets-panel">
-      <div class="section-head"><div><span class="section-kicker">Companheiros</span><h2>Seus pets</h2></div><a routerLink="/pets">Ver todos</a></div>
-      @if (recentPets.length) {
-        <div class="pets-row">
-          @for (pet of recentPets; track pet.id; let i = $index) {
-            <a class="pet-tile" [routerLink]="['/pets', pet.id]"><rp-pet-avatar [name]="pet.name" [species]="pet.species" [photoUrl]="pet.photoUrl" size="lg" [seed]="i"></rp-pet-avatar><span>{{ pet.name }}</span></a>
-          }
-          <a class="pet-tile add" routerLink="/pets" aria-label="Adicionar pet"><span class="add-blob"><mat-icon>add</mat-icon></span><span>Adicionar</span></a>
         </div>
-      } @else {
-        <rp-empty-state icon="pets" title="Nenhum pet por aqui ainda" message="Cadastre seu primeiro companheiro para montar a rotina."><button mat-flat-button routerLink="/pets"><mat-icon>add</mat-icon>Cadastrar pet</button></rp-empty-state>
-      }
-    </section>
+      </header>
+
+      <div class="day-layout">
+        <div class="day-flow" id="care-focus">
+          @if (today?.overdue?.length) {
+            <section class="care-section attention" aria-labelledby="overdue-title">
+              <div class="section-head">
+                <div>
+                  <span class="section-kicker"><mat-icon>warning_amber</mat-icon>Comece por aqui</span>
+                  <h2 id="overdue-title">Cuidados atrasados</h2>
+                  <p>{{ today!.overdue.length === 1 ? 'Há um cuidado esperando confirmação.' : 'Resolva primeiro o que ficou pendente.' }}</p>
+                </div>
+                <span class="section-count">{{ today!.overdue.length }}</span>
+              </div>
+              <div class="care-list">
+                @for (event of today!.overdue; track event.id) {
+                  <rp-care-occurrence-card [occurrence]="event" [petName]="petName(event.petId)" [busy]="busyIds.has(event.id)"
+                    [responsibleName]="memberName(event.responsibleTutorId)" [completedByName]="memberName(event.completedByTutorId)"
+                    [canComplete]="canCompleteCare" [showDate]="true" [showPlanActions]="canManagePlans"
+                    (complete)="complete($event)" (undo)="undo($event)" (editPlan)="openPlan($event.planId, $event.petId)"
+                    (endPlan)="endPlan($event)"></rp-care-occurrence-card>
+                }
+              </div>
+            </section>
+          }
+
+          <section class="care-section" aria-labelledby="today-title">
+            <div class="section-head">
+              <div>
+                <span class="section-kicker">Na ordem do dia</span>
+                <h2 id="today-title">Hoje</h2>
+                <p>Acompanhe e confirme cada cuidado quando ele acontecer.</p>
+              </div>
+              @if (today?.today?.length) { <span class="section-count calm">{{ today!.today.length }}</span> }
+            </div>
+            @if (today?.today?.length) {
+              <div class="care-list">
+                @for (event of today!.today; track event.id) {
+                  <rp-care-occurrence-card [occurrence]="event" [petName]="petName(event.petId)" [busy]="busyIds.has(event.id)"
+                    [responsibleName]="memberName(event.responsibleTutorId)" [completedByName]="memberName(event.completedByTutorId)"
+                    [canComplete]="canCompleteCare" [showPlanActions]="canManagePlans"
+                    (complete)="complete($event)" (undo)="undo($event)" (editPlan)="openPlan($event.planId, $event.petId)"
+                    (endPlan)="endPlan($event)"></rp-care-occurrence-card>
+                }
+              </div>
+            } @else {
+              <div class="calm-state">
+                <span class="calm-blob"><mat-icon>{{ completedCount ? 'done_all' : 'wb_sunny' }}</mat-icon></span>
+                <div>
+                  <h3>{{ completedCount ? 'Tudo feito por hoje' : 'Nenhum cuidado para hoje' }}</h3>
+                  <p>{{ completedCount ? 'A rotina está registrada e em dia.' : 'Você pode ver os próximos dias ou planejar um novo cuidado.' }}</p>
+                </div>
+                <a mat-stroked-button routerLink="/events">Abrir agenda</a>
+              </div>
+            }
+          </section>
+
+          @if (today?.completedToday?.length) {
+            <details class="completed-section">
+              <summary><span><mat-icon>verified</mat-icon>Concluídos hoje</span><strong>{{ today!.completedToday.length }}</strong></summary>
+              <div class="care-list">
+                @for (event of today!.completedToday; track event.id) {
+                  <rp-care-occurrence-card [occurrence]="event" [petName]="petName(event.petId)" [busy]="busyIds.has(event.id)"
+                    [responsibleName]="memberName(event.responsibleTutorId)" [completedByName]="memberName(event.completedByTutorId)"
+                    [canComplete]="canCompleteCare" [showPlanActions]="false" (undo)="undo($event)"></rp-care-occurrence-card>
+                }
+              </div>
+            </details>
+          }
+        </div>
+
+        <aside class="day-aside" aria-label="Depois de hoje">
+          <section class="up-next">
+            <p class="q-overline">Depois de hoje</p>
+            <div class="week-number"><strong>{{ today?.upcomingSevenDays || 0 }}</strong><span>{{ (today?.upcomingSevenDays || 0) === 1 ? 'cuidado nos próximos 7 dias' : 'cuidados nos próximos 7 dias' }}</span></div>
+            <a routerLink="/events">Ver agenda completa <mat-icon>arrow_forward</mat-icon></a>
+          </section>
+
+          <section class="pet-shortcuts">
+            <div class="aside-heading"><div><span>Seus companheiros</span><h2>Cuidar por pet</h2></div><a routerLink="/pets">Ver todos</a></div>
+            @if (recentPets.length) {
+              <div class="pet-links">
+                @for (pet of recentPets; track pet.id; let i = $index) {
+                  <a [routerLink]="['/pets', pet.id]">
+                    <rp-pet-avatar [name]="pet.name" [species]="pet.species" [photoUrl]="pet.photoUrl" size="sm" [seed]="i"></rp-pet-avatar>
+                    <span><strong>{{ pet.name }}</strong><small>Ver rotina e saúde</small></span><mat-icon>chevron_right</mat-icon>
+                  </a>
+                }
+              </div>
+            }
+          </section>
+        </aside>
+      </div>
+    }
   }
 </div>

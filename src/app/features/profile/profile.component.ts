@@ -89,7 +89,7 @@ import { finalize, map, of, switchMap } from 'rxjs';
 
             <div class="form-actions">
               <button mat-flat-button type="submit"
-                      [disabled]="profileForm.invalid || isUpdating || avatarUpload.isPreparing">
+                      [disabled]="isUpdating || avatarUpload.isPreparing">
                 {{ isUpdating ? 'Salvando...' : 'Salvar alterações' }}
               </button>
             </div>
@@ -173,7 +173,7 @@ import { finalize, map, of, switchMap } from 'rxjs';
     form {
       display: flex;
       flex-direction: column;
-      gap: var(--q-space-1);
+      gap: var(--q-space-3);
     }
 
     .form-row {
@@ -185,7 +185,7 @@ import { finalize, map, of, switchMap } from 'rxjs';
     .full-width { width: 100%; }
 
     @media (max-width: 480px) {
-      .form-row { flex-direction: column; gap: var(--q-space-1); }
+      .form-row { flex-direction: column; gap: var(--q-space-3); }
     }
 
     .form-actions {
@@ -329,6 +329,10 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   onUpdateProfile(): void {
+    if (this.profileForm.invalid) {
+      this.profileForm.markAllAsTouched();
+      return;
+    }
     if (this.profileForm.valid && this.currentUser) {
       this.isUpdating = true;
 

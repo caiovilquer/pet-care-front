@@ -21,6 +21,7 @@ import { PetService } from '../../core/services/pet.service';
 import { ToastService } from '../../core/services/toast.service';
 import { HouseholdService } from '../../core/services/household.service';
 import { HouseholdMember } from '../../core/models/household.model';
+import { CURRENCY_OPTIONS, currencySymbol, isListedCurrency, normalizeCurrency } from '../../core/models/currency.model';
 
 export interface CarePlanFormData { planId?: string; petId?: number }
 
@@ -51,6 +52,7 @@ export class EventFormComponent implements OnInit {
     { value: 30, label: '30 minutos antes' }, { value: 60, label: '1 hora antes' },
     { value: 1440, label: '1 dia antes' }, { value: 10080, label: '1 semana antes' }
   ];
+  readonly currencies = CURRENCY_OPTIONS;
   readonly eventTypes: Array<{ value: EventType; label: string; icon: string }> = [
     { value: 'VACCINE', label: 'Vacina', icon: 'vaccines' },
     { value: 'MEDICINE', label: 'Remédio', icon: 'medication' },
@@ -106,6 +108,8 @@ export class EventFormComponent implements OnInit {
   }
 
   selectType(type: EventType): void { this.eventForm.patchValue({ type }); }
+  get costCurrencySymbol(): string { return currencySymbol(this.eventForm.controls.estimatedCostCurrency.value); }
+  get hasUnlistedCurrency(): boolean { return !isListedCurrency(this.eventForm.controls.estimatedCostCurrency.value); }
   get frequencyUnit(): string {
     return this.frequencies.find(item => item.value === this.eventForm.controls.frequency.value)?.label || '';
   }
@@ -141,7 +145,7 @@ export class EventFormComponent implements OnInit {
       escalationDelayMinutes: value.critical ? Number(value.escalationDelayMinutes) : null,
       escalationTutorId: value.critical ? value.escalationTutorId : null,
       estimatedCostAmount: value.estimatedCostAmount ? Number(value.estimatedCostAmount) : null,
-      estimatedCostCurrency: value.estimatedCostAmount ? value.estimatedCostCurrency : null
+      estimatedCostCurrency: value.estimatedCostAmount ? normalizeCurrency(value.estimatedCostCurrency) : null
     };
 
     this.isLoading = true;
@@ -188,7 +192,7 @@ export class EventFormComponent implements OnInit {
           escalationDelayMinutes: plan.escalationDelayMinutes || 60,
           escalationTutorId: plan.escalationTutorId || null,
           estimatedCostAmount: plan.estimatedCostAmount || null,
-          estimatedCostCurrency: plan.estimatedCostCurrency || 'BRL'
+          estimatedCostCurrency: normalizeCurrency(plan.estimatedCostCurrency)
         });
         this.eventForm.controls.petId.disable();
         this.isLoadingPlan = false;

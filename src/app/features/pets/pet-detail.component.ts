@@ -31,6 +31,7 @@ import { HealthMeasurementFormComponent } from '../health/health-measurement-for
 import { HealthRecordFormComponent } from '../health/health-record-form.component';
 import { ConfirmDialogComponent } from '../../shared/components/ui/confirm-dialog.component';
 import { EmptyStateComponent } from '../../shared/components/ui/empty-state.component';
+import { HintComponent } from '../../shared/components/ui/hint.component';
 import { PetAvatarComponent } from '../../shared/components/ui/pet-avatar.component';
 import { SkeletonComponent } from '../../shared/components/ui/skeleton.component';
 import { PetFormComponent } from './pet-form.component';
@@ -44,7 +45,7 @@ type QuickAction = { label: string; helper: string; icon: string; recordType?: H
   imports: [
     CommonModule, MatButtonModule, MatDialogModule, MatIconModule, MatMenuModule,
     MatProgressSpinnerModule, MatTooltipModule, PetAvatarComponent, EmptyStateComponent,
-    SkeletonComponent, HealthMeasurementChartComponent
+    SkeletonComponent, HealthMeasurementChartComponent, HintComponent
   ],
   templateUrl: './pet-detail.component.html',
   styleUrls: ['./pet-detail.component.css']

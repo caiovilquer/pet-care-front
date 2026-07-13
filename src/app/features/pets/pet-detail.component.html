@@ -14,7 +14,7 @@
         </div>
       </div>
       <div class="hero-actions">
-        <button mat-stroked-button (click)="viewReport()"><mat-icon>clinical_notes</mat-icon>Resumo</button>
+        <button mat-stroked-button (click)="viewReport()"><mat-icon>assignment</mat-icon>Resumo</button>
         @if (canManagePet) { <button mat-stroked-button (click)="editPet()"><mat-icon>edit</mat-icon>Editar perfil</button> }
         @if (canRecordHealth) { <button mat-flat-button (click)="openRecord()"><mat-icon>add</mat-icon>Novo registro</button> }
       </div>
@@ -28,6 +28,12 @@
         }
       </div>
     </section> }
+
+    <rp-hint storageKey="caderneta-vs-agenda" icon="school">
+      <strong>Caderneta e Agenda se completam:</strong> aqui você registra o que <strong>já aconteceu</strong>
+      (vacinas, consultas, sintomas, medições). O que <strong>ainda vai acontecer</strong> — próximas doses,
+      banhos, retornos — você planeja na Agenda. Tudo se encontra depois no resumo para o veterinário.
+    </rp-hint>
 
     <div class="health-layout">
       <main class="timeline-panel" aria-labelledby="timeline-title">

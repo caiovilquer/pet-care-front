@@ -39,16 +39,17 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Raça</mat-label>
+      <mat-label>Raça (opcional)</mat-label>
       <input matInput formControlName="breed" maxlength="80">
       <mat-error *ngIf="petForm.get('breed')?.hasError('maxlength')">Use no máximo 80 caracteres</mat-error>
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Data de nascimento</mat-label>
+      <mat-label>Data de nascimento (opcional)</mat-label>
       <input matInput [matDatepicker]="picker" formControlName="birthdate" [max]="maxBirthdate">
       <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
       <mat-datepicker #picker></mat-datepicker>
+      <mat-hint>Usada para mostrar a idade e contextualizar a saúde</mat-hint>
       <mat-error *ngIf="petForm.get('birthdate')?.hasError('matDatepickerMax')">A data não pode estar no futuro</mat-error>
     </mat-form-field>
 
@@ -60,7 +61,7 @@
   <button mat-flat-button
           type="submit"
           form="pet-form"
-          [disabled]="petForm.invalid || isLoading || photoUpload.isPreparing"
+          [disabled]="isLoading || photoUpload.isPreparing"
           >
     {{isLoading ? 'Salvando...' : (isEdit ? 'Salvar' : 'Adicionar')}}
   </button>

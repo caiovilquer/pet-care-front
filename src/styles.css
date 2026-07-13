@@ -207,6 +207,8 @@ input:-webkit-autofill:focus {
   letter-spacing: 0.09em;
   text-transform: uppercase;
   color: var(--q-ipe-600);
+  /* respiro padrão entre o eyebrow e o título que vem abaixo */
+  margin-bottom: 6px;
 }
 
 .q-overline::before {
@@ -350,6 +352,24 @@ input:-webkit-autofill:focus {
 
 .mat-mdc-form-field-hint {
   color: var(--q-text-3);
+}
+
+/* Erros e hints: colados ao próprio campo, com respiro antes do próximo.
+   Alinhados ao texto interno do campo (16px) em vez do padding padrão. */
+.mat-mdc-form-field-subscript-wrapper {
+  font-size: 0.76rem;
+  line-height: 1.35;
+}
+
+.mat-mdc-form-field-error-wrapper,
+.mat-mdc-form-field-hint-wrapper {
+  padding: 4px 16px 0;
+}
+
+.mat-mdc-form-field-error {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
 }
 
 /* Painéis flutuantes (select, autocomplete) — mesma linguagem dos menus */

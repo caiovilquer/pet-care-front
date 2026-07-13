@@ -16,4 +16,4 @@ legend { font-weight: 650; margin-bottom: 10px; }
 .full-width { width: 100%; }
 mat-dialog-actions button mat-spinner { display: inline-block; margin-right: 8px; }
 @media (prefers-reduced-motion: reduce) { .type-grid button { transition: none; } }
-@media (max-width: 560px) { :host { width: 96vw; } .type-grid { grid-template-columns: 1fr; } .type-grid button { min-height: 58px; display: flex; flex-direction: row; gap: 8px; } .measurement-input { grid-template-columns: 1fr; gap: 0; } }
+@media (max-width: 560px) { :host { width: 96vw; } .type-grid { grid-template-columns: 1fr; } .type-grid button { min-height: 58px; display: flex; flex-direction: row; gap: 8px; } .measurement-input { grid-template-columns: 1fr; gap: 16px; } }

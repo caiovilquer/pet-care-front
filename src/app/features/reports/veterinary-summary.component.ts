@@ -19,11 +19,12 @@ import { PetService } from '../../core/services/pet.service';
 import { ToastService } from '../../core/services/toast.service';
 import { VeterinaryReportService } from '../../core/services/veterinary-report.service';
 import { ConfirmDialogComponent } from '../../shared/components/ui/confirm-dialog.component';
+import { HintComponent } from '../../shared/components/ui/hint.component';
 import { PetAvatarComponent } from '../../shared/components/ui/pet-avatar.component';
 
 @Component({
   selector: 'rp-veterinary-summary', standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatButtonModule, MatCheckboxModule, MatFormFieldModule, MatIconModule, MatInputModule, MatProgressSpinnerModule, MatSelectModule, PetAvatarComponent],
+  imports: [CommonModule, ReactiveFormsModule, MatButtonModule, MatCheckboxModule, MatFormFieldModule, MatIconModule, MatInputModule, MatProgressSpinnerModule, MatSelectModule, PetAvatarComponent, HintComponent],
   templateUrl: './veterinary-summary.component.html', styleUrl: './veterinary-summary.component.css'
 })
 export class VeterinarySummaryComponent implements OnInit {
@@ -87,6 +88,7 @@ export class VeterinarySummaryComponent implements OnInit {
       .afterClosed().subscribe(ok => { if (!ok) return; this.reports.revoke(share).subscribe({ next: () => { this.toast.success('Link revogado.'); this.loadShares(); }, error: e => this.toast.error(this.errors.message(e, 'Não foi possível revogar.')) }); });
   }
   records(type: HealthRecordType): VeterinaryRecord[] { return this.summary?.records.filter(item => item.type === type) || []; }
+  get selectedPet(): PetSummary | undefined { return this.pets.find(pet => pet.id === this.summary?.pet.id); }
   openDocument(mediaId: string): void { this.reports.attachmentUrl(mediaId).subscribe({ next: value => this.open(value.url), error: e => this.toast.error(this.errors.message(e, 'Não foi possível abrir o documento.')) }); }
   print(): void { window.print(); }
   date(value: string): string { return new Date(value).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }); }

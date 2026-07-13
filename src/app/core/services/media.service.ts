@@ -132,7 +132,7 @@ export class MediaService {
             }
           }),
           filter(event => event.type === HttpEventType.Response),
-          switchMap(() => this.http.post<MediaAssetResult>(`${this.apiUrl}/${init.uploadId}/complete`, {}))
+          switchMap(() => this.http.post<MediaAssetResult>(`${this.apiUrl}/uploads/${init.uploadId}/complete`, {}))
         );
       }),
       tap(() => this.invalidateMediaConsumers())

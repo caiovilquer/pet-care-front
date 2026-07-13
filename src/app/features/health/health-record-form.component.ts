@@ -21,6 +21,7 @@ import { ApiErrorService } from '../../core/services/api-error.service';
 import { HealthService } from '../../core/services/health.service';
 import { MediaService } from '../../core/services/media.service';
 import { ToastService } from '../../core/services/toast.service';
+import { CURRENCY_OPTIONS, currencySymbol, isListedCurrency, normalizeCurrency } from '../../core/models/currency.model';
 
 export interface HealthRecordFormData {
   petId: number;
@@ -44,6 +45,7 @@ export class HealthRecordFormComponent {
   readonly data = inject<HealthRecordFormData>(MAT_DIALOG_DATA);
   readonly meta = HEALTH_RECORD_META;
   readonly types = Object.keys(HEALTH_RECORD_META) as HealthRecordType[];
+  readonly currencies = CURRENCY_OPTIONS;
   readonly isEdit = !!this.data.record;
   readonly form = this.fb.group({
     type: this.fb.control<HealthRecordType>(this.data.record?.type || this.data.type || 'CONSULTATION', Validators.required),
@@ -56,7 +58,7 @@ export class HealthRecordFormComponent {
     professionalName: this.fb.control(this.data.record?.professionalName || '', Validators.maxLength(160)),
     clinicName: this.fb.control(this.data.record?.clinicName || '', Validators.maxLength(160)),
     costAmount: this.fb.control<number | null>(this.data.record?.costAmount ?? null, [Validators.min(0), Validators.max(9999999999.99)]),
-    currency: this.fb.control(this.data.record?.currency || 'BRL', [Validators.pattern(/^[A-Z]{3}$/)])
+    currency: this.fb.control(normalizeCurrency(this.data.record?.currency), [Validators.pattern(/^[A-Z]{3}$/)])
   });
 
   pendingAttachments: PreparedAttachment[] = [];
@@ -76,6 +78,8 @@ export class HealthRecordFormComponent {
   }
 
   get selectedType(): HealthRecordType { return this.form.controls.type.value || 'CONSULTATION'; }
+  get costCurrencySymbol(): string { return currencySymbol(this.form.controls.currency.value); }
+  get hasUnlistedCurrency(): boolean { return !isListedCurrency(this.form.controls.currency.value); }
   get showsProduct(): boolean { return this.selectedType === 'VACCINE' || this.selectedType === 'MEDICATION'; }
   get showsProfessional(): boolean {
     return ['VACCINE', 'MEDICATION', 'CONSULTATION', 'EXAM'].includes(this.selectedType);
@@ -166,7 +170,7 @@ export class HealthRecordFormComponent {
       professionalName: this.showsProfessional ? clean(value.professionalName) : null,
       clinicName: this.showsProfessional ? clean(value.clinicName) : null,
       costAmount: hasCost ? Number(value.costAmount) : null,
-      currency: hasCost ? value.currency!.toUpperCase() : null
+      currency: hasCost ? normalizeCurrency(value.currency) : null
     };
   }
 

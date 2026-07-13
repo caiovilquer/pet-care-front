@@ -1,21 +1,21 @@
 <header class="family-hero">
-  <div><p class="q-overline">Cuidado compartilhado</p><h1>{{ overview?.household?.name || 'Minha família' }}</h1>
-    <p>Todo mundo vê o contexto certo — e cada ação fica ligada a quem realmente cuidou.</p></div>
+  <div><p class="q-overline">{{ overview?.household?.name || 'Cuidado compartilhado' }}</p><h1>Quem cuida junto</h1>
+    <p>Organize as pessoas que participam da rotina e deixe a próxima pessoa por dentro.</p></div>
   @if (overview) { <span class="role-badge"><mat-icon>verified_user</mat-icon>{{ label(overview.household.role) }}</span> }
 </header>
 
 @if (loading) {
   <div class="loading" role="status"><mat-spinner diameter="36"></mat-spinner><span>Preparando o cuidado em equipe…</span></div>
 } @else if (overview) {
-  <section class="summary-grid" aria-label="Resumo da família">
-    <article><mat-icon>group</mat-icon><strong>{{ overview.members.length }}</strong><span>pessoas cuidando</span></article>
-    <article><mat-icon>history</mat-icon><strong>{{ overview.recentActivity.length }}</strong><span>ações recentes</span></article>
-    <article><mat-icon>swap_horiz</mat-icon><strong>{{ overview.recentHandoffs.length }}</strong><span>passagens de turno</span></article>
-  </section>
+  <rp-hint storageKey="familia-papeis" icon="school">
+    <strong>Cada pessoa tem um papel:</strong> o <strong>proprietário</strong> administra pets, planos e convites;
+    o <strong>cuidador</strong> confirma cuidados e registra saúde; o <strong>visualizador</strong> apenas acompanha.
+    Você pode mudar o papel de alguém a qualquer momento.
+  </rp-hint>
 
   <div class="family-grid">
     <section class="panel members-panel">
-      <div class="panel-head"><div><p class="q-overline">Equipe</p><h2>Quem cuida junto</h2></div></div>
+      <div class="panel-head"><div><p class="q-overline">{{ overview.members.length }} {{ overview.members.length === 1 ? 'pessoa' : 'pessoas' }}</p><h2>Pessoas com acesso</h2></div></div>
       <div class="member-list">
         @for (member of overview.members; track member.id) {
           <article class="member-row">

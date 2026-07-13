@@ -73,11 +73,12 @@ import { ToastService } from '../../core/services/toast.service';
                       [attr.aria-label]="hidePassword ? 'Mostrar senha' : 'Ocultar senha'">
                 <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
               </button>
+              <mat-hint>Pelo menos 8 caracteres</mat-hint>
               <mat-error *ngIf="signupForm.get('rawPassword')?.hasError('required')">
                 Senha é obrigatória
               </mat-error>
               <mat-error *ngIf="signupForm.get('rawPassword')?.hasError('minlength')">
-                Senha deve ter pelo menos 6 caracteres
+                Senha deve ter pelo menos 8 caracteres
               </mat-error>
             </mat-form-field>
 
@@ -92,13 +93,13 @@ import { ToastService } from '../../core/services/toast.service';
               <mat-error *ngIf="signupForm.get('confirmPassword')?.hasError('required')">
                 Confirmação de senha é obrigatória
               </mat-error>
-              <mat-error *ngIf="signupForm.hasError('passwordMismatch')">
-                Senhas não conferem
+              <mat-error *ngIf="signupForm.get('confirmPassword')?.hasError('passwordMismatch')">
+                As senhas não conferem
               </mat-error>
             </mat-form-field>
 
             <button mat-flat-button type="submit" class="auth-button full-width"
-                    [disabled]="signupForm.invalid || isLoading">
+                    [disabled]="isLoading">
               {{isLoading ? 'Criando conta...' : 'Criar conta'}}
             </button>
           </form>
@@ -125,7 +126,7 @@ import { ToastService } from '../../core/services/toast.service';
     @media (max-width: 480px) {
       .form-row {
         flex-direction: column;
-        gap: var(--q-space-1);
+        gap: var(--q-space-3);
       }
     }
   `],
@@ -156,14 +157,25 @@ export class SignupComponent {
   passwordMatchValidator(group: FormGroup) {
     const password = group.get('rawPassword');
     const confirmPassword = group.get('confirmPassword');
-    
-    if (password && confirmPassword && password.value !== confirmPassword.value) {
+    if (!password || !confirmPassword) return null;
+
+    // O erro precisa morar no próprio controle para o mat-error aparecer
+    if (password.value !== confirmPassword.value) {
+      confirmPassword.setErrors({ ...confirmPassword.errors, passwordMismatch: true });
       return { passwordMismatch: true };
+    }
+    if (confirmPassword.hasError('passwordMismatch')) {
+      const { passwordMismatch, ...rest } = confirmPassword.errors || {};
+      confirmPassword.setErrors(Object.keys(rest).length ? rest : null);
     }
     return null;
   }
 
   onSubmit(): void {
+    if (this.signupForm.invalid) {
+      this.signupForm.markAllAsTouched();
+      return;
+    }
     if (this.signupForm.valid) {
       this.isLoading = true;
       const formData = { ...this.signupForm.value };
@@ -171,11 +183,22 @@ export class SignupComponent {
       formData.firstName = formData.firstName.trim();
       formData.lastName = formData.lastName?.trim() || null;
       formData.phoneNumber = formData.phoneNumber?.trim() || null;
+      const credentials = { email: formData.email, password: formData.rawPassword };
 
       this.authService.signup(formData).subscribe({
         next: () => {
-          this.toast.success('Conta criada com sucesso! Faça login para continuar.', 5000);
-          this.router.navigate(['/auth/login']);
+          this.authService.login(credentials).subscribe({
+            next: () => {
+              this.isLoading = false;
+              this.toast.success('Conta criada. Vamos montar a rotina do seu pet!');
+              this.router.navigate(['/today']);
+            },
+            error: () => {
+              this.isLoading = false;
+              this.toast.info('Conta criada. Entre para continuar.');
+              this.router.navigate(['/auth/login']);
+            }
+          });
         },
         error: (error) => {
           let errorMessage = 'Erro ao criar conta. Tente novamente.';
@@ -200,9 +223,6 @@ export class SignupComponent {
           }
           
           this.toast.error(errorMessage, 6000);
-          this.isLoading = false;
-        },
-        complete: () => {
           this.isLoading = false;
         }
       });

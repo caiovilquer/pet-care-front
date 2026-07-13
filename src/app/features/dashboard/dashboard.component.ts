@@ -16,18 +16,18 @@ import { ToastService } from '../../core/services/toast.service';
 import { EventFormComponent } from '../events/event-form.component';
 import { CareOccurrenceCardComponent } from '../../shared/components/ui/care-occurrence-card.component';
 import { ConfirmDialogComponent } from '../../shared/components/ui/confirm-dialog.component';
-import { EmptyStateComponent } from '../../shared/components/ui/empty-state.component';
 import { PetAvatarComponent } from '../../shared/components/ui/pet-avatar.component';
 import { SkeletonComponent } from '../../shared/components/ui/skeleton.component';
-import { StatCardComponent } from '../../shared/components/ui/stat-card.component';
 import { HouseholdService } from '../../core/services/household.service';
+import { PetFormComponent } from '../pets/pet-form.component';
+import { UserStateService } from '../../core/services/user-state.service';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [
-    CommonModule, RouterLink, MatButtonModule, MatIconModule, StatCardComponent, PetAvatarComponent,
-    EmptyStateComponent, SkeletonComponent, CareOccurrenceCardComponent
+    CommonModule, RouterLink, MatButtonModule, MatIconModule, PetAvatarComponent,
+    SkeletonComponent, CareOccurrenceCardComponent
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
@@ -51,7 +51,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private readonly toast: ToastService,
     private readonly apiError: ApiErrorService,
     private readonly dialog: MatDialog,
-    private readonly households: HouseholdService
+    private readonly households: HouseholdService,
+    private readonly userState: UserStateService
   ) {}
 
   ngOnInit(): void {
@@ -79,6 +80,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
       width: '680px', maxWidth: 'calc(100vw - 24px)', data: { planId, petId }
     });
     ref.afterClosed().subscribe(saved => { if (saved) this.load(true); });
+  }
+  openPetSetup(): void {
+    const ref = this.dialog.open(PetFormComponent, {
+      width: '520px', maxWidth: 'calc(100vw - 24px)'
+    });
+    ref.afterClosed().subscribe(saved => {
+      if (!saved) return;
+      this.userState.notifyUserUpdated();
+      this.load(true);
+    });
   }
   complete(event: CareOccurrence): void {
     if (this.busyIds.has(event.id)) return;
@@ -112,6 +123,28 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
   petName(id: number): string { return this.overview?.pets.find(pet => pet.id === id)?.name || `Pet #${id}`; }
   memberName(id?: number): string { return id ? this.memberNames.get(id) || 'Membro da família' : ''; }
+  get pendingCount(): number { return (this.today?.overdue.length || 0) + (this.today?.today.length || 0); }
+  get completedCount(): number { return this.today?.completedToday.length || 0; }
+  get totalCareCount(): number { return this.pendingCount + this.completedCount; }
+  get progressPercent(): number {
+    return this.totalCareCount ? Math.round((this.completedCount / this.totalCareCount) * 100) : 100;
+  }
+  get dayHeadline(): string {
+    if (this.today?.overdue.length) {
+      const amount = this.today.overdue.length;
+      return `${amount} ${amount === 1 ? 'cuidado precisa' : 'cuidados precisam'} de atenção`;
+    }
+    if (this.pendingCount) {
+      return `${this.pendingCount} ${this.pendingCount === 1 ? 'cuidado para hoje' : 'cuidados para hoje'}`;
+    }
+    return this.totalCareCount ? 'A rotina de hoje está completa' : 'Seu dia está livre por enquanto';
+  }
+  get daySupportingText(): string {
+    if (this.today?.overdue.length) return 'Comece pelo que ficou para trás e siga o dia no seu ritmo.';
+    if (this.pendingCount) return 'A lista está em ordem. Confirme cada cuidado quando terminar.';
+    if (this.totalCareCount) return 'Tudo registrado. Agora é só aproveitar o tempo juntos.';
+    return 'Nenhum cuidado foi planejado para hoje. Veja o que vem pela frente ou crie uma nova rotina.';
+  }
   get greeting(): string { const h = new Date().getHours(); return h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite'; }
   get todayLabel(): string {
     const label = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });

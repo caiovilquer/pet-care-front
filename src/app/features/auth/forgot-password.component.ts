@@ -64,7 +64,7 @@ import { PasswordResetService } from '../../core/services/password-reset.service
                 mat-flat-button
                 type="submit"
                 class="auth-button full-width"
-                [disabled]="forgotForm.invalid || isLoading"
+                [disabled]="isLoading"
               >
                 <mat-spinner *ngIf="isLoading" diameter="20"></mat-spinner>
                 <span *ngIf="!isLoading">Enviar instruções</span>

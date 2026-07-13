@@ -45,4 +45,4 @@ form { display: grid; gap: 16px; padding-top: 8px; }
 mat-dialog-actions button mat-spinner { display: inline-block; margin-right: 8px; }
 @keyframes reveal { from { opacity: 0; transform: translateY(-5px); } }
 @media (prefers-reduced-motion: reduce) { .type-option, .progressive-section { transition: none; animation: none; } }
-@media (max-width: 720px) { :host { width: 96vw; } .type-grid { grid-template-columns: repeat(3, 1fr); } .form-row, .form-row.three { flex-direction: column; gap: 0; } .form-row mat-form-field { width: 100%; } .cost-row { flex-direction: row; } }
+@media (max-width: 720px) { :host { width: 96vw; } .type-grid { grid-template-columns: repeat(3, 1fr); } .form-row, .form-row.three { flex-direction: column; gap: 16px; } .form-row mat-form-field { width: 100%; } .cost-row { flex-direction: row; } }

@@ -8,9 +8,9 @@ import { VeterinarySummaryComponent } from './veterinary-summary.component';
   selector: 'app-care-center', standalone: true,
   imports: [MatIconModule, MatTabsModule, VeterinarySummaryComponent, FinanceComponent],
   template: `
-    <header class="center-hero"><div><p class="q-overline">Decisões com contexto</p><h1>Central de cuidado</h1><p>Leve um histórico claro à consulta e enxergue custos futuros sem misturar fatos, previsões ou recomendações.</p></div><span><mat-icon>shield</mat-icon>Privado por padrão</span></header>
+    <header class="center-hero"><div><p class="q-overline">Histórico e planejamento</p><h1>Saúde e finanças</h1><p>Prepare um resumo claro para a consulta e acompanhe os custos da rotina sem misturar o que aconteceu com o que ainda está previsto.</p></div><span><mat-icon>shield</mat-icon>Privado por padrão</span></header>
     <mat-tab-group animationDuration="180ms" dynamicHeight preserveContent>
-      <mat-tab><ng-template mat-tab-label><mat-icon>clinical_notes</mat-icon><span>Resumo veterinário</span></ng-template><div class="tab-content"><rp-veterinary-summary></rp-veterinary-summary></div></mat-tab>
+      <mat-tab><ng-template mat-tab-label><mat-icon>assignment</mat-icon><span>Resumo para consulta</span></ng-template><div class="tab-content"><rp-veterinary-summary></rp-veterinary-summary></div></mat-tab>
       <mat-tab><ng-template mat-tab-label><mat-icon>account_balance_wallet</mat-icon><span>Finanças</span></ng-template><div class="tab-content"><rp-finance></rp-finance></div></mat-tab>
     </mat-tab-group>
   `,
