@@ -1,4 +1,4 @@
-export type MediaPurpose = 'PET_PHOTO' | 'TUTOR_AVATAR';
+export type MediaPurpose = 'PET_PHOTO' | 'TUTOR_AVATAR' | 'HEALTH_ATTACHMENT';
 
 export interface MediaUploadInitiated {
   uploadId: string;
@@ -15,5 +15,10 @@ export interface MediaAssetResult {
 export interface PreparedImage {
   file: File;
   previewUrl: string;
+  checksumSha256: string;
+}
+
+export interface PreparedAttachment {
+  file: File;
   checksumSha256: string;
 }

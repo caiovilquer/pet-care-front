@@ -1,0 +1,41 @@
+<div class="chart-shell">
+  @if (points.length) {
+    <div class="chart-summary">
+      <div><span>Mais recente</span><strong>{{ value(latest!.value) }}</strong></div>
+      <span>{{ dateTime(latest!.measuredAt) }}</span>
+    </div>
+    <div class="svg-wrap">
+      <svg [attr.viewBox]="'0 0 ' + width + ' ' + height" role="img" [attr.aria-label]="accessibleSummary">
+        <title>Evolução de {{ meta[type].label.toLowerCase() }}</title>
+        <desc>{{ accessibleSummary }}</desc>
+        @for (tick of yTicks; track $index) {
+          <line class="grid" [attr.x1]="plot.left" [attr.x2]="width - plot.right" [attr.y1]="tickY(tick)" [attr.y2]="tickY(tick)"></line>
+          <text class="axis-label" x="4" [attr.y]="tickY(tick) + 4">{{ value(tick) }}</text>
+        }
+        @if (points.length > 1) { <polyline class="line" [attr.points]="polyline"></polyline> }
+        @for (point of points; track point.item.id) {
+          <circle class="point-halo" [attr.cx]="point.x" [attr.cy]="point.y" r="8"></circle>
+          <circle class="point" [attr.cx]="point.x" [attr.cy]="point.y" r="4"><title>{{ value(point.item.value) }} em {{ dateTime(point.item.measuredAt) }}</title></circle>
+        }
+        <text class="date-label" [attr.x]="plot.left" [attr.y]="height - 8">{{ date(points[0].item.measuredAt) }}</text>
+        @if (points.length > 1) { <text class="date-label end" [attr.x]="width - plot.right" [attr.y]="height - 8">{{ date(points[points.length - 1].item.measuredAt) }}</text> }
+      </svg>
+    </div>
+    <details>
+      <summary><mat-icon>table_rows</mat-icon>Ver dados em tabela</summary>
+      <div class="table-scroll">
+        <table>
+          <caption class="sr-only">Medições de {{ meta[type].label.toLowerCase() }}</caption>
+          <thead><tr><th scope="col">Data</th><th scope="col">Valor</th><th scope="col">Contexto</th></tr></thead>
+          <tbody>
+            @for (item of sorted.slice().reverse(); track item.id) {
+              <tr><td>{{ dateTime(item.measuredAt) }}</td><td><strong>{{ value(item.value) }}</strong></td><td>{{ item.notes || '—' }}</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </details>
+  } @else {
+    <div class="empty-chart"><span><mat-icon>{{ meta[type].icon }}</mat-icon></span><div><strong>Sem dados ainda</strong><p>Registre a primeira medição para iniciar o acompanhamento.</p></div></div>
+  }
+</div>

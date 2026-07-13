@@ -1,81 +1,102 @@
 <div class="pet-detail-page">
   @if (isLoading) {
-    <rp-skeleton variant="detail"></rp-skeleton>
-    <div class="sk-gap"></div>
-    <rp-skeleton variant="list" [count]="3"></rp-skeleton>
+    <rp-skeleton variant="detail"></rp-skeleton><div class="sk-gap"></div><rp-skeleton variant="list" [count]="3"></rp-skeleton>
   } @else if (pet) {
-    <nav class="breadcrumb">
-      <button mat-button (click)="goBack()">
-        <mat-icon>arrow_back</mat-icon>
-        Meus pets
-      </button>
+    <nav class="breadcrumb" aria-label="Navegação estrutural">
+      <button mat-button (click)="goBack()"><mat-icon>arrow_back</mat-icon>Meus pets</button>
     </nav>
 
-    <section class="hero">
-      <rp-pet-avatar [name]="pet.name" [species]="pet.species"
-                     [photoUrl]="pet.photoUrl" size="xl" [seed]="pet.id || 0">
-      </rp-pet-avatar>
-      <div class="hero-tx">
-        <p class="q-overline">{{ pet.species }}</p>
-        <h1>{{ pet.name }}</h1>
-        <p class="hero-sub">
-          {{ pet.breed || 'Raça não informada' }}
-          @if (pet.birthdate) {
-            · {{ getAgeDisplay(pet.birthdate) }}
-            · nasceu em {{ formatDate(pet.birthdate) }}
-          }
-        </p>
+    <header class="hero">
+      <div class="hero-identity">
+        <rp-pet-avatar [name]="pet.name" [species]="pet.species" [photoUrl]="pet.photoUrl" size="xl" [seed]="pet.id || 0"></rp-pet-avatar>
+        <div class="hero-tx"><p class="q-overline">Caderneta de saúde</p><h1>{{ pet.name }}</h1>
+          <p>{{ pet.species }} · {{ pet.breed || 'Raça não informada' }} @if (pet.birthdate) { · {{ getAgeDisplay(pet.birthdate) }} }</p>
+        </div>
       </div>
       <div class="hero-actions">
-        <button mat-stroked-button (click)="editPet()">
-          <mat-icon>edit</mat-icon>
-          Editar
-        </button>
-        <button mat-flat-button (click)="viewAllEvents()">
-          <mat-icon>calendar_month</mat-icon>
-          Agenda de {{ pet.name }}
-        </button>
+        @if (canManagePet) { <button mat-stroked-button (click)="editPet()"><mat-icon>edit</mat-icon>Editar perfil</button> }
+        @if (canRecordHealth) { <button mat-flat-button (click)="openRecord()"><mat-icon>add</mat-icon>Novo registro</button> }
       </div>
-    </section>
+    </header>
 
-    <section class="history">
-      <div class="history-head">
-        <h2>Últimos cuidados</h2>
-        @if (recentEvents.length > 0) {
-          <button mat-button (click)="viewAllEvents()">Ver todos</button>
+    @if (canRecordHealth) { <section class="quick-section" aria-labelledby="quick-title">
+      <div class="section-heading"><div><p class="q-overline">Registro rápido</p><h2 id="quick-title">O que aconteceu hoje?</h2></div><p>Escolha uma opção; mostraremos apenas os campos necessários.</p></div>
+      <div class="quick-grid">
+        @for (action of quickActions; track action.label) {
+          <button type="button" (click)="runQuickAction(action)"><span class="quick-icon"><mat-icon>{{ action.icon }}</mat-icon></span><span><strong>{{ action.label }}</strong><small>{{ action.helper }}</small></span><mat-icon class="arrow">arrow_forward</mat-icon></button>
         }
       </div>
+    </section> }
 
-      @if (recentEvents.length > 0) {
-        <div class="event-list">
-          @for (event of recentEvents; track event.id) {
-            <div class="event-row">
-              <div class="q-ev-icon q-ev-{{ event.type.toLowerCase() }}">
-                <mat-icon>{{ getEventIcon(event.type) }}</mat-icon>
-              </div>
-              <div class="event-tx">
-                <span class="event-title">{{ event.title }}</span>
-                <span class="event-when">{{ formatEventDate(event.dueAt) }}</span>
-              </div>
-              <span class="q-status"
-                    [class.q-status-done]="getStatusChipClass(event.dueAt, event.status) === 'status-done'"
-                    [class.q-status-overdue]="getStatusChipClass(event.dueAt, event.status) === 'status-overdue'"
-                    [class.q-status-pending]="getStatusChipClass(event.dueAt, event.status) === 'status-pending'">
-                {{ getEventStatus(event.dueAt, event.status) }}
-              </span>
-            </div>
-          }
+    <div class="health-layout">
+      <main class="timeline-panel" aria-labelledby="timeline-title">
+        <div class="panel-head"><div><p class="q-overline">Histórico confiável</p><h2 id="timeline-title">Linha do tempo clínica</h2><p>{{ recordTotal }} {{ recordTotal === 1 ? 'registro' : 'registros' }}</p></div>@if (canRecordHealth) { <button mat-icon-button [matMenuTriggerFor]="newRecordMenu" aria-label="Novo registro clínico"><mat-icon>add_circle</mat-icon></button> }</div>
+        <mat-menu #newRecordMenu="matMenu">@for (type of recordTypes; track type) { <button mat-menu-item (click)="openRecord(type)"><mat-icon>{{ recordMeta[type].icon }}</mat-icon>{{ recordMeta[type].label }}</button> }</mat-menu>
+
+        <div class="filter-row" role="group" aria-label="Filtrar linha do tempo">
+          <button type="button" [class.active]="recordFilter === null" (click)="filterRecords(null)">Todos</button>
+          @for (type of recordTypes; track type) { <button type="button" [class.active]="recordFilter === type" (click)="filterRecords(type)">{{ recordMeta[type].label }}</button> }
         </div>
-      } @else {
-        <rp-empty-state icon="event_available"
-                        title="Nenhum cuidado registrado ainda"
-                        message="A história de cuidados de {{ pet.name }} começa no primeiro registro.">
-          <button mat-flat-button (click)="viewAllEvents()">
-            <mat-icon>add</mat-icon>
-            Adicionar cuidado
-          </button>
-        </rp-empty-state>
-      }
-    </section>
+
+        @if (isLoadingRecords) {
+          <div class="loading-state" role="status"><mat-spinner diameter="30"></mat-spinner><span>Organizando o histórico…</span></div>
+        } @else if (records.length) {
+          <ol class="timeline">
+            @for (record of records; track record.id) {
+              <li class="timeline-item tone-{{ recordMeta[record.type].tone }}">
+                <span class="timeline-marker"><mat-icon>{{ recordMeta[record.type].icon }}</mat-icon></span>
+                <article>
+                  <header><div><span class="record-type">{{ recordMeta[record.type].label }}</span><h3>{{ record.title }}</h3><time [attr.datetime]="record.occurredAt">{{ formatDateTime(record.occurredAt) }}</time></div>
+                    @if (canRecordHealth) { <button mat-icon-button [matMenuTriggerFor]="recordMenu" [attr.aria-label]="'Opções de ' + record.title"><mat-icon>more_horiz</mat-icon></button> }
+                    <mat-menu #recordMenu="matMenu"><button mat-menu-item (click)="openRecord(undefined, record)"><mat-icon>edit</mat-icon>Editar</button><button mat-menu-item class="danger-menu" (click)="confirmDeleteRecord(record)"><mat-icon>delete_outline</mat-icon>Excluir</button></mat-menu>
+                  </header>
+                  @if (record.productName || record.dosage || record.batchNumber || record.professionalName || record.clinicName || record.costAmount !== null) {
+                    <dl class="record-facts">
+                      @if (record.productName) { <div><dt>Produto</dt><dd>{{ record.productName }}</dd></div> }
+                      @if (record.dosage) { <div><dt>Dose</dt><dd>{{ record.dosage }}</dd></div> }
+                      @if (record.batchNumber) { <div><dt>Lote</dt><dd>{{ record.batchNumber }}</dd></div> }
+                      @if (record.professionalName) { <div><dt>Profissional</dt><dd>{{ record.professionalName }}</dd></div> }
+                      @if (record.clinicName) { <div><dt>Local</dt><dd>{{ record.clinicName }}</dd></div> }
+                      @if (record.costAmount !== null && record.costAmount !== undefined) { <div><dt>Custo</dt><dd>{{ formatMoney(record) }}</dd></div> }
+                    </dl>
+                  }
+                  @if (record.notes) { <p class="record-notes">{{ record.notes }}</p> }
+                  @if (record.attachments.length) {
+                    <ul class="attachment-list" aria-label="Anexos privados">
+                      @for (attachment of record.attachments; track attachment.id) {
+                        <li><button type="button" class="attachment-open" (click)="downloadAttachment(attachment)" [matTooltip]="'Abrir ' + attachment.filename"><mat-icon>{{ attachment.contentType === 'application/pdf' ? 'picture_as_pdf' : 'image' }}</mat-icon><span><strong>{{ attachment.filename }}</strong><small>{{ formatBytes(attachment.sizeBytes) }} · privado</small></span></button>
+                          <button mat-icon-button (click)="confirmDeleteAttachment(record, attachment)" [attr.aria-label]="'Remover ' + attachment.filename"><mat-icon>close</mat-icon></button></li>
+                      }
+                    </ul>
+                  }
+                </article>
+              </li>
+            }
+          </ol>
+          @if (records.length < recordTotal) { <button mat-stroked-button class="load-more" (click)="loadMoreRecords()" [disabled]="isLoadingMore">@if (isLoadingMore) { <mat-spinner diameter="17"></mat-spinner> }{{ isLoadingMore ? 'Carregando…' : 'Ver registros anteriores' }}</button> }
+        } @else {
+          <rp-empty-state icon="health_and_safety" [title]="recordFilter ? 'Nenhum registro deste tipo' : 'A história de saúde começa aqui'" [message]="recordFilter ? 'Tente outro filtro ou adicione um novo registro.' : 'Vacinas, consultas, sintomas e exames ficam organizados por data.'">@if (canRecordHealth) { <button mat-flat-button (click)="openRecord(recordFilter || undefined)"><mat-icon>add</mat-icon>Adicionar registro</button> }</rp-empty-state>
+        }
+      </main>
+
+      <aside class="side-column">
+        <section class="measurement-panel" aria-labelledby="measurement-title">
+          <div class="panel-head compact"><div><p class="q-overline">Evolução</p><h2 id="measurement-title">Medições</h2></div>@if (canRecordHealth) { <button mat-icon-button (click)="openMeasurement(selectedMeasurementType)" [attr.aria-label]="'Registrar ' + measurementMeta[selectedMeasurementType].label"><mat-icon>add</mat-icon></button> }</div>
+          <div class="measurement-tabs" role="tablist" aria-label="Tipo de medição">@for (type of measurementTypes; track type) { <button type="button" role="tab" [attr.aria-selected]="selectedMeasurementType === type" [class.active]="selectedMeasurementType === type" (click)="selectMeasurementType(type)"><mat-icon>{{ measurementMeta[type].icon }}</mat-icon><span>{{ measurementMeta[type].label }}</span></button> }</div>
+          @if (isLoadingMeasurements) { <div class="loading-state small" role="status"><mat-spinner diameter="26"></mat-spinner><span>Carregando medições…</span></div> }
+          @else { <rp-health-measurement-chart [measurements]="measurements" [type]="selectedMeasurementType"></rp-health-measurement-chart>
+            @if (canRecordHealth) { <div class="measurement-actions"><button mat-stroked-button (click)="openMeasurement(selectedMeasurementType)"><mat-icon>add</mat-icon>Registrar {{ measurementMeta[selectedMeasurementType].label.toLowerCase() }}</button>
+              @if (filteredMeasurements().length) { <button mat-button [matMenuTriggerFor]="measurementMenu">Gerenciar</button><mat-menu #measurementMenu="matMenu">@for (item of filteredMeasurements().slice().reverse().slice(0, 10); track item.id) { <button mat-menu-item (click)="openMeasurement(undefined, item)"><mat-icon>edit</mat-icon>{{ formatDateTime(item.measuredAt) }} · {{ item.value }} {{ measurementMeta[item.type].shortUnit }}</button><button mat-menu-item (click)="confirmDeleteMeasurement(item)"><mat-icon>delete_outline</mat-icon>Excluir medição acima</button> }</mat-menu> }
+            </div> }
+          }
+        </section>
+
+        <section class="agenda-panel" aria-labelledby="agenda-title">
+          <div class="panel-head compact"><div><p class="q-overline">Próximos passos</p><h2 id="agenda-title">Agenda de cuidados</h2></div><button mat-button (click)="viewAllEvents()">Ver agenda</button></div>
+          @if (recentEvents.length) { <ul class="agenda-list">@for (event of recentEvents; track event.id) { <li><span><mat-icon>{{ eventIcon(event.type) }}</mat-icon></span><div><strong>{{ event.title }}</strong><small>{{ formatDateTime(event.dueAt) }}</small></div><em [class.overdue]="eventStatus(event) === 'Atrasado'">{{ eventStatus(event) }}</em></li> }</ul> }
+          @else { <p class="agenda-empty">Nenhum cuidado próximo. Use a agenda para planejar doses e compromissos futuros.</p> }
+        </section>
+      </aside>
+    </div>
   }
 </div>

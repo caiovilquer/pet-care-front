@@ -1,0 +1,48 @@
+:host { display: block; width: min(760px, 92vw); }
+.form-header { padding: 24px 24px 8px; }
+.form-header h2 { margin: 6px 0; padding: 0; }
+.form-header > p:last-child { color: var(--q-text-2); margin: 0; max-width: 620px; font-size: .9rem; }
+mat-dialog-content { max-height: min(72vh, 760px); }
+form { display: grid; gap: 16px; padding-top: 8px; }
+.type-field { border: 0; min-width: 0; }
+.type-field legend { font-weight: 650; margin-bottom: 10px; }
+.type-grid { display: grid; grid-template-columns: repeat(6, minmax(86px, 1fr)); gap: 8px; }
+.type-option { min-height: 72px; border: 1px solid var(--q-border); border-radius: 12px; background: var(--q-surface-2); color: var(--q-text-2); display: grid; place-items: center; align-content: center; gap: 4px; font: inherit; font-size: .75rem; cursor: pointer; transition: transform 150ms ease, border-color 150ms ease, background 150ms ease; }
+.type-option:hover { transform: translateY(-1px); border-color: var(--q-border-2); }
+.type-option.selected { border: 2px solid var(--q-green-600); background: var(--q-green-50); color: var(--q-green-700); font-weight: 650; }
+.type-option mat-icon { font-size: 23px; width: 23px; height: 23px; }
+.form-row { display: flex; gap: 12px; align-items: start; }
+.form-row mat-form-field { flex: 1; min-width: 0; }
+.form-row .grow { flex: 1.25; }
+.form-row.three mat-form-field { flex-basis: 0; }
+.full-width { width: 100%; }
+.progressive-section { padding: 14px 14px 0; border-radius: 14px; background: var(--q-surface-2); border: 1px solid var(--q-border); animation: reveal 180ms ease-out; }
+.section-heading { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; }
+.section-heading > mat-icon { color: var(--q-green-600); }
+.section-heading div { display: grid; }
+.section-heading span { color: var(--q-text-2); font-size: .78rem; }
+.cost-row mat-form-field { flex: 0 1 240px; }
+.cost-row .currency { flex-basis: 100px; max-width: 120px; }
+.attachment-zone { position: relative; border: 1px dashed var(--q-border-2); border-radius: 16px; padding: 16px; background: var(--q-surface-2); display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+.attachment-copy { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 220px; }
+.attachment-copy > div { display: grid; }
+.attachment-copy span { color: var(--q-text-2); font-size: .78rem; }
+.attachment-icon { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 12px; background: var(--q-green-100); color: var(--q-green-700); }
+.file-button { cursor: pointer; display: inline-flex; align-items: center; gap: 5px; padding: 7px 14px; border: 1px solid var(--q-border-2); border-radius: 999px; font-size: .84rem; font-weight: 650; background: var(--q-surface); }
+.file-button input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.file-button.disabled { opacity: .55; pointer-events: none; }
+.file-button mat-icon { font-size: 18px; width: 18px; height: 18px; }
+.slot-count { width: 100%; text-align: right; color: var(--q-text-3); font-size: .72rem; }
+.file-list { width: 100%; display: grid; gap: 6px; list-style: none; }
+.file-list li { display: flex; align-items: center; gap: 9px; padding: 8px 10px; background: var(--q-surface); border-radius: 10px; border: 1px solid var(--q-border); }
+.file-list li > mat-icon { color: var(--q-green-600); }
+.file-list li span { display: grid; min-width: 0; flex: 1; }
+.file-list strong { white-space: nowrap; text-overflow: ellipsis; overflow: hidden; font-size: .82rem; }
+.file-list small { color: var(--q-text-2); }
+.existing-note { display: flex; align-items: center; gap: 6px; color: var(--q-text-2); font-size: .78rem; width: 100%; }
+.existing-note mat-icon { font-size: 16px; width: 16px; height: 16px; }
+.upload-status { padding: 8px 24px 2px; color: var(--q-text-2); font-size: .8rem; display: grid; gap: 6px; }
+mat-dialog-actions button mat-spinner { display: inline-block; margin-right: 8px; }
+@keyframes reveal { from { opacity: 0; transform: translateY(-5px); } }
+@media (prefers-reduced-motion: reduce) { .type-option, .progressive-section { transition: none; animation: none; } }
+@media (max-width: 720px) { :host { width: 96vw; } .type-grid { grid-template-columns: repeat(3, 1fr); } .form-row, .form-row.three { flex-direction: column; gap: 0; } .form-row mat-form-field { width: 100%; } .cost-row { flex-direction: row; } }

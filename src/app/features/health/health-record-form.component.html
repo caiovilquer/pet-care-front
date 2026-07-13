@@ -1,0 +1,113 @@
+<header class="form-header">
+  <p class="q-overline">Saúde de {{ data.petName }}</p>
+  <h2 mat-dialog-title>{{ isEdit ? 'Editar registro' : 'Novo registro clínico' }}</h2>
+  <p>Guarde o que aconteceu. A agenda continua sendo usada para planejar o que ainda vai acontecer.</p>
+</header>
+
+<mat-dialog-content>
+  <form id="health-record-form" [formGroup]="form" (ngSubmit)="submit()">
+    <fieldset class="type-field">
+      <legend>O que você quer registrar?</legend>
+      <div class="type-grid" role="radiogroup" aria-label="Tipo de registro de saúde">
+        @for (type of types; track type) {
+          <button type="button" class="type-option tone-{{ meta[type].tone }}"
+                  [class.selected]="selectedType === type"
+                  [attr.aria-pressed]="selectedType === type" (click)="selectType(type)">
+            <mat-icon>{{ meta[type].icon }}</mat-icon><span>{{ meta[type].label }}</span>
+          </button>
+        }
+      </div>
+    </fieldset>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="grow">
+        <mat-label>Título</mat-label>
+        <input matInput formControlName="title" maxlength="120" autocomplete="off" required>
+        <mat-hint align="end">{{ form.controls.title.value?.length || 0 }}/120</mat-hint>
+        <mat-error>Informe um título de até 120 caracteres</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Data e hora</mat-label>
+        <input matInput type="datetime-local" formControlName="occurredAt" required>
+        <mat-error>Informe quando aconteceu</mat-error>
+      </mat-form-field>
+    </div>
+
+    @if (showsProduct) {
+      <section class="progressive-section" aria-labelledby="product-heading">
+        <div class="section-heading"><mat-icon>inventory_2</mat-icon><div><strong id="product-heading">Produto e aplicação</strong><span>Campos úteis para rastrear doses e lotes.</span></div></div>
+        <div class="form-row three">
+          <mat-form-field appearance="outline"><mat-label>Produto</mat-label><input matInput formControlName="productName" maxlength="160" placeholder="Ex.: V10"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Dose</mat-label><input matInput formControlName="dosage" maxlength="120" placeholder="Ex.: 1 comprimido"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Lote</mat-label><input matInput formControlName="batchNumber" maxlength="120"></mat-form-field>
+        </div>
+      </section>
+    }
+
+    @if (showsProfessional) {
+      <section class="progressive-section" aria-labelledby="care-heading">
+        <div class="section-heading"><mat-icon>medical_services</mat-icon><div><strong id="care-heading">Atendimento</strong><span>Opcional, para encontrar rapidamente quem atendeu.</span></div></div>
+        <div class="form-row">
+          <mat-form-field appearance="outline"><mat-label>Profissional</mat-label><input matInput formControlName="professionalName" maxlength="160"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Clínica ou hospital</mat-label><input matInput formControlName="clinicName" maxlength="160"></mat-form-field>
+        </div>
+      </section>
+    }
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Observações</mat-label>
+      <textarea matInput formControlName="notes" rows="3" maxlength="4000" placeholder="Resultados, reações, orientação recebida ou contexto importante"></textarea>
+      <mat-hint align="end">{{ form.controls.notes.value?.length || 0 }}/4000</mat-hint>
+    </mat-form-field>
+
+    <div class="form-row cost-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Custo (opcional)</mat-label>
+        <input matInput type="number" min="0" max="9999999999.99" step="0.01" inputmode="decimal" formControlName="costAmount">
+        <mat-error>Informe um valor positivo com até 2 casas decimais</mat-error>
+      </mat-form-field>
+      @if (form.controls.costAmount.value !== null) {
+        <mat-form-field appearance="outline" class="currency"><mat-label>Moeda</mat-label><input matInput formControlName="currency" maxlength="3"></mat-form-field>
+      }
+    </div>
+
+    <section class="attachment-zone" [class.disabled]="availableAttachmentSlots <= 0">
+      <div class="attachment-copy">
+        <span class="attachment-icon"><mat-icon>attach_file</mat-icon></span>
+        <div><strong>Exames, receitas e fotos</strong><span>JPG, PNG ou PDF · até 10 MB cada · acesso privado</span></div>
+      </div>
+      <label class="file-button" [class.disabled]="availableAttachmentSlots <= 0 || isPreparingFile">
+        <input type="file" multiple accept="image/jpeg,image/png,application/pdf" (change)="chooseFiles($event)"
+               [disabled]="availableAttachmentSlots <= 0 || isPreparingFile">
+        <mat-icon>{{ isPreparingFile ? 'hourglass_top' : 'add' }}</mat-icon>
+        {{ isPreparingFile ? 'Verificando…' : 'Adicionar' }}
+      </label>
+      <span class="slot-count">{{ 5 - availableAttachmentSlots }}/5 anexos</span>
+      @if (pendingAttachments.length) {
+        <ul class="file-list" aria-label="Anexos prontos para envio">
+          @for (attachment of pendingAttachments; track attachment.file.name + $index; let i = $index) {
+            <li><mat-icon>{{ attachment.file.type === 'application/pdf' ? 'picture_as_pdf' : 'image' }}</mat-icon>
+              <span><strong>{{ attachment.file.name }}</strong><small>{{ attachment.file.size / 1048576 | number:'1.1-1' }} MB</small></span>
+              <button type="button" mat-icon-button aria-label="Remover anexo" (click)="removePending(i)"><mat-icon>close</mat-icon></button>
+            </li>
+          }
+        </ul>
+      }
+      @if (data.record?.attachments?.length) {
+        <p class="existing-note"><mat-icon>lock</mat-icon>{{ data.record!.attachments.length }} anexo(s) já armazenado(s) com acesso privado.</p>
+      }
+    </section>
+  </form>
+</mat-dialog-content>
+
+@if (isSaving && pendingAttachments.length) {
+  <div class="upload-status" role="status"><span>Enviando anexos com segurança… {{ uploadProgress }}%</span><mat-progress-bar mode="determinate" [value]="uploadProgress"></mat-progress-bar></div>
+}
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="dialogRef.close(false)" [disabled]="isSaving">Cancelar</button>
+  <button mat-flat-button type="submit" form="health-record-form" [disabled]="isSaving || isPreparingFile">
+    @if (isSaving) { <mat-spinner diameter="18"></mat-spinner> }
+    {{ isSaving ? (pendingAttachments.length ? 'Salvando e enviando…' : 'Salvando…') : (isEdit ? 'Salvar alterações' : 'Adicionar à linha do tempo') }}
+  </button>
+</mat-dialog-actions>

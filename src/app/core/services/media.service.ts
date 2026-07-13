@@ -1,12 +1,13 @@
 import { HttpClient, HttpEventType, HttpHeaders, HttpRequest } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, from } from 'rxjs';
-import { filter, map, switchMap, tap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { filter, switchMap, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import {
   MediaAssetResult,
   MediaPurpose,
   MediaUploadInitiated,
+  PreparedAttachment,
   PreparedImage
 } from '../models/media.model';
 import { CacheService } from './cache.service';
@@ -74,19 +75,51 @@ export class MediaService {
     prepared: PreparedImage,
     onProgress: (progress: number) => void
   ): Observable<MediaAssetResult> {
+    return this.uploadFile(purpose, prepared.file, prepared.checksumSha256, onProgress, targetId);
+  }
+
+  async prepareAttachment(source: File): Promise<PreparedAttachment> {
+    if (!['image/jpeg', 'image/png', 'application/pdf'].includes(source.type)) {
+      throw new Error('Escolha um arquivo JPG, PNG ou PDF.');
+    }
+    if (source.size < 1 || source.size > 10 * 1024 * 1024) {
+      throw new Error('Cada anexo deve ter no máximo 10 MB.');
+    }
+    const signature = new Uint8Array(await source.slice(0, 8).arrayBuffer());
+    const valid = source.type === 'image/jpeg'
+      ? signature[0] === 0xff && signature[1] === 0xd8 && signature[2] === 0xff
+      : source.type === 'image/png'
+        ? [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a].every((byte, index) => signature[index] === byte)
+        : new TextDecoder('ascii').decode(signature).startsWith('%PDF-1.');
+    if (!valid) throw new Error('O conteúdo do arquivo não corresponde ao formato informado.');
+    return { file: source, checksumSha256: await this.sha256(source) };
+  }
+
+  uploadAttachment(
+    recordId: string,
+    prepared: PreparedAttachment,
+    onProgress: (progress: number) => void
+  ): Observable<MediaAssetResult> {
+    return this.uploadFile('HEALTH_ATTACHMENT', prepared.file, prepared.checksumSha256, onProgress, undefined, recordId);
+  }
+
+  private uploadFile(
+    purpose: MediaPurpose,
+    file: File,
+    checksumSha256: string,
+    onProgress: (progress: number) => void,
+    targetId?: number,
+    targetUuid?: string
+  ): Observable<MediaAssetResult> {
     const body = {
-      purpose,
-      targetId,
-      filename: prepared.file.name,
-      contentType: prepared.file.type,
-      sizeBytes: prepared.file.size,
-      checksumSha256: prepared.checksumSha256
+      purpose, targetId, targetUuid, filename: file.name, contentType: file.type,
+      sizeBytes: file.size, checksumSha256
     };
 
     return this.http.post<MediaUploadInitiated>(`${this.apiUrl}/uploads`, body).pipe(
       switchMap(init => {
         const headers = new HttpHeaders(init.headers);
-        const request = new HttpRequest('PUT', init.uploadUrl, prepared.file, {
+        const request = new HttpRequest('PUT', init.uploadUrl, file, {
           headers,
           reportProgress: true,
           responseType: 'text',

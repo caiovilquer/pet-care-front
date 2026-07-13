@@ -1,249 +1,283 @@
-import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
-import { MatDialogModule, MatDialog } from '@angular/material/dialog';
-import { PetAvatarComponent } from '../../shared/components/ui/pet-avatar.component';
-import { EmptyStateComponent } from '../../shared/components/ui/empty-state.component';
-import { SkeletonComponent } from '../../shared/components/ui/skeleton.component';
-import { ToastService } from '../../core/services/toast.service';
-import { PetService } from '../../core/services/pet.service';
-import { CareService } from '../../core/services/care.service';
-import { UserStateService } from '../../core/services/user-state.service';
-import { DateTimeService } from '../../core/services/datetime.service';
-import { Pet } from '../../core/models/pet.model';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { CareOccurrence } from '../../core/models/care.model';
+import {
+  HEALTH_MEASUREMENT_META,
+  HEALTH_RECORD_META,
+  HealthAttachment,
+  HealthMeasurement,
+  HealthMeasurementType,
+  HealthRecord,
+  HealthRecordType
+} from '../../core/models/health.model';
+import { Pet } from '../../core/models/pet.model';
+import { ApiErrorService } from '../../core/services/api-error.service';
+import { CareService } from '../../core/services/care.service';
+import { DateTimeService } from '../../core/services/datetime.service';
+import { HealthService } from '../../core/services/health.service';
+import { MediaService } from '../../core/services/media.service';
+import { PetService } from '../../core/services/pet.service';
+import { ToastService } from '../../core/services/toast.service';
+import { UserStateService } from '../../core/services/user-state.service';
+import { HealthMeasurementChartComponent } from '../health/health-measurement-chart.component';
+import { HealthMeasurementFormComponent } from '../health/health-measurement-form.component';
+import { HealthRecordFormComponent } from '../health/health-record-form.component';
+import { ConfirmDialogComponent } from '../../shared/components/ui/confirm-dialog.component';
+import { EmptyStateComponent } from '../../shared/components/ui/empty-state.component';
+import { PetAvatarComponent } from '../../shared/components/ui/pet-avatar.component';
+import { SkeletonComponent } from '../../shared/components/ui/skeleton.component';
 import { PetFormComponent } from './pet-form.component';
+import { HouseholdService } from '../../core/services/household.service';
+
+type QuickAction = { label: string; helper: string; icon: string; recordType?: HealthRecordType; measurementType?: HealthMeasurementType };
 
 @Component({
   selector: 'app-pet-detail',
   standalone: true,
   imports: [
-    CommonModule,
-    MatButtonModule,
-    MatIconModule,
-    MatDialogModule,
-    PetAvatarComponent,
-    EmptyStateComponent,
-    SkeletonComponent
+    CommonModule, MatButtonModule, MatDialogModule, MatIconModule, MatMenuModule,
+    MatProgressSpinnerModule, MatTooltipModule, PetAvatarComponent, EmptyStateComponent,
+    SkeletonComponent, HealthMeasurementChartComponent
   ],
   templateUrl: './pet-detail.component.html',
   styleUrls: ['./pet-detail.component.css']
 })
 export class PetDetailComponent implements OnInit {
+  readonly recordMeta = HEALTH_RECORD_META;
+  readonly measurementMeta = HEALTH_MEASUREMENT_META;
+  readonly recordTypes = Object.keys(HEALTH_RECORD_META) as HealthRecordType[];
+  readonly measurementTypes = Object.keys(HEALTH_MEASUREMENT_META) as HealthMeasurementType[];
+  readonly quickActions: QuickAction[] = [
+    { label: 'Vacina', helper: 'Produto e lote', icon: 'vaccines', recordType: 'VACCINE' },
+    { label: 'Medicamento', helper: 'Dose administrada', icon: 'medication', recordType: 'MEDICATION' },
+    { label: 'Consulta', helper: 'Atendimento e custo', icon: 'local_hospital', recordType: 'CONSULTATION' },
+    { label: 'Exame', helper: 'Resultado e arquivo', icon: 'biotech', recordType: 'EXAM' },
+    { label: 'Sintoma', helper: 'Sinal observado', icon: 'sick', recordType: 'SYMPTOM' },
+    { label: 'Peso', helper: 'Acompanhar evolução', icon: 'monitor_weight', measurementType: 'WEIGHT' },
+    { label: 'Cuidado diário', helper: 'Banho, alimentação…', icon: 'favorite', recordType: 'DAILY_CARE' }
+  ];
+
   pet: Pet | null = null;
   recentEvents: CareOccurrence[] = [];
+  records: HealthRecord[] = [];
+  measurements: HealthMeasurement[] = [];
+  petId = 0;
   isLoading = true;
-  petId: number = 0;
+  isLoadingRecords = true;
+  isLoadingMeasurements = true;
+  isLoadingMore = false;
+  recordPage = 0;
+  recordTotal = 0;
+  recordFilter: HealthRecordType | null = null;
+  selectedMeasurementType: HealthMeasurementType = 'WEIGHT';
+  canManagePet = false;
+  canRecordHealth = false;
 
   constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private petService: PetService,
-    private careService: CareService,
-    private dateTimeService: DateTimeService,
-    private dialog: MatDialog,
-    private toast: ToastService,
-    private userStateService: UserStateService
-  ) { }
+    private readonly route: ActivatedRoute,
+    private readonly router: Router,
+    private readonly petService: PetService,
+    private readonly careService: CareService,
+    private readonly health: HealthService,
+    private readonly media: MediaService,
+    private readonly dateTime: DateTimeService,
+    private readonly dialog: MatDialog,
+    private readonly toast: ToastService,
+    private readonly apiError: ApiErrorService,
+    private readonly userState: UserStateService,
+    private readonly householdService: HouseholdService,
+  ) {}
 
   ngOnInit(): void {
+    this.householdService.current$.subscribe(item => {
+      this.canManagePet = item?.role === 'OWNER';
+      this.canRecordHealth = !!item && item.role !== 'VIEWER';
+    });
     this.route.paramMap.subscribe(params => {
-      const id = params.get('id');
-      if (id) {
-        this.petId = +id;
-        this.loadPetDetails();
-        this.loadRecentEvents();
-      } else {
-        this.router.navigate(['/pets']);
-      }
+      const rawId = Number(params.get('id'));
+      if (!Number.isSafeInteger(rawId) || rawId <= 0) { void this.router.navigate(['/pets']); return; }
+      this.petId = rawId;
+      this.loadPetDetails();
+      this.loadRecentEvents();
+      this.loadRecords(true);
+      this.loadMeasurements();
     });
   }
 
-  private loadPetDetails(): void {
-    this.petService.getByIdCached(this.petId).subscribe({
-      next: (pet) => {
-        this.pet = pet;
-        this.isLoading = false;
-  
+  goBack(): void { void this.router.navigate(['/pets']); }
+  viewAllEvents(): void { void this.router.navigate(['/events/pet', this.petId]); }
+
+  editPet(): void {
+    if (!this.pet) return;
+    this.dialog.open(PetFormComponent, {
+      width: '420px',
+      data: { id: this.pet.id, name: this.pet.name, species: this.pet.species, breed: this.pet.breed, birthdate: this.pet.birthdate }
+    }).afterClosed().subscribe(result => {
+      if (!result) return;
+      this.loadPetDetails();
+      this.toast.success('Pet atualizado com sucesso!');
+      this.userState.notifyUserUpdated();
+    });
+  }
+
+  runQuickAction(action: QuickAction): void {
+    if (action.measurementType) this.openMeasurement(action.measurementType);
+    else this.openRecord(action.recordType);
+  }
+
+  openRecord(type?: HealthRecordType, record?: HealthRecord): void {
+    if (!this.pet) return;
+    this.dialog.open(HealthRecordFormComponent, {
+      width: '800px', maxWidth: '98vw', autoFocus: false, restoreFocus: true,
+      data: { petId: this.petId, petName: this.pet.name, type, record }
+    }).afterClosed().subscribe(saved => { if (saved) this.loadRecords(true); });
+  }
+
+  openMeasurement(type?: HealthMeasurementType, measurement?: HealthMeasurement): void {
+    if (!this.pet) return;
+    this.dialog.open(HealthMeasurementFormComponent, {
+      width: '640px', maxWidth: '98vw', autoFocus: false, restoreFocus: true,
+      data: { petId: this.petId, petName: this.pet.name, type, measurement }
+    }).afterClosed().subscribe(saved => { if (saved) this.loadMeasurements(); });
+  }
+
+  filterRecords(type: HealthRecordType | null): void {
+    if (this.recordFilter === type) return;
+    this.recordFilter = type;
+    this.loadRecords(true);
+  }
+
+  selectMeasurementType(type: HealthMeasurementType): void { this.selectedMeasurementType = type; }
+  filteredMeasurements(): HealthMeasurement[] { return this.measurements.filter(item => item.type === this.selectedMeasurementType); }
+
+  loadMoreRecords(): void { this.recordPage += 1; this.loadRecords(false); }
+
+  confirmDeleteRecord(record: HealthRecord): void {
+    this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Excluir registro clínico?',
+        message: `“${record.title}” e seus anexos serão removidos da linha do tempo. Esta ação não pode ser desfeita.`,
+        confirmLabel: 'Excluir registro', danger: true
+      }
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.health.deleteRecord(record).subscribe({
+        next: () => { this.toast.success('Registro excluído.'); this.loadRecords(true); },
+        error: error => this.toast.error(this.apiError.message(error, 'Não foi possível excluir o registro.'))
+      });
+    });
+  }
+
+  confirmDeleteMeasurement(measurement: HealthMeasurement): void {
+    this.dialog.open(ConfirmDialogComponent, {
+      data: { title: 'Excluir medição?', message: 'Este ponto será removido da evolução de saúde.', confirmLabel: 'Excluir medição', danger: true }
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.health.deleteMeasurement(measurement).subscribe({
+        next: () => { this.toast.success('Medição excluída.'); this.loadMeasurements(); },
+        error: error => this.toast.error(this.apiError.message(error, 'Não foi possível excluir a medição.'))
+      });
+    });
+  }
+
+  downloadAttachment(attachment: HealthAttachment): void {
+    this.health.attachmentDownloadUrl(attachment.contentUrl).subscribe({
+      next: result => {
+        const anchor = document.createElement('a');
+        anchor.href = result.url; anchor.target = '_blank'; anchor.rel = 'noopener noreferrer';
+        document.body.appendChild(anchor); anchor.click(); anchor.remove();
       },
-      error: (err) => {
+      error: error => this.toast.error(this.apiError.message(error, 'Não foi possível abrir este anexo.'))
+    });
+  }
+
+  confirmDeleteAttachment(record: HealthRecord, attachment: HealthAttachment): void {
+    this.dialog.open(ConfirmDialogComponent, {
+      data: { title: 'Remover anexo?', message: `O arquivo “${attachment.filename}” será removido com segurança.`, confirmLabel: 'Remover arquivo', danger: true }
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.media.delete(attachment.mediaAssetId).subscribe({
+        next: () => { this.toast.success('Anexo removido.'); this.loadRecords(true); },
+        error: error => this.toast.error(this.apiError.message(error, 'Não foi possível remover o anexo.'))
+      });
+    });
+  }
+
+  formatDate(value: string): string { return this.dateTime.formatForDisplay(value); }
+  formatDateTime(value: string): string {
+    return new Date(value).toLocaleString('pt-BR', { dateStyle: 'medium', timeStyle: 'short' });
+  }
+  formatMoney(record: HealthRecord): string {
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: record.currency || 'BRL' }).format(record.costAmount || 0);
+  }
+  formatBytes(bytes: number): string { return bytes >= 1048576 ? `${(bytes / 1048576).toFixed(1)} MB` : `${Math.ceil(bytes / 1024)} KB`; }
+  getAgeDisplay(birthDate: string): string {
+    const birth = new Date(`${birthDate}T12:00:00`); const now = new Date();
+    let months = (now.getFullYear() - birth.getFullYear()) * 12 + now.getMonth() - birth.getMonth();
+    if (now.getDate() < birth.getDate()) months -= 1;
+    return months >= 24 ? `${Math.floor(months / 12)} anos` : `${Math.max(0, months)} ${months === 1 ? 'mês' : 'meses'}`;
+  }
+  eventIcon(type: string): string {
+    return ({ VACCINE: 'vaccines', MEDICINE: 'medication', DIARY: 'book', BREED: 'favorite', SERVICE: 'content_cut' } as Record<string, string>)[type] || 'event';
+  }
+  eventStatus(event: CareOccurrence): string {
+    if (event.status === 'COMPLETED') return 'Concluído';
+    return new Date(event.dueAt) < new Date() ? 'Atrasado' : 'Pendente';
+  }
+
+  private loadPetDetails(): void {
+    this.isLoading = true;
+    this.petService.getByIdCached(this.petId).subscribe({
+      next: pet => { this.pet = pet; this.isLoading = false; },
+      error: error => {
         this.isLoading = false;
-        if (err.status === 404) {
-          this.router.navigate(['/pets']);
-        }
+        if (error.status === 404) void this.router.navigate(['/pets']);
+        else this.toast.error(this.apiError.message(error, 'Não foi possível carregar este pet.'));
       }
     });
   }
 
   private loadRecentEvents(): void {
-    const now = new Date();
-    const from = new Date(now); from.setDate(from.getDate() - 180);
+    const now = new Date(); const from = new Date(now); from.setDate(from.getDate() - 30);
     const to = new Date(now); to.setDate(to.getDate() + 90);
     this.careService.search({
-      from: this.dateTimeService.formatDateTimeForAPIWithoutTimezone(from),
-      to: this.dateTimeService.formatDateTimeForAPIWithoutTimezone(to),
-      petId: this.petId, page: 0, size: 100
+      from: this.dateTime.formatDateTimeForAPIWithoutTimezone(from),
+      to: this.dateTime.formatDateTimeForAPIWithoutTimezone(to), petId: this.petId, page: 0, size: 20
     }).subscribe({
-      next: (page) => {
-        this.recentEvents = page.items
-          .sort((a, b) => new Date(b.dueAt).getTime() - new Date(a.dueAt).getTime())
-          .slice(0, 5);
-  
+      next: page => this.recentEvents = page.items.sort((a, b) => new Date(a.dueAt).getTime() - new Date(b.dueAt).getTime()).slice(0, 4),
+      error: () => this.recentEvents = []
+    });
+  }
+
+  private loadRecords(reset: boolean): void {
+    if (reset) { this.recordPage = 0; this.isLoadingRecords = true; } else this.isLoadingMore = true;
+    this.health.listRecords(this.petId, this.recordPage, 12, this.recordFilter || undefined).subscribe({
+      next: page => {
+        this.records = reset ? page.items : [...this.records, ...page.items];
+        this.recordTotal = page.total; this.isLoadingRecords = false; this.isLoadingMore = false;
       },
-      error: (err) => {
-  
+      error: error => {
+        this.isLoadingRecords = false; this.isLoadingMore = false;
+        this.toast.error(this.apiError.message(error, 'Não foi possível carregar a linha do tempo de saúde.'));
       }
     });
   }
 
-  goBack(): void {
-    this.router.navigate(['/pets']);
-  }
-
-  editPet(): void {
-    if (this.pet) {
-      const dialogRef = this.dialog.open(PetFormComponent, {
-        width: '400px',
-        data: {
-          id: this.pet.id,
-          name: this.pet.name,
-          species: this.pet.species,
-          breed: this.pet.breed,
-          birthdate: this.pet.birthdate
-        }
-      });
-
-      dialogRef.afterClosed().subscribe(result => {
-        if (result) {
-          // Recarregar os dados do pet após edição
-          this.loadPetDetails();
-          this.toast.success('Pet atualizado com sucesso!');
-          this.userStateService.notifyUserUpdated();
-        }
-      });
-    }
-  }
-
-  viewAllEvents(): void {
-    this.router.navigate(['/events/pet', this.petId]);
-  }
-
-  formatDate(dateString: string): string {
-    if (!dateString) return 'N/A';
-    return this.dateTimeService.formatForDisplay(dateString); // FIX: usar serviço centralizado
-  }
-
-  getGenderDisplay(gender: string): string {
-    return gender === 'MALE' ? 'Macho' : 'Fêmea';
-  }
-
-  getAgeDisplay(birthDate: string): string {
-    if (!birthDate) return 'N/A';
-    
-    const birth = new Date(birthDate);
-    const today = new Date();
-    const ageInMs = today.getTime() - birth.getTime();
-    const ageInYears = Math.floor(ageInMs / (1000 * 60 * 60 * 24 * 365.25));
-    const ageInMonths = Math.floor((ageInMs % (1000 * 60 * 60 * 24 * 365.25)) / (1000 * 60 * 60 * 24 * 30.44));
-    
-    if (ageInYears > 0) {
-      return `${ageInYears} ano${ageInYears > 1 ? 's' : ''}`;
-    } else {
-      return `${ageInMonths} mês${ageInMonths > 1 ? 'es' : ''}`;
-    }
-  }
-
-  getEventIcon(type: string): string {
-    const icons: { [key: string]: string } = {
-      'VACCINE': 'vaccines',
-      'MEDICINE': 'medication',
-      'DIARY': 'book',
-      'BREED': 'favorite',
-      'SERVICE': 'content_cut'
-    };
-    return icons[type] || 'event';
-  }
-
-  getEventTypeName(type: string): string {
-    const names: { [key: string]: string } = {
-      'VACCINE': 'Vacina',
-      'MEDICINE': 'Remédio',
-      'DIARY': 'Diário',
-      'BREED': 'Cio',
-      'SERVICE': 'Serviço'
-    };
-    return names[type] || 'Evento';
-  }
-
-  formatEventDate(dateString: string): string {
-    if (!dateString) return 'N/A';
-    return this.dateTimeService.formatDateTimeForDisplay(dateString); // FIX: usar serviço centralizado
-  }
-
-  getEventStatus(dateStart: string, status: string): string {
-    if (status === 'COMPLETED') {
-      return 'Concluído';
-    }
-    const now = new Date();
-    const eventDate = this.dateTimeService.parseAPIDate(dateStart); // FIX: usar parsing seguro
-    if (!eventDate) return 'Desconhecido';
-    if (eventDate < now) {
-      return 'Atrasado';
-    }
-    return 'Pendente';
-  }
-
-  getStatusChipClass(dateStart: string, status: string): string {
-    if (status === 'COMPLETED') {
-      return 'status-done';
-    }
-    const now = new Date();
-    const eventDate = this.dateTimeService.parseAPIDate(dateStart); // FIX: usar parsing seguro
-    if (!eventDate || eventDate < now) {
-      return 'status-overdue';
-    }
-    return 'status-pending';
-  }
-
-  getDefaultPetImage(species: string): string {
-    const specieIcons: { [key: string]: string } = {
-      'Cão': '🐕',
-      'Gato': '🐱',
-      'Pássaro': '🐦',
-      'Peixe': '🐠',
-      'Hamster': '🐹',
-      'Coelho': '🐰'
-    };
-    return specieIcons[species] || '🐾';
-  }
-
-  onImageError(event: any): void {
-    // Substituir a imagem por um canvas com emoji quando falhar
-    const img = event.target;
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    if (ctx && this.pet) {
-      canvas.width = 300;
-      canvas.height = 300;
-      
-      // Background gradient
-      const gradient = ctx.createLinearGradient(0, 0, 300, 300);
-      gradient.addColorStop(0, '#f3f4f6');
-      gradient.addColorStop(1, '#e5e7eb');
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, 300, 300);
-      
-      // Emoji
-      ctx.font = '120px Arial';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillStyle = '#374151';
-      ctx.fillText(this.getDefaultPetImage(this.pet.species), 150, 150);
-      
-      img.src = canvas.toDataURL();
-      img.classList.add('fallback-image');
-    }
+  private loadMeasurements(): void {
+    this.isLoadingMeasurements = true;
+    this.health.listMeasurements(this.petId).subscribe({
+      next: items => { this.measurements = items; this.isLoadingMeasurements = false; },
+      error: error => {
+        this.isLoadingMeasurements = false;
+        this.toast.error(this.apiError.message(error, 'Não foi possível carregar as medições.'));
+      }
+    });
   }
 }

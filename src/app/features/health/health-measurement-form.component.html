@@ -1,0 +1,53 @@
+<header class="form-header">
+  <p class="q-overline">Acompanhar {{ data.petName }}</p>
+  <h2 mat-dialog-title>{{ isEdit ? 'Editar medição' : 'Nova medição' }}</h2>
+  <p>Registros consistentes ajudam a perceber mudanças antes que elas passem despercebidas.</p>
+</header>
+
+<mat-dialog-content>
+  <form id="measurement-form" [formGroup]="form" (ngSubmit)="submit()">
+    <fieldset>
+      <legend>O que foi medido?</legend>
+      <div class="type-grid" role="radiogroup">
+        @for (type of types; track type) {
+          <button type="button" [class.selected]="selectedType === type" [disabled]="isEdit"
+                  [attr.aria-pressed]="selectedType === type" (click)="selectType(type)">
+            <mat-icon>{{ meta[type].icon }}</mat-icon><span>{{ meta[type].label }}</span>
+          </button>
+        }
+      </div>
+      @if (isEdit) { <p class="locked-hint"><mat-icon>lock</mat-icon>O tipo não muda para preservar a série histórica.</p> }
+    </fieldset>
+
+    <div class="measurement-input">
+      <mat-form-field appearance="outline">
+        <mat-label>{{ meta[selectedType].label }}</mat-label>
+        <input matInput type="number" inputmode="decimal" formControlName="value"
+               [min]="min" [max]="max" [step]="step" required autofocus>
+        <span matTextSuffix>&nbsp;{{ meta[selectedType].shortUnit }}</span>
+        <mat-hint>{{ selectedType === 'BODY_CONDITION_SCORE' ? 'Escala de 1 (muito magro) a 9 (obeso)' : 'Faixa aceita: ' + min + ' a ' + max }}</mat-hint>
+        <mat-error>Use um valor entre {{ min }} e {{ max }}{{ selectedType === 'BODY_CONDITION_SCORE' ? ', sem decimais' : '' }}</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Data e hora</mat-label>
+        <input matInput type="datetime-local" formControlName="measuredAt" required>
+        <mat-error>Informe quando foi medido</mat-error>
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Contexto (opcional)</mat-label>
+      <textarea matInput formControlName="notes" rows="2" maxlength="500"
+                placeholder="Ex.: em jejum, após passeio, medido na clínica"></textarea>
+      <mat-hint align="end">{{ form.controls.notes.value?.length || 0 }}/500</mat-hint>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="dialogRef.close(false)" [disabled]="isSaving">Cancelar</button>
+  <button mat-flat-button type="submit" form="measurement-form" [disabled]="isSaving">
+    @if (isSaving) { <mat-spinner diameter="18"></mat-spinner> }
+    {{ isSaving ? 'Salvando…' : 'Salvar medição' }}
+  </button>
+</mat-dialog-actions>
