@@ -47,7 +47,7 @@
         </button>
 
         <div class="auth-links">
-          <a routerLink="/auth/forgot-password" mat-button>
+          <a routerLink="/auth/forgot-password" [queryParams]="returnUrl ? { returnUrl: returnUrl } : null" mat-button>
             Esqueci minha senha
           </a>
         </div>
@@ -55,7 +55,7 @@
 
       <p class="auth-footer">
         Não tem uma conta?
-        <a routerLink="/auth/signup">Cadastre-se</a>
+        <a routerLink="/auth/signup" [queryParams]="returnUrl ? { returnUrl: returnUrl } : null">Cadastre-se</a>
       </p>
     </div>
   </div>

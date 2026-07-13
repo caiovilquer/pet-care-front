@@ -6,12 +6,13 @@
 .role-badge mat-icon { width: 19px; height: 19px; font-size: 19px; }
 .loading { min-height: 45vh; display: grid; place-content: center; justify-items: center; gap: 12px; color: var(--q-text-2); }
 
-.family-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(300px, .85fr); gap: 32px 42px; align-items: start; }
+/* Colunas independentes: cada uma flui sozinha, sem acoplar alturas de linha
+   (senão a "Atividade recente" desce até onde termina o cartão de convites) */
+.family-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(300px, .85fr); gap: 42px; align-items: start; }
+.family-col { min-width: 0; display: flex; flex-direction: column; gap: 32px; }
 .panel { padding: 0 0 28px; border-bottom: 1px solid var(--q-border); }
 .panel h2 { margin: 5px 0 16px; }
-.members-panel, .activity-panel { grid-column: 1; }
-.invite-panel, .handoff-panel { grid-column: 2; }
-.invite-panel { grid-row: 1; padding: 24px; border: 1px solid var(--q-border); border-radius: 22px; background: var(--q-surface); }
+.invite-panel { padding: 24px; border: 1px solid var(--q-border); border-radius: 22px; background: var(--q-surface); }
 .handoff-panel { padding: 24px; border: 1px solid var(--q-border); border-radius: 22px; background: var(--q-green-50); }
 .member-list { display: grid; }
 .member-row { min-height: 68px; display: flex; align-items: center; gap: 12px; padding: 13px 0; border-bottom: 1px solid var(--q-border); }
@@ -22,6 +23,10 @@
 .role-select { width: 150px; }
 .role-small { color: var(--q-text-2); font-size: .8rem; }
 .invite-panel form, .handoff-panel form { display: grid; gap: 14px; margin-top: 16px; }
+.owner-access-note { display: flex; align-items: flex-start; gap: 10px; margin-top: -4px; padding: 12px 14px; border: 1px solid var(--q-green-100); border-radius: 14px; background: var(--q-green-50); color: var(--q-green-700); }
+.owner-access-note mat-icon { width: 20px; height: 20px; flex: none; font-size: 20px; }
+.owner-access-note p { margin: 0; color: var(--q-text-2); font-size: .78rem; line-height: 1.45; }
+.owner-access-note strong { color: var(--q-green-700); }
 .pending { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--q-border); }
 .pending h3 { font-size: .9rem; }
 .pending > div { display: flex; align-items: center; justify-content: space-between; }
@@ -37,8 +42,13 @@
 
 @media (max-width: 800px) {
   .family-hero { align-items: start; flex-direction: column; margin-bottom: 28px; }
-  .family-grid { grid-template-columns: 1fr; gap: 28px; }
-  .members-panel, .activity-panel, .invite-panel, .handoff-panel { grid-column: 1; grid-row: auto; }
+  /* Empilha os painéis na ordem de uso: pessoas → convite → passagem → atividade */
+  .family-grid { display: flex; flex-direction: column; gap: 28px; }
+  .family-col { display: contents; }
+  .members-panel { order: 1; }
+  .invite-panel { order: 2; }
+  .handoff-panel { order: 3; }
+  .activity-panel { order: 4; }
   .member-row { flex-wrap: wrap; }
   .role-select { margin-left: 56px; flex: 1; }
 }

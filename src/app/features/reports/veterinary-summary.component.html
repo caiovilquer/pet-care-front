@@ -1,16 +1,20 @@
 <header class="summary-toolbar no-print"><div><p class="q-overline">Consulta sem informação espalhada</p><h2>Resumo veterinário</h2><p>Organize fatos do período; o RotinaPet não interpreta sintomas nem substitui avaliação profissional.</p></div><div class="toolbar-actions"><button mat-stroked-button (click)="print()" [disabled]="!summary"><mat-icon>print</mat-icon>Imprimir ou salvar PDF</button></div></header>
-<rp-hint class="no-print" storageKey="resumo-consulta" icon="school">
+<rp-hint class="no-print" storageKey="resumo-consulta" icon="school" collapsedLabel="Como usar este resumo?">
   <strong>Leve este resumo para a consulta:</strong> escolha o pet e o período, e o RotinaPet reúne o histórico,
   as medições e a adesão aos cuidados. Você pode imprimir, salvar em PDF ou criar um link temporário
   somente leitura para enviar ao veterinário.
 </rp-hint>
 
-<div class="filters no-print"><mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-label>Pet</mat-label><mat-select [(value)]="selectedPetId" (selectionChange)="load()">@for (pet of pets; track pet.id) { <mat-option [value]="pet.id">{{ pet.name }}</mat-option> }</mat-select></mat-form-field><mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-label>Período</mat-label><mat-select [(value)]="selectedMonths" (selectionChange)="load()"><mat-option [value]="3">Últimos 3 meses</mat-option><mat-option [value]="6">Últimos 6 meses</mat-option><mat-option [value]="12">Últimos 12 meses</mat-option></mat-select></mat-form-field></div>
+<div class="filters no-print"><mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-label>Pet</mat-label><mat-select [(value)]="selectedPetId" (selectionChange)="load()">@for (pet of pets; track pet.id) { <mat-option [value]="pet.id">{{ pet.name }}</mat-option> }</mat-select></mat-form-field><mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-label>Período</mat-label><mat-select [(value)]="selectedMonths" (selectionChange)="load()"><mat-option [value]="3">3 meses</mat-option><mat-option [value]="6">6 meses</mat-option><mat-option [value]="12">12 meses</mat-option></mat-select></mat-form-field></div>
 
 @if (loading) { <div class="loading" role="status"><mat-spinner diameter="34"></mat-spinner><span>Reunindo histórico, medições e adesão…</span></div> }
 @else if (!summary) { <section class="empty"><mat-icon>pets</mat-icon><h3>Cadastre um pet para gerar o resumo</h3></section> }
 @else {
   <article class="report" aria-labelledby="report-pet-name">
+    <div class="print-brand print-only" aria-hidden="true">
+      <span class="pb-wordmark">rotina<b>pet</b><i></i></span>
+      <span class="pb-kicker">Resumo veterinário · preparado para consulta</span>
+    </div>
     <header class="pet-cover"><rp-pet-avatar [name]="summary.pet.name" [species]="summary.pet.species" [photoUrl]="selectedPet?.photoUrl" size="lg" [seed]="summary.pet.id"></rp-pet-avatar><div><p class="q-overline">Resumo de {{ date(summary.from) }} a {{ date(summary.to) }}</p><h3 id="report-pet-name">{{ summary.pet.name }}</h3><p>{{ summary.pet.species }} @if (summary.pet.breed) { · {{ summary.pet.breed }} } @if (summary.pet.birthdate) { · nasceu em {{ date(summary.pet.birthdate) }} }</p></div><span class="generated">Gerado em {{ dateTime(summary.generatedAt) }}</span></header>
     @if (summary.truncated) { <p class="warning"><mat-icon>info</mat-icon>O período possui muitos registros. Reduza o intervalo para uma versão completa.</p> }
     <section class="adherence" aria-labelledby="adherence-title"><div class="section-title"><p class="q-overline">Agenda no período</p><h3 id="adherence-title">Adesão aos cuidados</h3></div><div class="stat-grid"><article class="rate"><strong>{{ summary.adherence.adherencePercent == null ? '—' : summary.adherence.adherencePercent + '%' }}</strong><span>concluídos entre cuidados vencidos</span></article><article><strong>{{ summary.adherence.completed }}</strong><span>concluídos</span></article><article class="overdue"><strong>{{ summary.adherence.overdue }}</strong><span>atrasados</span></article><article><strong>{{ summary.adherence.upcoming }}</strong><span>futuros no período</span></article></div></section>

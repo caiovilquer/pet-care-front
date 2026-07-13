@@ -1,0 +1,179 @@
+<section id="quem-cuida" class="family-section chapter" aria-labelledby="family-title">
+  <div class="family-shell">
+    <header class="family-intro u-reveal" #revealEl>
+      <p class="section-kicker section-kicker-light">02 · Quem cuida junto</p>
+      <h2 id="family-title">O pet é da família.<br>A rotina também.</h2>
+      <p>
+        Convide outros proprietários, cuidadores ou alguém que só precisa acompanhar.
+        Cada pessoa entende seu papel — e todo mundo enxerga o que já aconteceu.
+      </p>
+      <span class="owners-highlight">
+        <span class="material-icons" aria-hidden="true">groups</span>
+        Mais de um proprietário pode administrar a mesma família.
+      </span>
+    </header>
+
+    <div class="household-scene u-reveal" #revealEl aria-label="Exemplo de cuidado compartilhado na Casa da Pipoca">
+      <header>
+        <div><span class="scene-label">Família</span><h3>Casa da Pipoca</h3></div>
+        <span class="member-count">3 pessoas</span>
+      </header>
+      <div class="member-row">
+        <span class="member-avatar owner">AN</span>
+        <span><strong>Ana Ribeiro</strong><small>Proprietária</small></span>
+        <span class="member-state">Cuidou às 08:02</span>
+      </div>
+      <div class="member-row">
+        <span class="member-avatar owner alt">JO</span>
+        <span><strong>João Ribeiro</strong><small>Proprietário</small></span>
+        <span class="member-state">Passeio às 12:00</span>
+      </div>
+      <div class="member-row">
+        <span class="member-avatar caregiver">LI</span>
+        <span><strong>Lia</strong><small>Cuidadora</small></span>
+        <span class="member-state">Hoje à noite</span>
+      </div>
+      <blockquote class="handoff-note">
+        <span class="material-icons" aria-hidden="true">sync_alt</span>
+        <div>
+          <span>Passagem de turno · Ana para toda a família</span>
+          <p>“Pipoca comeu pouco hoje. Observar no jantar.”</p>
+        </div>
+      </blockquote>
+    </div>
+
+    <div class="role-grid">
+      @for (role of householdRoles; track role.title) {
+        <article class="role-card u-reveal" #revealEl>
+          <span class="role-icon"><span class="material-icons" aria-hidden="true">{{ role.icon }}</span></span>
+          <h3>{{ role.title }}</h3>
+          <p>{{ role.description }}</p>
+          <small>{{ role.detail }}</small>
+        </article>
+      }
+    </div>
+  </div>
+</section>
+
+<section id="saude" class="health-section chapter" aria-labelledby="health-title">
+  <div class="health-shell">
+    <div class="health-photo-wrap u-reveal" #revealEl>
+      <figure class="health-photo">
+        <img src="images/consulta.webp" alt="Pipoca em atendimento veterinário, apoiando a pata na mão da profissional" width="1100" height="880" loading="lazy" decoding="async">
+      </figure>
+      <span class="privacy-badge"><span class="material-icons" aria-hidden="true">lock</span> Privado por padrão</span>
+    </div>
+
+    <header class="health-intro u-reveal" #revealEl>
+      <p class="section-kicker">03 · A história de saúde</p>
+      <h2 id="health-title">Agenda para o que vem. História para o que ficou.</h2>
+      <p>
+        Registre vacinas, medicamentos, consultas, exames, sintomas e cuidados diários.
+        Acompanhe peso, temperatura e condição corporal, com fotos e PDFs no contexto certo.
+      </p>
+      <ul class="health-chips" aria-label="Informações de saúde disponíveis">
+        <li><span class="material-icons" aria-hidden="true">vaccines</span> Vacinas e medicamentos</li>
+        <li><span class="material-icons" aria-hidden="true">monitor_weight</span> Medições e evolução</li>
+        <li><span class="material-icons" aria-hidden="true">description</span> Exames e documentos</li>
+      </ul>
+    </header>
+
+    <article class="clinical-preview u-reveal" #revealEl>
+      <header>
+        <div><span class="preview-overline">Linha do tempo clínica</span><h3>História da Pipoca</h3></div>
+        <span class="clinical-period">Últimos 12 meses</span>
+      </header>
+      <div class="clinical-entry">
+        <span class="clinical-icon vaccine"><span class="material-icons" aria-hidden="true">vaccines</span></span>
+        <div><strong>Vacina V10</strong><small>12 jun · dose e lote registrados</small></div>
+        <span class="entry-file"><span class="material-icons" aria-hidden="true">attach_file</span> 1</span>
+      </div>
+      <div class="clinical-entry">
+        <span class="clinical-icon diary"><span class="material-icons" aria-hidden="true">monitor_weight</span></span>
+        <div><strong>Peso · 18,4 kg</strong><small>28 mai · evolução acompanhada</small></div>
+        <span class="trend">+0,2 kg</span>
+      </div>
+      <div class="clinical-entry">
+        <span class="clinical-icon medicine"><span class="material-icons" aria-hidden="true">medical_information</span></span>
+        <div><strong>Consulta de rotina</strong><small>03 abr · clínica e profissional</small></div>
+        <span class="entry-file"><span class="material-icons" aria-hidden="true">picture_as_pdf</span> 2</span>
+      </div>
+    </article>
+
+    <article class="vet-share u-reveal" #revealEl>
+      <span class="share-icon"><span class="material-icons" aria-hidden="true">ios_share</span></span>
+      <div class="share-copy">
+        <span class="preview-overline">Resumo para consulta</span>
+        <h3>O histórico chega pronto.</h3>
+        <p>Escolha o período e compartilhe só o necessário por um link temporário, somente leitura e revogável.</p>
+        <div class="share-tags">
+          <span><i class="material-icons" aria-hidden="true">schedule</i> Expira</span>
+          <span><i class="material-icons" aria-hidden="true">block</i> Pode ser revogado</span>
+          <span><i class="material-icons" aria-hidden="true">tune</i> Conteúdo escolhido por você</span>
+        </div>
+      </div>
+    </article>
+
+    <p class="health-disclaimer u-reveal" #revealEl>
+      <span class="material-icons" aria-hidden="true">info_outline</span>
+      O RotinaPet organiza informações e não substitui a avaliação veterinária.
+    </p>
+  </div>
+</section>
+
+<section id="planejamento" class="planning-section chapter" aria-labelledby="planning-title">
+  <div class="planning-shell">
+    <header class="planning-intro u-reveal" #revealEl>
+      <p class="section-kicker">04 · Planejamento</p>
+      <h2 id="planning-title">Veja o que custou. Antecipe o que vem.</h2>
+      <p>
+        Registre despesas por pet e categoria, compare o realizado com os próximos cuidados
+        e leve os dados para uma planilha quando quiser.
+      </p>
+      <span class="owner-only"><span class="material-icons" aria-hidden="true">shield</span> Finanças visíveis somente para proprietários</span>
+    </header>
+
+    <article class="finance-preview u-reveal" #revealEl aria-label="Exemplo de organização financeira por moeda">
+      <header>
+        <div><span class="preview-overline">Saúde e finanças</span><h3>Custos da rotina</h3></div>
+        <span class="material-icons finance-more" aria-hidden="true">more_horiz</span>
+      </header>
+      <div class="currency-tabs" aria-label="Moedas disponíveis">
+        <span class="active">BRL</span><span>USD</span><span>EUR</span><span>GBP</span>
+      </div>
+      <div class="money-grid">
+        <div><span>Realizado no período</span><strong>R$ 420,00</strong><small>Consultas, saúde e rotina</small></div>
+        <div><span>Previsto · 30 dias</span><strong>R$ 185,00</strong><small>Próximos cuidados planejados</small></div>
+      </div>
+      <div class="cost-bars" aria-hidden="true">
+        <span><i style="--bar-size: 82%"></i><b>Saúde</b></span>
+        <span><i style="--bar-size: 54%"></i><b>Alimentação</b></span>
+        <span><i style="--bar-size: 36%"></i><b>Serviços</b></span>
+      </div>
+      <footer>
+        <span><span class="material-icons" aria-hidden="true">table_view</span> Exportar CSV</span>
+        <small>Cada moeda fica separada, sem conversão automática.</small>
+      </footer>
+    </article>
+
+    <article class="nearby-card u-reveal" #revealEl>
+      <div class="nearby-copy">
+        <p class="section-kicker">05 · Por perto</p>
+        <h3>Quando o cuidado sai de casa, o bairro fica mais perto.</h3>
+        <p>Busque veterinários e petshops por CEP no Brasil, compare distância e avaliações públicas e abra a rota antes de sair.</p>
+        <a class="text-link" routerLink="/auth/signup">
+          Criar conta e buscar por perto
+          <span class="material-icons" aria-hidden="true">arrow_forward</span>
+        </a>
+      </div>
+      <div class="nearby-visual" aria-hidden="true">
+        <span class="map-road road-one"></span><span class="map-road road-two"></span>
+        <span class="map-block block-one"></span><span class="map-block block-two"></span><span class="map-block block-three"></span>
+        <span class="map-pin pin-main"><i class="material-icons">pets</i></span>
+        <span class="map-pin pin-small one"><i class="material-icons">local_hospital</i></span>
+        <span class="map-pin pin-small two"><i class="material-icons">storefront</i></span>
+        <span class="nearby-result"><i class="material-icons">near_me</i><b>1,2 km</b><small>abrir rota</small></span>
+      </div>
+    </article>
+  </div>
+</section>

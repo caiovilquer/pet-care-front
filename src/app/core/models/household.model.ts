@@ -8,6 +8,7 @@ export interface HouseholdMember {
   avatarAssetId?: string; role: HouseholdRole; joinedAt: string;
 }
 export interface HouseholdInvitation { id: string; email: string; role: HouseholdRole; expiresAt: string; createdAt: string; }
+export interface HouseholdInvitationPreview { householdName: string; inviterName: string; role: HouseholdRole; expiresAt: string; }
 export interface HouseholdActivity {
   id: string; type: string; actorName?: string; targetName?: string; petName?: string; summary: string; happenedAt: string;
 }

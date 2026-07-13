@@ -473,6 +473,32 @@ input:-webkit-autofill:focus {
 }
 
 /* ============================================================
+   Impressão — papel sempre claro, sem overlays
+   ============================================================ */
+/* Margens de impressão. Precisa ficar no CSS global (componentes Angular
+   descartam @page) e no nível raiz (aninhada em @media print alguns motores
+   a ignoram). Só tem efeito ao imprimir. */
+@page {
+  size: A4;
+  margin: 14mm 12mm;
+}
+
+@media print {
+  :root {
+    color-scheme: light !important; /* light-dark() resolve para os valores claros */
+  }
+
+  html,
+  body {
+    background: #fff !important;
+  }
+
+  .cdk-overlay-container {
+    display: none !important;
+  }
+}
+
+/* ============================================================
    Acessibilidade
    ============================================================ */
 @media (prefers-reduced-motion: reduce) {

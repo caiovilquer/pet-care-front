@@ -5,5 +5,43 @@
 .documents ul{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}.documents li{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--q-border);border-radius:13px}.documents li>mat-icon{color:var(--q-info)}.documents li span{display:grid;min-width:0;flex:1}.documents li strong{overflow:hidden;text-overflow:ellipsis}.documents li small,.muted{color:var(--q-text-2)}.report-note{padding:18px 24px;background:var(--q-surface-2);font-size:.75rem;color:var(--q-text-2);text-align:center}
 .share-panel{margin-top:20px;padding:24px;border:1px solid var(--q-border);border-radius:20px;background:var(--q-surface)}.share-intro{margin-bottom:18px}.share-intro h3{margin:0 0 4px}.share-intro p:last-child{color:var(--q-text-2)}.share-panel form{display:grid;gap:14px}.share-fields{display:grid;grid-template-columns:1fr 220px;gap:12px}.share-panel fieldset{display:flex;gap:20px;border:0;padding:0}.share-panel legend{font-size:.75rem;color:var(--q-text-2);margin-bottom:6px}.share-panel form>button{justify-self:start}.one-time{display:flex;gap:12px;align-items:center;margin-top:18px;padding:14px;border:1px solid var(--q-green-500);border-radius:14px;background:var(--q-green-50)}.one-time>div{display:grid;min-width:0;flex:1}.one-time code{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.7rem}.share-list{margin-top:20px}.share-list article{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:11px 0;border-top:1px solid var(--q-border)}.share-list article div{display:grid}.share-list small{color:var(--q-text-2)}.share-status{font-size:.68rem;padding:4px 8px;border-radius:99px;background:var(--q-surface-2)}.share-status.active{background:var(--q-green-50);color:var(--q-green-700)}
 @media(max-width:760px){.summary-toolbar{align-items:flex-start;flex-direction:column}.clinical-grid{grid-template-columns:1fr}.clinical-grid .section-card+section{border-left:0;border-top:1px solid var(--q-border)}.stat-grid{grid-template-columns:1fr 1fr}.pet-cover{align-items:flex-start;flex-wrap:wrap}.generated{width:100%;margin-left:0}.share-fields{grid-template-columns:1fr}.share-panel fieldset{display:grid;gap:6px}.one-time{align-items:flex-start;flex-wrap:wrap}.records li{grid-template-columns:75px 1fr}.records em{grid-column:2}}
-@media(max-width:480px){.filters{overflow:auto}.report{border-radius:16px}.pet-cover,.adherence,.section-card,.share-panel{padding:16px}.stat-grid{grid-template-columns:1fr 1fr}.toolbar-actions,.toolbar-actions button{width:100%}}
-@media print{.no-print{display:none!important}:host{color:#17221c}.report{box-shadow:none;border:0}.pet-cover{background:#f3f8f4!important}.section-card,.adherence{break-inside:avoid}.share-panel{display:none}.records li{break-inside:avoid}}
+@media(max-width:600px){.filters{display:grid;grid-template-columns:1fr 1fr}.filters mat-form-field{min-width:0;width:100%}}
+@media(max-width:480px){.report{border-radius:16px}.pet-cover,.adherence,.section-card,.share-panel{padding:16px}.stat-grid{grid-template-columns:1fr 1fr}.toolbar-actions,.toolbar-actions button{width:100%}}
+/* ---- impressão: documento A4 limpo, estilo relatório clínico ---- */
+.print-only{display:none}
+@media print{
+.no-print,rp-hint,.share-panel{display:none!important}
+:host{color:#1a241d;font-size:12px;line-height:1.45}
+.print-only.print-brand{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding-bottom:10px;border-bottom:2px solid #1b4033}
+.pb-wordmark{font:700 1.25rem var(--q-font-display);color:#17221c;letter-spacing:-.02em}
+.pb-wordmark b{color:#265949}
+.pb-wordmark i{display:inline-block;width:6px;height:6px;margin-left:3px;border-radius:50%;background:#dfa32e;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.pb-kicker{font-size:.66rem;font-weight:700;color:#5a6253;text-transform:uppercase;letter-spacing:.09em}
+.report{box-shadow:none;border:0;border-radius:0;overflow:visible;background:#fff}
+.pet-cover{padding:16px 0;background:none!important;gap:14px}
+.pet-cover h3{font-size:1.9rem;margin:1px 0}
+.generated{font-size:.68rem;align-self:center}
+.warning{margin:0 0 10px;padding:9px 12px;border:1px solid #e0c98e;background:none;color:#7a5a10;border-radius:8px}
+.adherence,.section-card{padding:14px 0;border-top:1px solid #dbe2dc;break-inside:avoid}
+.section-title{margin-bottom:10px}
+.section-title h3{font-size:1rem}
+.q-overline,.q-overline::before,.q-ev-chip,.stat-grid article{print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.stat-grid{gap:8px}
+.stat-grid article{padding:10px 12px;border:1px solid #e0e6e0;border-radius:10px;background:#fff}
+.stat-grid strong{font-size:1.25rem}
+.stat-grid .rate{background:#e9f2eb;color:#1b4033}
+.stat-grid .overdue{background:#f9ece8;color:#8c3325}
+.clinical-grid{border-top:1px solid #dbe2dc;gap:0 20px}
+.clinical-grid .section-card{border-top:0}
+.clinical-grid .section-card+section{border-left:1px solid #dbe2dc;padding-left:20px}
+.records li{grid-template-columns:96px 1fr auto;gap:10px;padding:8px 0;border-top:1px solid #e6ebe6;break-inside:avoid}
+.records time{white-space:nowrap}
+.records li:first-child{border-top:0}
+.records time,.records span,.records p{font-size:.7rem;color:#5a6253}
+.measurement-grid{gap:8px}
+.measurement-grid article{padding:9px 11px;border:1px solid #e0e6e0;border-radius:10px;break-inside:avoid}
+.documents ul{gap:6px}
+.documents li{padding:8px 10px;border:1px solid #e0e6e0;border-radius:10px;break-inside:avoid}
+.muted{font-size:.75rem}
+.report-note{margin-top:4px;padding:12px 0 0;border-top:1px solid #dbe2dc;background:none;text-align:left;font-size:.68rem}
+}

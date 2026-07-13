@@ -1,269 +1,135 @@
-<header
-  class="landing-topbar"
-  [class.is-scrolled]="topbarScrolled"
->
-  <nav class="topbar-nav" aria-label="Ações da página">
-    <div class="theme-segment" role="group" aria-label="Tema da interface">
-      <button
-        type="button"
-        class="theme-segment-btn"
-        [class.active]="!isDark"
-        [attr.aria-pressed]="!isDark"
-        (click)="setTheme('light')"
-      >
-        <svg class="theme-icon" viewBox="0 0 20 20" aria-hidden="true">
-          <circle cx="10" cy="10" r="4" fill="currentColor"/>
-          <path d="M10 1.5v2M10 16.5v2M1.5 10h2M16.5 10h2M3.6 3.6l1.4 1.4M15 15l1.4 1.4M3.6 16.4l1.4-1.4M15 5l1.4-1.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
-        <span class="theme-label">Claro</span>
-      </button>
-      <button
-        type="button"
-        class="theme-segment-btn"
-        [class.active]="isDark"
-        [attr.aria-pressed]="isDark"
-        (click)="setTheme('dark')"
-      >
-        <svg class="theme-icon" viewBox="0 0 20 20" aria-hidden="true">
-          <path d="M15.5 11.2a6.3 6.3 0 0 1-8.7-8.7 6.5 6.5 0 1 0 8.7 8.7Z" fill="currentColor"/>
-        </svg>
-        <span class="theme-label">Escuro</span>
-      </button>
-      <span class="theme-segment-indicator" [class.dark]="isDark" aria-hidden="true"></span>
-    </div>
+<a class="skip-link" href="#conteudo-principal">Pular para o conteúdo</a>
 
-    <a class="topbar-enter" routerLink="/auth/login">Entrar</a>
+<header class="landing-topbar" [class.is-scrolled]="topbarScrolled">
+  <nav class="topbar-nav" aria-label="Navegação principal">
+    <a class="topbar-brand" routerLink="/" aria-label="RotinaPet — início">
+      <img class="brand-light" src="logo-horizontal.svg" alt="RotinaPet">
+      <img class="brand-dark" src="logo-horizontal-reverso.svg" alt="RotinaPet">
+    </a>
+    <div class="topbar-links">
+      <a href="#como-funciona">Como funciona</a>
+      <a href="#quem-cuida">Quem cuida</a>
+      <a href="#saude">Saúde</a>
+      <a href="#planejamento">Planejamento</a>
+    </div>
+    <div class="topbar-actions">
+      <button
+        type="button"
+        class="theme-button"
+        (click)="toggleTheme()"
+        [attr.aria-label]="isDark ? 'Ativar tema claro' : 'Ativar tema escuro'"
+        [attr.title]="isDark ? 'Tema claro' : 'Tema escuro'"
+      >
+        <span class="material-icons" aria-hidden="true">{{ isDark ? 'light_mode' : 'dark_mode' }}</span>
+      </button>
+      <a class="topbar-login" routerLink="/auth/login">Entrar</a>
+      <a class="topbar-cta" routerLink="/auth/signup">
+        <span class="cta-desktop">Criar minha rotina</span>
+        <span class="cta-mobile">Começar</span>
+      </a>
+    </div>
   </nav>
 </header>
 
-<div class="landing">
-
-  <!-- ============ E1 — O Portão ============ -->
-  <section class="e1 u-reveal is-visible" #revealEl>
-    <img class="e1-logo logo-light" src="logo-completa.svg" alt="RotinaPet">
-    <img class="e1-logo logo-dark" src="logo-completa-reverso.svg" alt="RotinaPet">
-
-    <p class="manifesto">
-      A vida de um pet é feita de rotina.<br>
-      A rotina merece um lugar bonito.
-    </p>
-
-    <div class="e1-blob" aria-hidden="true"></div>
-  </section>
-
-  <div class="path-connector u-reveal" #revealEl aria-hidden="true">
-    <svg viewBox="0 0 60 140" class="path-svg"><path pathLength="100" d="M30 0 C 8 35, 52 70, 30 105 S 8 130, 30 140"/></svg>
-  </div>
-
-  <!-- ============ E2 — A Chegada ============ -->
-  <section class="e2">
-    <div class="e2-photo organic-1 u-reveal" #revealEl>
-      <img
-        class="landing-photo"
-        src="images/chegada.webp"
-        alt="Filhote vira-lata nos braços de quem a recebeu"
-        width="1000"
-        height="1250"
-        loading="lazy"
-        decoding="async"
-      >
-    </div>
-    <div class="e2-text u-reveal" #revealEl>
-      <p class="q-overline">01. A chegada</p>
-      <h2>Ela chegou pequena. Chegou com ela uma vida inteira de cuidados.</h2>
-      <p class="lede">
-        Vamos chamá-la de Pipoca. Uma vira-lata caramelo, como tantas que existem por aí,
-        que vai atravessar esta página do jeito que atravessa os dias: com rotina.
-      </p>
-    </div>
-
-    <button
-      type="button"
-      class="e2-continua u-reveal"
-      #revealEl
-      (click)="scrollToE3()"
-      aria-label="Continuar leitura: um dia no quintal"
-    >
-      <span class="e2-continua-label">Um dia no quintal</span>
-      <span class="e2-continua-trail" aria-hidden="true">
-        <svg class="e2-continua-path" viewBox="0 0 40 64">
-          <path pathLength="100" d="M20 2 C 8 18, 32 34, 20 50 S 8 58, 20 62"/>
-        </svg>
-        <svg class="e2-paw" viewBox="0 0 24 24"><path d="M12 17.5c-3.2 0-5.5-2-5.5-4.2 0-1.2 1-2.3 2.5-2.3.9 0 1.7.4 2.2 1 .5-.6 1.3-1 2.2-1 1.5 0 2.5 1.1 2.5 2.3 0 2.2-2.3 4.2-5.5 4.2Z"/><circle cx="7.5" cy="9" r="2.2"/><circle cx="12" cy="7" r="2.2"/><circle cx="16.5" cy="9" r="2.2"/></svg>
-        <svg class="e2-paw" viewBox="0 0 24 24"><path d="M12 17.5c-3.2 0-5.5-2-5.5-4.2 0-1.2 1-2.3 2.5-2.3.9 0 1.7.4 2.2 1 .5-.6 1.3-1 2.2-1 1.5 0 2.5 1.1 2.5 2.3 0 2.2-2.3 4.2-5.5 4.2Z"/><circle cx="7.5" cy="9" r="2.2"/><circle cx="12" cy="7" r="2.2"/><circle cx="16.5" cy="9" r="2.2"/></svg>
-        <svg class="e2-paw" viewBox="0 0 24 24"><path d="M12 17.5c-3.2 0-5.5-2-5.5-4.2 0-1.2 1-2.3 2.5-2.3.9 0 1.7.4 2.2 1 .5-.6 1.3-1 2.2-1 1.5 0 2.5 1.1 2.5 2.3 0 2.2-2.3 4.2-5.5 4.2Z"/><circle cx="7.5" cy="9" r="2.2"/><circle cx="12" cy="7" r="2.2"/><circle cx="16.5" cy="9" r="2.2"/></svg>
-      </span>
-    </button>
-  </section>
-
-  <!-- ============ E3 — Um Dia no Quintal ============ -->
-  <section class="e3" id="e3">
-    <p class="q-overline e3-overline u-reveal" #revealEl>02. Um dia no quintal</p>
-
-    <div class="momento momento-right u-reveal" #revealEl>
-      <p class="momento-frase">Às 8h, meio comprimido junto com a ração.</p>
-      <span class="q-ev-chip q-ev-medicine">Anti-inflamatório, hoje às 8h</span>
-    </div>
-
-    <div class="momento momento-left u-reveal" #revealEl>
-      <span class="q-ev-chip q-ev-service">Passeio no parque, 12h</span>
-      <p class="momento-frase">Ao meio-dia, a hora do passeio nunca muda, e a agenda lembra por ela.</p>
-    </div>
-
-    <div class="momento momento-right momento-foto u-reveal" #revealEl>
-      <div class="e3-photo organic-2">
-        <img
-          class="landing-photo"
-          src="images/consulta.webp"
-          alt="Cachorra na mesa de consulta veterinária"
-          width="1100"
-          height="880"
-          loading="lazy"
-          decoding="async"
-        >
-      </div>
-      <div class="momento-copy">
-        <p class="momento-frase">De tarde, a caderneta de vacina, sempre em dia.</p>
-        <span class="q-ev-chip q-ev-vaccine">V10, aplicada</span>
-      </div>
-    </div>
-
-    <div class="momento momento-left u-reveal" #revealEl>
-      <span class="q-ev-chip q-ev-diary">Comeu pouco hoje</span>
-      <p class="momento-frase">À noite, um registro rápido no diário, antes de dormir.</p>
-    </div>
-
-    <p class="e3-pergunta u-reveal" #revealEl>E quando é muita coisa pra lembrar?</p>
-  </section>
-
-  <div class="path-connector flip u-reveal" #revealEl aria-hidden="true">
-    <svg viewBox="0 0 60 140" class="path-svg"><path pathLength="100" d="M30 0 C 52 35, 8 70, 30 105 S 52 130, 30 140"/></svg>
-  </div>
-
-  <!-- ============ E4 — O Painel de Azulejos ============ -->
-  <section class="e4">
-    <p class="q-overline u-reveal" #revealEl>03. O quintal inteiro</p>
-
-    <div class="azulejos u-reveal" #revealEl>
-      @for (tile of tiles; track $index) {
-        <div
-          class="azulejo"
-          [class.span-2]="tile.span === 2"
-          [class.azulejo-empty]="tile.type === 'empty'"
-          [class.azulejo-rotated]="tile.rotated"
-          [ngClass]="'tile-' + tile.type"
-        >
-          @if (tile.label) {
-            <span>{{ tile.label }}</span>
-          }
+<main id="conteudo-principal" class="landing">
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-shell">
+      <div class="hero-copy u-reveal is-visible" #revealEl>
+        <p class="section-kicker">Cuidado compartilhado, do jeito que a vida acontece</p>
+        <h1 id="hero-title">A rotina do seu pet, <em>clara para todo mundo</em> que cuida.</h1>
+        <p class="hero-lede">
+          Planeje remédios, vacinas, consultas e outros cuidados. Organize saúde e custos,
+          acompanhe o que foi feito e divida responsabilidades com a família — em um só lugar.
+        </p>
+        <div class="hero-actions">
+          <a class="button button-primary" routerLink="/auth/signup">
+            Criar a rotina do meu pet
+            <span class="material-icons" aria-hidden="true">arrow_forward</span>
+          </a>
+          <a class="button button-secondary" href="#como-funciona">Ver como funciona</a>
         </div>
-      }
-    </div>
-
-    <p class="e4-frase u-reveal" #revealEl>Cada canto da rotina, com o seu lugar na parede.</p>
-  </section>
-
-  <!-- ============ E5 — A Pausa ============ -->
-  <section class="e5 u-reveal" #revealEl>
-    <div class="e5-photo" aria-hidden="true">
-      <img
-        class="landing-photo"
-        src="images/pausa.webp"
-        alt=""
-        width="1800"
-        height="1013"
-        loading="lazy"
-        decoding="async"
-      >
-    </div>
-    <p class="e5-frase">Cuidar também é descansar.</p>
-  </section>
-
-  <!-- ============ E6 — A Vida Inteira ============ -->
-  <section class="e6">
-    <p class="q-overline u-reveal" #revealEl>04. A vida inteira</p>
-    <div class="timeline">
-      <div class="timeline-line" aria-hidden="true"></div>
-      @for (point of lifePoints; track point.age) {
-        <div class="timeline-point u-reveal" [class]="'side-' + point.side" #revealEl>
-          <span class="timeline-dot" aria-hidden="true"></span>
-          @if (point.image) {
-            <div class="timeline-photo" [ngClass]="point.imageShape ?? 'organic-3'">
-              <img
-                class="landing-photo"
-                [src]="point.image"
-                [alt]="point.imageAlt ?? ''"
-                loading="lazy"
-                decoding="async"
-              >
-            </div>
-          }
-          <p class="timeline-age">{{ point.age }}</p>
-          <p class="timeline-text">{{ point.text }}</p>
-        </div>
-      }
-    </div>
-  </section>
-
-  <div class="path-connector u-reveal" #revealEl aria-hidden="true">
-    <svg viewBox="0 0 60 140" class="path-svg"><path pathLength="100" d="M30 0 C 8 35, 52 70, 30 105 S 8 130, 30 140"/></svg>
-  </div>
-
-  <!-- ============ E7 — Além do Portão ============ -->
-  <section class="e7">
-    <div class="e7-text u-reveal" #revealEl>
-      <p class="q-overline">05. Além do portão</p>
-      <h2>O quintal se estende pelo bairro.</h2>
-      <p class="lede">Petshops e veterinários por perto, sempre que ela precisar.</p>
-      <a class="cep-hint" routerLink="/auth/signup">Criar conta e buscar por perto →</a>
-    </div>
-
-    <div class="bairro u-reveal" #revealEl aria-hidden="true">
-      <span class="quarteirao q-organic-a"></span>
-      <span class="quarteirao q-organic-b"></span>
-      <span class="quarteirao q-organic-c"></span>
-      <span class="ponto ponto-1"></span>
-      <span class="ponto ponto-2"></span>
-      <span class="ponto ponto-3"></span>
-    </div>
-  </section>
-
-  <!-- ============ E8 — O Convite ============ -->
-  <section class="e8 u-reveal" #revealEl>
-    <img class="e8-logo" src="logo-completa-reverso.svg" alt="RotinaPet">
-    <h2 class="e8-headline">A Pipoca é inventada. O seu pet não.</h2>
-    <div class="e8-ctas">
-      <a class="cta-primary" routerLink="/auth/signup">Criar conta</a>
-      <a class="cta-secondary" routerLink="/auth/login">Entrar</a>
-    </div>
-
-    <footer class="e8-footer">
-      <div class="e8-footer-main">
-        <img class="footer-wordmark" src="logo-horizontal-reverso.svg" alt="RotinaPet">
-        <button class="theme-toggle" type="button" (click)="toggleTheme()">
-          {{ isDark ? 'Modo claro' : 'Modo escuro' }}
-        </button>
-      </div>
-      <div class="e8-footer-meta">
-        <span class="footer-legal">© {{ currentYear }} RotinaPet</span>
-        <p class="e8-credits">
-          Desenvolvido por
-          <a
-            class="e8-credit-link"
-            href="https://www.linkedin.com/in/caio-vilquer/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >Caio Vilquer Carvalho</a>
-          <span class="e8-credits-sep" aria-hidden="true">·</span>
-          <a
-            class="e8-credit-link"
-            href="https://vilquer.dev"
-            target="_blank"
-            rel="noopener noreferrer"
-          >Portfólio</a>
+        <p class="hero-note">
+          <span class="material-icons" aria-hidden="true">pets</span>
+          Comece pelo seu pet e monte o primeiro cuidado em poucos passos.
         </p>
       </div>
-    </footer>
+
+      <div class="hero-visual u-reveal is-visible" #revealEl aria-label="Exemplo da rotina da Pipoca no RotinaPet">
+        <div class="hero-halo" aria-hidden="true"></div>
+        <figure class="hero-photo">
+          <img src="images/chegada.webp" alt="Pipoca sentada em um quintal iluminado" width="1000" height="1250" fetchpriority="high" decoding="async">
+        </figure>
+        <article class="today-preview">
+          <header class="preview-header">
+            <div><span class="preview-overline">Exemplo da rotina</span><h2>Hoje com Pipoca</h2></div>
+            <span class="pet-mini-avatar" aria-hidden="true">P</span>
+          </header>
+          <div class="preview-progress-copy"><span>2 de 3 cuidados concluídos</span><strong>67%</strong></div>
+          <div class="preview-progress" role="progressbar" aria-label="Cuidados concluídos" aria-valuenow="67" aria-valuemin="0" aria-valuemax="100"><span></span></div>
+          <div class="preview-care is-done">
+            <span class="care-icon medicine"><span class="material-icons" aria-hidden="true">medication</span></span>
+            <span><strong>Antialérgico</strong><small>08:00 · confirmado por Ana</small></span>
+            <span class="material-icons care-status" aria-hidden="true">check_circle</span>
+          </div>
+          <div class="preview-care">
+            <span class="care-icon service"><span class="material-icons" aria-hidden="true">directions_walk</span></span>
+            <span><strong>Passeio</strong><small>12:00 · responsável: João</small></span>
+            <span class="preview-time">agora</span>
+          </div>
+          <div class="preview-care">
+            <span class="care-icon vaccine"><span class="material-icons" aria-hidden="true">event</span></span>
+            <span><strong>Consulta</strong><small>15:30 · Clínica do bairro</small></span>
+          </div>
+        </article>
+        <aside class="family-float">
+          <div class="avatar-stack" aria-hidden="true"><span>AN</span><span>JO</span><span>LI</span></div>
+          <div><strong>Casa da Pipoca</strong><small>3 pessoas cuidando juntas</small></div>
+        </aside>
+      </div>
+    </div>
+    <a class="hero-scroll" href="#como-funciona" aria-label="Continuar para como funciona">
+      <span>Conheça a história</span><span class="material-icons" aria-hidden="true">south</span>
+    </a>
   </section>
 
-</div>
+  <section id="como-funciona" class="day-section chapter" aria-labelledby="day-title">
+    <div class="day-shell">
+      <header class="chapter-intro u-reveal" #revealEl>
+        <p class="section-kicker">01 · Hoje</p>
+        <h2 id="day-title">Você abre. O próximo cuidado já está claro.</h2>
+        <p>
+          Vamos chamá-la de Pipoca. Quando ela chegou, veio também uma vida inteira de doses,
+          passeios, consultas e pequenos detalhes que não deveriam depender da memória de uma pessoa só.
+        </p>
+        <div class="feature-list" aria-label="Recursos da rotina">
+          <span><i class="material-icons" aria-hidden="true">repeat</i> Planos recorrentes</span>
+          <span><i class="material-icons" aria-hidden="true">person</i> Pessoa responsável</span>
+          <span><i class="material-icons" aria-hidden="true">mail_outline</i> Lembretes por e-mail</span>
+          <span><i class="material-icons" aria-hidden="true">notification_important</i> Alertas críticos</span>
+        </div>
+        <a class="text-link" routerLink="/auth/signup">
+          Organizar meu primeiro cuidado
+          <span class="material-icons" aria-hidden="true">arrow_forward</span>
+        </a>
+      </header>
+      <ol class="routine-list" aria-label="Um dia na rotina da Pipoca">
+        @for (moment of routineMoments; track moment.time) {
+          <li class="routine-moment u-reveal" #revealEl>
+            <time>{{ moment.time }}</time>
+            <span class="routine-node" [ngClass]="'tone-' + moment.tone" aria-hidden="true"><span class="material-icons">{{ moment.icon }}</span></span>
+            <article class="routine-card" [ngClass]="'tone-' + moment.tone">
+              <div><h3>{{ moment.title }}</h3><p>{{ moment.description }}</p></div>
+              <span class="routine-meta" [class.done]="moment.done">
+                @if (moment.done) { <span class="material-icons" aria-hidden="true">check</span> }
+                {{ moment.meta }}
+              </span>
+            </article>
+          </li>
+        }
+      </ol>
+    </div>
+  </section>
+
+  <app-landing-features></app-landing-features>
+  <app-landing-closing [isDark]="isDark" [currentYear]="currentYear" (themeToggle)="toggleTheme()"></app-landing-closing>
+</main>

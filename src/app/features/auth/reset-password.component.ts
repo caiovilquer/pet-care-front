@@ -10,6 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { ToastService } from '../../core/services/toast.service';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { PasswordResetService } from '../../core/services/password-reset.service';
+import { safeReturnUrl } from '../../core/utils/return-url';
 
 @Component({
   selector: 'app-reset-password',
@@ -52,7 +53,7 @@ import { PasswordResetService } from '../../core/services/password-reset.service
             <div *ngIf="invalidToken" class="error-container">
               <mat-icon class="error-icon">error_outline</mat-icon>
               <p>O link de redefinição de senha é inválido ou já expirou.</p>
-              <button mat-flat-button routerLink="/auth/forgot-password">
+              <button mat-flat-button routerLink="/auth/forgot-password" [queryParams]="returnUrl ? { returnUrl: returnUrl } : null">
                 Solicitar novo link
               </button>
             </div>
@@ -128,7 +129,7 @@ import { PasswordResetService } from '../../core/services/password-reset.service
               </button>
 
               <div class="auth-links">
-                <a routerLink="/auth/login" mat-button>
+                <a routerLink="/auth/login" [queryParams]="returnUrl ? { returnUrl: returnUrl } : null" mat-button>
                   <mat-icon>arrow_back</mat-icon>
                   Voltar ao login
                 </a>
@@ -162,6 +163,10 @@ export class ResetPasswordComponent implements OnInit {
       password: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(72)]],
       confirmPassword: ['', Validators.required]
     }, { validators: this.passwordsMatchValidator });
+  }
+
+  get returnUrl(): string | null {
+    return safeReturnUrl(this.route.snapshot.queryParamMap.get('returnUrl'));
   }
 
   ngOnInit(): void {
@@ -208,7 +213,7 @@ export class ResetPasswordComponent implements OnInit {
         this.toast.success('Senha redefinida com sucesso! Redirecionando para o login...');
         
         setTimeout(() => {
-          this.router.navigate(['/auth/login']);
+          this.router.navigate(['/auth/login'], { queryParams: this.returnUrl ? { returnUrl: this.returnUrl } : undefined });
         }, 2000);
       },
       error: (error) => {

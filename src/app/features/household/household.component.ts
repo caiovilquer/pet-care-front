@@ -27,7 +27,11 @@ export class HouseholdComponent implements OnInit {
   overview: HouseholdOverview | null = null;
   loading = true; saving = false;
   currentTutorId: number | null = null;
-  readonly roles: HouseholdRole[] = ['CAREGIVER', 'VIEWER'];
+  readonly inviteRoles: ReadonlyArray<{ value: HouseholdRole; label: string }> = [
+    { value: 'OWNER', label: 'Proprietário — acesso total e administração' },
+    { value: 'CAREGIVER', label: 'Cuidador — registra cuidados e saúde' },
+    { value: 'VIEWER', label: 'Visualizador — somente consulta' },
+  ];
   readonly inviteForm;
   readonly handoffForm;
 
@@ -51,6 +55,7 @@ export class HouseholdComponent implements OnInit {
   }
   get isOwner(): boolean { return this.overview?.household.role === 'OWNER'; }
   get canCare(): boolean { return this.overview?.household.role !== 'VIEWER'; }
+  get isInvitingOwner(): boolean { return this.inviteForm.controls.role.value === 'OWNER'; }
   label(role: HouseholdRole): string { return roleLabel(role); }
   initials(member: HouseholdMember): string { return `${member.firstName[0] || ''}${member.lastName?.[0] || ''}`.toUpperCase(); }
   isLastOwner(member: HouseholdMember): boolean {
@@ -65,7 +70,7 @@ export class HouseholdComponent implements OnInit {
     this.saving = true;
     const value = this.inviteForm.getRawValue();
     this.households.invite(value.email.trim(), value.role).subscribe({
-      next: () => { this.toast.success('Convite enviado com acesso limitado ao papel escolhido.'); this.inviteForm.reset({ email: '', role: 'CAREGIVER' }); this.reload(); },
+      next: () => { this.toast.success(`Convite enviado. A pessoa entrará como ${this.label(value.role).toLocaleLowerCase('pt-BR')}.`); this.inviteForm.reset({ email: '', role: 'CAREGIVER' }); this.reload(); },
       error: error => this.fail(error, 'Não foi possível enviar o convite.')
     });
   }

@@ -19,6 +19,7 @@ import { HouseholdService } from '../../core/services/household.service';
 import { HouseholdSummary } from '../../core/models/household.model';
 import { EventFormComponent } from '../../features/events/event-form.component';
 import { PetFormComponent } from '../../features/pets/pet-form.component';
+import { FooterComponent } from './ui/footer.component';
 
 @Component({
   selector: 'app-layout',
@@ -32,7 +33,8 @@ import { PetFormComponent } from '../../features/pets/pet-form.component';
     MatIconModule,
     MatMenuModule,
     MatDividerModule,
-    MatTooltipModule
+    MatTooltipModule,
+    FooterComponent
   ],
   template: `
     <a class="skip-link" href="#main-content">Pular para o conteúdo</a>
@@ -84,6 +86,7 @@ import { PetFormComponent } from '../../features/pets/pet-form.component';
 
       <main class="rp-main" id="main-content" tabindex="-1">
         <router-outlet></router-outlet>
+        <rp-footer [isDark]="isDark" (themeToggle)="toggleTheme()" />
       </main>
 
       <nav class="rp-bottom-nav" aria-label="Navegação principal">
@@ -234,6 +237,12 @@ import { PetFormComponent } from '../../features/pets/pet-form.component';
       .wordmark { font-size: 1.18rem; }
       .header-actions { gap: 0; }
       .header-actions .mat-mdc-icon-button { width: 38px; }
+    }
+
+    @media print {
+      .rp-header, .rp-bottom-nav, .skip-link, rp-footer { display: none !important; }
+      .shell { background: #fff; min-height: 0; }
+      .rp-main { max-width: none; margin: 0; padding: 0; }
     }
   `]
 })

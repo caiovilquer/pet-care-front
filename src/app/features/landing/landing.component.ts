@@ -10,27 +10,25 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { LandingFeaturesComponent } from './landing-features.component';
+import { LandingClosingComponent } from './landing-closing.component';
 
-interface Tile {
-  label: string;
-  type: 'vaccine' | 'medicine' | 'diary' | 'breed' | 'service' | 'empty';
-  span: 1 | 2;
-  rotated?: boolean;
-}
+type CareTone = 'medicine' | 'service' | 'vaccine' | 'diary';
 
-interface LifePoint {
-  age: string;
-  text: string;
-  side: 'left' | 'right';
-  image?: string;
-  imageAlt?: string;
-  imageShape?: 'organic-1' | 'organic-2' | 'organic-3';
+interface RoutineMoment {
+  time: string;
+  icon: string;
+  title: string;
+  description: string;
+  meta: string;
+  tone: CareTone;
+  done?: boolean;
 }
 
 @Component({
   selector: 'app-landing',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, LandingFeaturesComponent, LandingClosingComponent],
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.css'
 })
@@ -41,36 +39,39 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
   topbarScrolled = false;
   currentYear = new Date().getFullYear();
 
-  readonly tiles: Tile[] = [
-    { label: 'Vacinas', type: 'vaccine', span: 2 },
-    { label: 'Medicamentos', type: 'medicine', span: 1 },
-    { label: '', type: 'empty', span: 1 },
-    { label: 'Diário', type: 'diary', span: 1 },
-    { label: 'Reprodução', type: 'breed', span: 1, rotated: true },
-    { label: 'Serviços', type: 'service', span: 2 },
-    { label: '', type: 'empty', span: 2 },
-    { label: 'Lembretes', type: 'vaccine', span: 1 },
-    { label: 'Banho', type: 'service', span: 1 }
-  ];
-
-  readonly lifePoints: LifePoint[] = [
-    { age: 'filhote', text: 'A primeira vacina, o primeiro nome na agenda.', side: 'left' },
-    { age: 'adulta', text: 'A rotina vira hábito: passeio, ração, remédio, sempre na hora certa.', side: 'right' },
+  readonly routineMoments: RoutineMoment[] = [
     {
-      age: 'uma ninhada',
-      text: 'Uma nova vida chega, e o histórico dela começa junto.',
-      side: 'left',
-      image: 'images/ninhada.webp',
-      imageAlt: 'Filhotes recém-nascidos com a mãe',
-      imageShape: 'organic-3'
+      time: '08:00',
+      icon: 'medication',
+      title: 'A dose da manhã',
+      description: 'O responsável recebe o lembrete por e-mail e encontra a orientação no cuidado.',
+      meta: 'Confirmado por Ana',
+      tone: 'medicine',
+      done: true
     },
     {
-      age: 'anos grisalhos',
-      text: 'Anos de cuidado, num só lugar, pronto para mostrar ao veterinário.',
-      side: 'right',
-      image: 'images/idosa.webp',
-      imageAlt: 'Cachorra idosa com óculos, pronta para a consulta',
-      imageShape: 'organic-2'
+      time: '12:00',
+      icon: 'directions_walk',
+      title: 'O passeio do meio-dia',
+      description: 'A rotina recorrente já aparece no dia certo, para a pessoa certa.',
+      meta: 'Responsável: João',
+      tone: 'service'
+    },
+    {
+      time: '15:30',
+      icon: 'vaccines',
+      title: 'A consulta da tarde',
+      description: 'O próximo compromisso fica visível junto de tudo o que precisa acompanhar a Pipoca.',
+      meta: 'Clínica do bairro',
+      tone: 'vaccine'
+    },
+    {
+      time: '20:00',
+      icon: 'edit_note',
+      title: 'Um detalhe antes de dormir',
+      description: 'Quem cuidou registra o que observou e deixa contexto para a próxima pessoa.',
+      meta: 'Passagem de turno',
+      tone: 'diary'
     }
   ];
 
@@ -82,7 +83,10 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    if (typeof IntersectionObserver === 'undefined') {
+    const reducedMotion = typeof window !== 'undefined'
+      && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (reducedMotion || typeof IntersectionObserver === 'undefined') {
       this.revealEls.forEach(el => el.nativeElement.classList.add('is-visible'));
       return;
     }
@@ -96,7 +100,7 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
           }
         }
       },
-      { threshold: 0.15, rootMargin: '0px 0px -10% 0px' }
+      { threshold: 0.12, rootMargin: '0px 0px -8% 0px' }
     );
 
     this.revealEls.forEach(el => this.observer?.observe(el.nativeElement));
@@ -127,10 +131,6 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.setTheme(this.isDark ? 'light' : 'dark');
   }
 
-  scrollToE3(): void {
-    document.getElementById('e3')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-
   private applyLandingTheme(): void {
     let saved: string | null = null;
     try {
@@ -139,13 +139,8 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
       /* localStorage indisponível */
     }
 
-    if (saved === 'dark' || saved === 'light') {
-      document.documentElement.setAttribute('data-theme', saved);
-      this.isDark = saved === 'dark';
-      return;
-    }
-
-    document.documentElement.setAttribute('data-theme', 'light');
-    this.isDark = false;
+    const mode = saved === 'dark' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', mode);
+    this.isDark = mode === 'dark';
   }
 }

@@ -5,6 +5,7 @@ import { environment } from '../../../environments/environment';
 
 export interface ForgotPasswordRequest {
   email: string;
+  returnUrl?: string;
 }
 
 export interface ResetPasswordRequest {
@@ -23,8 +24,8 @@ export class PasswordResetService {
   /**
    * Solicita reset de senha enviando email para o usuário
    */
-  requestPasswordReset(email: string): Observable<void> {
-    const request: ForgotPasswordRequest = { email };
+  requestPasswordReset(email: string, returnUrl?: string | null): Observable<void> {
+    const request: ForgotPasswordRequest = { email, ...(returnUrl ? { returnUrl } : {}) };
     return this.http.post<void>(`${this.API_URL}/auth/password/forgot`, request);
   }
 

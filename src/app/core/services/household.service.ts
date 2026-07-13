@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, catchError, tap, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { HOUSEHOLD_STORAGE_KEY, HouseholdOverview, HouseholdRole, HouseholdSummary } from '../models/household.model';
+import { HOUSEHOLD_STORAGE_KEY, HouseholdInvitationPreview, HouseholdOverview, HouseholdRole, HouseholdSummary } from '../models/household.model';
 import { CacheService } from './cache.service';
 
 @Injectable({ providedIn: 'root' })
@@ -46,6 +46,9 @@ export class HouseholdService {
   }
   invite(email: string, role: HouseholdRole): Observable<void> {
     return this.http.post<void>(`${this.url}/current/invitations`, { email, role });
+  }
+  invitationPreview(token: string): Observable<HouseholdInvitationPreview> {
+    return this.http.post<HouseholdInvitationPreview>(`${this.url}/invitations/preview`, { token });
   }
   accept(token: string): Observable<{ householdId: string }> {
     return this.http.post<{ householdId: string }>(`${this.url}/invitations/accept`, { token }).pipe(tap(value => {

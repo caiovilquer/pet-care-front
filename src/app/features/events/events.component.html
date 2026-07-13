@@ -6,7 +6,7 @@
     @if (canManagePlans) { <button mat-flat-button (click)="openPlan(undefined, routePetId || undefined)"><mat-icon>add</mat-icon>Planejar cuidado</button> }
   </rp-page-header>
 
-  <rp-hint storageKey="agenda-planos" icon="school">
+  <rp-hint storageKey="agenda-planos" icon="school" collapsedLabel="Como a agenda funciona?">
     <strong>Como a agenda funciona:</strong> você cria um <strong>plano</strong> (ex.: antibiótico a cada 12 horas)
     e cada execução aparece aqui como um item separado, no dia e horário certos. Quando fizer o cuidado,
     confirme no próprio item — assim toda a família sabe que já foi feito. Para mudar horário ou frequência,

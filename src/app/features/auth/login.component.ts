@@ -8,6 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { ToastService } from '../../core/services/toast.service';
+import { safeReturnUrl } from '../../core/utils/return-url';
 
 @Component({
   selector: 'app-login',
@@ -42,6 +43,10 @@ export class LoginComponent {
     });
   }
 
+  get returnUrl(): string | null {
+    return safeReturnUrl(this.route.snapshot.queryParamMap.get('returnUrl'));
+  }
+
   onSubmit(): void {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
@@ -54,8 +59,7 @@ export class LoginComponent {
     this.authService.login({ email, password }).subscribe({
       next: () => {
         this.toast.success('Login realizado com sucesso!');
-        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
-        this.router.navigateByUrl(returnUrl?.startsWith('/') ? returnUrl : '/dashboard');
+        this.router.navigateByUrl(this.returnUrl || '/dashboard');
       },
       error: (error) => {
         this.isLoading = false;

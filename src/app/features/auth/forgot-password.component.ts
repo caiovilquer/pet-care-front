@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -10,6 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { ToastService } from '../../core/services/toast.service';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { PasswordResetService } from '../../core/services/password-reset.service';
+import { safeReturnUrl } from '../../core/utils/return-url';
 
 @Component({
   selector: 'app-forgot-password',
@@ -71,7 +72,7 @@ import { PasswordResetService } from '../../core/services/password-reset.service
               </button>
 
               <div class="auth-links">
-                <a routerLink="/auth/login" mat-button>
+                <a routerLink="/auth/login" [queryParams]="returnUrl ? { returnUrl: returnUrl } : null" mat-button>
                   <mat-icon>arrow_back</mat-icon>
                   Voltar ao login
                 </a>
@@ -92,11 +93,16 @@ export class ForgotPasswordComponent {
     private fb: FormBuilder,
     private passwordResetService: PasswordResetService,
     private router: Router,
+    private route: ActivatedRoute,
     private toast: ToastService
   ) {
     this.forgotForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]]
     });
+  }
+
+  get returnUrl(): string | null {
+    return safeReturnUrl(this.route.snapshot.queryParamMap.get('returnUrl'));
   }
 
   onSubmit(): void {
@@ -108,7 +114,7 @@ export class ForgotPasswordComponent {
     this.isLoading = true;
     const email = this.forgotForm.get('email')?.value;
 
-    this.passwordResetService.requestPasswordReset(email).subscribe({
+    this.passwordResetService.requestPasswordReset(email, this.returnUrl).subscribe({
       next: () => {
         this.isLoading = false;
         this.toast.success(
@@ -117,7 +123,7 @@ export class ForgotPasswordComponent {
         );
         // Redireciona para login após 3 segundos
         setTimeout(() => {
-          this.router.navigate(['/auth/login']);
+          this.router.navigate(['/auth/login'], { queryParams: this.returnUrl ? { returnUrl: this.returnUrl } : undefined });
         }, 3000);
       },
       error: (error) => {

@@ -1,0 +1,72 @@
+<section class="life-section chapter" aria-labelledby="life-title">
+  <div class="life-shell">
+    <header class="life-intro u-reveal" #revealEl>
+      <p class="section-kicker">06 · Uma vida em contexto</p>
+      <h2 id="life-title">O que começa numa rotina vira a memória inteira de uma vida.</h2>
+      <p>
+        Dos primeiros cuidados aos anos grisalhos, o cotidiano deixa de ficar espalhado
+        e passa a contar uma história que acompanha o seu pet.
+      </p>
+    </header>
+    <div class="life-journey u-reveal" #revealEl>
+      <article><span>01</span><h3>A chegada</h3><p>Cadastro, primeiras doses e o primeiro plano.</p></article>
+      <article><span>02</span><h3>A vida acontecendo</h3><p>Família, rotina, saúde e custos no mesmo contexto.</p></article>
+      <article><span>03</span><h3>Os anos grisalhos</h3><p>Uma história organizada para cada nova consulta.</p></article>
+    </div>
+    <figure class="senior-photo u-reveal" #revealEl>
+      <img src="images/idosa.webp" alt="Cachorra idosa deitada no quintal" loading="lazy" decoding="async">
+    </figure>
+  </div>
+</section>
+
+<section class="pause-section u-reveal" #revealEl aria-labelledby="pause-title">
+  <img src="images/pausa.webp" alt="" width="1800" height="1013" loading="lazy" decoding="async">
+  <div class="pause-overlay" aria-hidden="true"></div>
+  <div class="pause-copy">
+    <p>Quando a rotina encontra seu lugar, sobra mais espaço para estar junto.</p>
+    <h2 id="pause-title">Cuidar também é descansar.</h2>
+  </div>
+</section>
+
+<section class="final-section" aria-labelledby="final-title">
+  <div class="final-glow" aria-hidden="true"></div>
+  <div class="final-shell u-reveal" #revealEl>
+    <img class="final-logo" src="logo-completa-reverso.svg" alt="RotinaPet">
+    <p class="section-kicker section-kicker-light">A rotina começa hoje</p>
+    <h2 id="final-title">A Pipoca é inventada.<br>O seu pet não.</h2>
+    <p>Crie a rotina, convide quem cuida e dê um lugar seguro à história do seu pet.</p>
+    <div class="final-actions">
+      <a class="button button-accent" routerLink="/auth/signup">
+        Criar minha conta
+        <span class="material-icons" aria-hidden="true">arrow_forward</span>
+      </a>
+      <a class="button button-on-dark" routerLink="/auth/login">Já tenho conta</a>
+    </div>
+    <span class="final-privacy"><span class="material-icons" aria-hidden="true">lock</span> Seus dados ficam privados por padrão.</span>
+  </div>
+
+  <footer class="landing-footer">
+    <div class="footer-main">
+      <img src="logo-horizontal-reverso.svg" alt="RotinaPet">
+      <div class="footer-links">
+        <a href="#como-funciona">Como funciona</a>
+        <a href="#quem-cuida">Quem cuida</a>
+        <a href="#saude">Saúde</a>
+        <a href="#planejamento">Planejamento</a>
+      </div>
+      <button type="button" class="footer-theme" (click)="themeToggle.emit()">
+        <span class="material-icons" aria-hidden="true">{{ isDark ? 'light_mode' : 'dark_mode' }}</span>
+        {{ isDark ? 'Tema claro' : 'Tema escuro' }}
+      </button>
+    </div>
+    <div class="footer-meta">
+      <span>© {{ currentYear }} RotinaPet</span>
+      <p>
+        Desenvolvido por
+        <a href="https://www.linkedin.com/in/caio-vilquer/" target="_blank" rel="noopener noreferrer">Caio Vilquer Carvalho</a>
+        <span aria-hidden="true">·</span>
+        <a href="https://vilquer.dev" target="_blank" rel="noopener noreferrer">Portfólio</a>
+      </p>
+    </div>
+  </footer>
+</section>

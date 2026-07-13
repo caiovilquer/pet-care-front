@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -8,6 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { ToastService } from '../../core/services/toast.service';
+import { safeReturnUrl } from '../../core/utils/return-url';
 
 @Component({
   selector: 'app-signup',
@@ -106,7 +107,7 @@ import { ToastService } from '../../core/services/toast.service';
 
           <p class="auth-footer">
             Já tem uma conta?
-            <a routerLink="/auth/login">Entrar</a>
+            <a routerLink="/auth/login" [queryParams]="returnUrl ? { returnUrl: returnUrl } : null">Entrar</a>
           </p>
         </div>
       </div>
@@ -142,6 +143,7 @@ export class SignupComponent {
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router,
+    private route: ActivatedRoute,
     private toast: ToastService
   ) {
     this.signupForm = this.fb.group({
@@ -152,6 +154,10 @@ export class SignupComponent {
       rawPassword: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(72)]],
       confirmPassword: ['', [Validators.required]]
     }, { validators: this.passwordMatchValidator });
+  }
+
+  get returnUrl(): string | null {
+    return safeReturnUrl(this.route.snapshot.queryParamMap.get('returnUrl'));
   }
 
   passwordMatchValidator(group: FormGroup) {
@@ -190,13 +196,13 @@ export class SignupComponent {
           this.authService.login(credentials).subscribe({
             next: () => {
               this.isLoading = false;
-              this.toast.success('Conta criada. Vamos montar a rotina do seu pet!');
-              this.router.navigate(['/today']);
+              this.toast.success(this.returnUrl ? 'Conta criada. Vamos concluir seu convite!' : 'Conta criada. Vamos montar a rotina do seu pet!');
+              this.router.navigateByUrl(this.returnUrl || '/today');
             },
             error: () => {
               this.isLoading = false;
               this.toast.info('Conta criada. Entre para continuar.');
-              this.router.navigate(['/auth/login']);
+              this.router.navigate(['/auth/login'], { queryParams: this.returnUrl ? { returnUrl: this.returnUrl } : undefined });
             }
           });
         },
