@@ -21,6 +21,8 @@ export interface CarePlan {
   critical: boolean;
   escalationDelayMinutes?: number;
   escalationTutorId?: number;
+  estimatedCostAmount?: number | null;
+  estimatedCostCurrency?: string | null;
   active: boolean;
 }
 
@@ -39,6 +41,8 @@ export interface CarePlanRequest {
   critical: boolean;
   escalationDelayMinutes: number | null;
   escalationTutorId: number | null;
+  estimatedCostAmount: number | null;
+  estimatedCostCurrency: string | null;
 }
 
 export interface CareOccurrence {
@@ -58,6 +62,8 @@ export interface CareOccurrence {
   critical: boolean;
   escalationDelayMinutes?: number;
   escalationTutorId?: number;
+  estimatedCostAmount?: number | null;
+  estimatedCostCurrency?: string | null;
   canUndoUntil?: string;
 }
 

@@ -46,6 +46,7 @@ import { HouseholdSummary } from '../../core/models/household.model';
           <a routerLink="/today" routerLinkActive="on">Hoje</a>
           <a routerLink="/pets" routerLinkActive="on">Pets</a>
           <a routerLink="/events" routerLinkActive="on">Agenda</a>
+          <a routerLink="/care-center" routerLinkActive="on">Central</a>
           <a routerLink="/family" routerLinkActive="on">Família</a>
           <a routerLink="/petshops" [class.on]="isNearbyActive">Por perto</a>
         </nav>
@@ -135,6 +136,10 @@ import { HouseholdSummary } from '../../core/models/household.model';
       <button mat-menu-item routerLink="/profile">
         <mat-icon>person_outline</mat-icon>
         <span>Meu perfil</span>
+      </button>
+      <button mat-menu-item routerLink="/care-center">
+        <mat-icon>clinical_notes</mat-icon>
+        <span>Central de cuidado</span>
       </button>
       <button mat-menu-item (click)="logout()">
         <mat-icon>logout</mat-icon>

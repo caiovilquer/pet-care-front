@@ -17,6 +17,9 @@
 - ✅ **Caderneta de saúde** - Linha do tempo clínica, registro rápido e formulários progressivos
 - ✅ **Evolução de saúde** - Peso, temperatura e condição corporal em gráfico e tabela acessíveis
 - ✅ **Anexos privados** - Exames, receitas e fotos com upload direto e download autenticado
+- ✅ **Cuidado compartilhado** - Papéis familiares, convites, responsáveis e passagem de turno
+- ✅ **Resumo veterinário** - Histórico por período, impressão e link externo revogável com escopo mínimo
+- ✅ **Planejamento financeiro** - Realizado, previsões dos planos, filtros e CSV seguro para planilhas
 - ✅ **Integração Google Maps** - Localização de veterinárias e petshops
 - ✅ **Perfil de usuário** - Gerenciamento de dados pessoais
 - ✅ **Design responsivo** - Funciona em desktop e mobile
@@ -101,6 +104,7 @@ src/
 │   │   ├── pets/             # Gerenciamento de pets
 │   │   ├── health/           # Linha do tempo, formulários e gráficos clínicos
 │   │   ├── events/           # Sistema de eventos
+│   │   ├── reports/          # Resumo veterinário, compartilhamento e finanças
 │   │   └── profile/          # Perfil do usuário
 │   ├── shared/               # Componentes compartilhados
 │   │   └── components/       # Layout, cards, mapas

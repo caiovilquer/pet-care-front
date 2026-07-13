@@ -31,6 +31,7 @@
       <span aria-hidden="true">·</span>
       <span>{{ typeLabel }}</span>
       @if (responsibleName) { <span aria-hidden="true">·</span><span><mat-icon class="meta-icon">person</mat-icon>{{ responsibleName }}</span> }
+      @if (occurrence.estimatedCostAmount) { <span aria-hidden="true">·</span><span><mat-icon class="meta-icon">payments</mat-icon>{{ estimatedCost }}</span> }
     </div>
     @if (occurrence.instructions) { <p class="instructions">{{ occurrence.instructions }}</p> }
     @if (isCompleted) {

@@ -31,6 +31,10 @@ export const routes: Routes = [
     ]
   },
   {
+    path: 'shared/veterinary',
+    loadComponent: () => import('./features/reports/public-veterinary-summary.component').then(m => m.PublicVeterinarySummaryComponent)
+  },
+  {
     path: '',
     loadComponent: () => import('./shared/components/layout.component').then(m => m.LayoutComponent),
     canActivate: [authGuard],
@@ -67,6 +71,10 @@ export const routes: Routes = [
       {
         path: 'profile',
         loadComponent: () => import('./features/profile/profile.component').then(m => m.ProfileComponent)
+      },
+      {
+        path: 'care-center',
+        loadComponent: () => import('./features/reports/care-center.component').then(m => m.CareCenterComponent)
       },
       {
         path: 'family',

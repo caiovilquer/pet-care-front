@@ -74,7 +74,9 @@ export class EventFormComponent implements OnInit {
     responsibleTutorId: this.fb.control<number | null>(null, Validators.required),
     critical: this.fb.nonNullable.control(false),
     escalationDelayMinutes: this.fb.control<number | null>(60),
-    escalationTutorId: this.fb.control<number | null>(null)
+    escalationTutorId: this.fb.control<number | null>(null),
+    estimatedCostAmount: this.fb.control<number | null>(null, [Validators.min(0.01), Validators.max(9999999999.99)]),
+    estimatedCostCurrency: this.fb.nonNullable.control('BRL')
   }, { validators: [this.finalDateValidator, this.startDateValidator, this.escalationValidator] });
 
   constructor(
@@ -137,7 +139,9 @@ export class EventFormComponent implements OnInit {
       responsibleTutorId: value.responsibleTutorId,
       critical: value.critical,
       escalationDelayMinutes: value.critical ? Number(value.escalationDelayMinutes) : null,
-      escalationTutorId: value.critical ? value.escalationTutorId : null
+      escalationTutorId: value.critical ? value.escalationTutorId : null,
+      estimatedCostAmount: value.estimatedCostAmount ? Number(value.estimatedCostAmount) : null,
+      estimatedCostCurrency: value.estimatedCostAmount ? value.estimatedCostCurrency : null
     };
 
     this.isLoading = true;
@@ -182,7 +186,9 @@ export class EventFormComponent implements OnInit {
           responsibleTutorId: plan.responsibleTutorId,
           critical: plan.critical,
           escalationDelayMinutes: plan.escalationDelayMinutes || 60,
-          escalationTutorId: plan.escalationTutorId || null
+          escalationTutorId: plan.escalationTutorId || null,
+          estimatedCostAmount: plan.estimatedCostAmount || null,
+          estimatedCostCurrency: plan.estimatedCostCurrency || 'BRL'
         });
         this.eventForm.controls.petId.disable();
         this.isLoadingPlan = false;

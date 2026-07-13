@@ -113,6 +113,7 @@ export class PetDetailComponent implements OnInit {
 
   goBack(): void { void this.router.navigate(['/pets']); }
   viewAllEvents(): void { void this.router.navigate(['/events/pet', this.petId]); }
+  viewReport(): void { void this.router.navigate(['/care-center'], { queryParams: { petId: this.petId } }); }
 
   editPet(): void {
     if (!this.pet) return;

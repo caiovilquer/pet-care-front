@@ -44,6 +44,10 @@ export class CareOccurrenceCardComponent {
       ? new Date(this.occurrence.completedAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
       : '';
   }
+  get estimatedCost(): string {
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: this.occurrence.estimatedCostCurrency || 'BRL' })
+      .format(this.occurrence.estimatedCostAmount || 0);
+  }
   get typeLabel(): string { return TYPE_LABELS[this.occurrence.type]; }
   get icon(): string { return TYPE_ICONS[this.occurrence.type]; }
 }
