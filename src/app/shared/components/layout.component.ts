@@ -62,8 +62,9 @@ import { FooterComponent } from './ui/footer.component';
             </button>
           }
           @if (currentHousehold) {
-            <button mat-button [matMenuTriggerFor]="householdMenu" class="household-switch" aria-label="Trocar família">
-              <mat-icon>home</mat-icon><span>{{ currentHousehold.name }}</span><mat-icon>expand_more</mat-icon>
+            <button mat-icon-button [matMenuTriggerFor]="householdMenu" class="household-switch"
+                    matTooltip="Trocar família" [attr.aria-label]="'Trocar família: ' + currentHousehold.name">
+              <mat-icon>home</mat-icon>
             </button>
           }
           <button mat-icon-button [matMenuTriggerFor]="notificationMenu"
@@ -182,9 +183,7 @@ import { FooterComponent } from './ui/footer.component';
     .header-actions { display: flex; align-items: center; gap: 3px; }
     .header-actions .mat-mdc-icon-button { color: var(--q-text-2); }
     .primary-action { margin-right: var(--q-space-2); white-space: nowrap; }
-    .household-switch { max-width: 190px; margin-right: 2px; color: var(--q-text-2); border-radius: var(--q-radius-pill); }
-    .household-switch span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .household-switch mat-icon:last-child { font-size: 18px; }
+    .household-switch { margin-right: 2px; color: var(--q-text-2); }
     .family-menu-title { display: grid; padding: 13px 16px; }
     .family-menu-title span { font-weight: 700; }
     .family-menu-title small { color: var(--q-text-2); }
@@ -228,15 +227,16 @@ import { FooterComponent } from './ui/footer.component';
       .rp-bottom-nav { display: flex; }
       .rp-header { height: 60px; padding: 0 var(--q-space-3) 0 var(--q-space-4); gap: var(--q-space-2); }
       .rp-main { padding: var(--q-space-4) var(--q-space-4) calc(84px + env(safe-area-inset-bottom)); }
-      .primary-action { width: 40px; min-width: 40px; height: 40px; margin: 0; padding: 0; border-radius: 50%; }
-      .primary-action span { display: none; }
-      .primary-action mat-icon { margin: 0; }
+      .primary-action { display: none; }
+      .household-switch { display: inline-flex; }
+      .header-actions { gap: 4px; }
+      .header-actions .mat-mdc-icon-button { width: 44px; height: 44px; }
     }
     @media (max-width: 430px) {
       .rp-header { padding-left: var(--q-space-3); }
       .wordmark { font-size: 1.18rem; }
-      .header-actions { gap: 0; }
-      .header-actions .mat-mdc-icon-button { width: 38px; }
+      .header-actions { gap: 2px; }
+      .header-actions .mat-mdc-icon-button { width: 44px; height: 44px; }
     }
 
     @media print {
