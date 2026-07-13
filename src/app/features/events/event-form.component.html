@@ -18,6 +18,18 @@
         @if (isEdit) { <mat-hint>O histórico permanece vinculado a este pet</mat-hint> }
       </mat-form-field>
 
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Responsável principal</mat-label>
+        <mat-select formControlName="responsibleTutorId" required>
+          @for (member of members; track member.id) {
+            @if (member.role !== 'VIEWER') { <mat-option [value]="member.tutorId">{{ member.firstName }} {{ member.lastName }} · {{ member.role === 'OWNER' ? 'proprietário' : 'cuidador' }}</mat-option> }
+          }
+        </mat-select>
+        <mat-icon matIconPrefix>person</mat-icon>
+        <mat-hint>A pessoa que assume este cuidado</mat-hint>
+        <mat-error>Escolha um cuidador</mat-error>
+      </mat-form-field>
+
       <fieldset class="type-field">
         <legend>Tipo de cuidado</legend>
         <div class="type-picker" role="radiogroup">
@@ -114,6 +126,18 @@
         </mat-select>
         <mat-icon matIconPrefix>notifications_active</mat-icon>
       </mat-form-field>
+
+      <section class="critical-section" [class.active]="eventForm.controls.critical.value">
+        <mat-checkbox formControlName="critical"><strong>Cuidado crítico</strong></mat-checkbox>
+        <p>Se ninguém confirmar no prazo, o RotinaPet avisa um proprietário por e-mail.</p>
+        @if (eventForm.controls.critical.value) {
+          <div class="form-row">
+            <mat-form-field appearance="outline"><mat-label>Alertar após</mat-label><mat-select formControlName="escalationDelayMinutes"><mat-option [value]="15">15 minutos</mat-option><mat-option [value]="30">30 minutos</mat-option><mat-option [value]="60">1 hora</mat-option><mat-option [value]="120">2 horas</mat-option><mat-option [value]="1440">1 dia</mat-option></mat-select></mat-form-field>
+            <mat-form-field appearance="outline"><mat-label>Proprietário avisado</mat-label><mat-select formControlName="escalationTutorId">@for (member of members; track member.id) { @if (member.role === 'OWNER') { <mat-option [value]="member.tutorId">{{ member.firstName }} {{ member.lastName }}</mat-option> } }</mat-select></mat-form-field>
+          </div>
+          @if (eventForm.hasError('escalationInvalid')) { <span class="field-error" role="alert">Escolha o prazo e um proprietário para o alerta</span> }
+        }
+      </section>
     </form>
   }
 </mat-dialog-content>

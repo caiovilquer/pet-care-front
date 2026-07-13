@@ -5,7 +5,7 @@
     <header class="greeting">
       <div><p class="q-overline">{{ todayLabel }}</p><h1>{{ greeting }}{{ overview ? ', ' + overview.firstName : '' }}</h1>
         <p>Veja o que precisa de atenção e registre cada cuidado no momento certo.</p></div>
-      <button mat-flat-button (click)="openPlan()"><mat-icon>add</mat-icon>Novo cuidado</button>
+      @if (canManagePlans) { <button mat-flat-button (click)="openPlan()"><mat-icon>add</mat-icon>Novo cuidado</button> }
     </header>
 
     @if (hadError) {
@@ -20,8 +20,8 @@
             <a routerLink="/events">Ver na agenda</a></div>
           <div class="care-list">
             @for (event of today.overdue; track event.id) {
-              <rp-care-occurrence-card [occurrence]="event" [petName]="petName(event.petId)" [busy]="busyIds.has(event.id)"
-                [showDate]="true" (complete)="complete($event)" (undo)="undo($event)"
+              <rp-care-occurrence-card [occurrence]="event" [petName]="petName(event.petId)" [busy]="busyIds.has(event.id)" [responsibleName]="memberName(event.responsibleTutorId)" [completedByName]="memberName(event.completedByTutorId)" [canComplete]="canCompleteCare"
+                [showDate]="true" [showPlanActions]="canManagePlans" (complete)="complete($event)" (undo)="undo($event)"
                 (editPlan)="openPlan($event.planId, $event.petId)" (endPlan)="endPlan($event)"></rp-care-occurrence-card>
             }
           </div>
@@ -34,8 +34,8 @@
         @if (today.today.length) {
           <div class="care-list">
             @for (event of today.today; track event.id) {
-              <rp-care-occurrence-card [occurrence]="event" [petName]="petName(event.petId)" [busy]="busyIds.has(event.id)"
-                (complete)="complete($event)" (undo)="undo($event)" (editPlan)="openPlan($event.planId, $event.petId)"
+              <rp-care-occurrence-card [occurrence]="event" [petName]="petName(event.petId)" [busy]="busyIds.has(event.id)" [responsibleName]="memberName(event.responsibleTutorId)" [completedByName]="memberName(event.completedByTutorId)" [canComplete]="canCompleteCare"
+                [showPlanActions]="canManagePlans" (complete)="complete($event)" (undo)="undo($event)" (editPlan)="openPlan($event.planId, $event.petId)"
                 (endPlan)="endPlan($event)"></rp-care-occurrence-card>
             }
           </div>
@@ -51,7 +51,7 @@
           <summary><span><mat-icon>verified</mat-icon>Concluídos hoje</span><strong>{{ today.completedToday.length }}</strong></summary>
           <div class="care-list">
             @for (event of today.completedToday; track event.id) {
-              <rp-care-occurrence-card [occurrence]="event" [petName]="petName(event.petId)" [busy]="busyIds.has(event.id)"
+              <rp-care-occurrence-card [occurrence]="event" [petName]="petName(event.petId)" [busy]="busyIds.has(event.id)" [responsibleName]="memberName(event.responsibleTutorId)" [completedByName]="memberName(event.completedByTutorId)" [canComplete]="canCompleteCare"
                 [showPlanActions]="false" (undo)="undo($event)"></rp-care-occurrence-card>
             }
           </div>

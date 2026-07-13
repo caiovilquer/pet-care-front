@@ -20,6 +20,7 @@ import { EmptyStateComponent } from '../../shared/components/ui/empty-state.comp
 import { PetAvatarComponent } from '../../shared/components/ui/pet-avatar.component';
 import { SkeletonComponent } from '../../shared/components/ui/skeleton.component';
 import { StatCardComponent } from '../../shared/components/ui/stat-card.component';
+import { HouseholdService } from '../../core/services/household.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -38,6 +39,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   isLoading = true;
   hadError = false;
   readonly busyIds = new Set<string>();
+  readonly memberNames = new Map<number, string>();
+  canManagePlans = false;
+  canCompleteCare = false;
   private updates?: Subscription;
 
   constructor(
@@ -46,10 +50,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private readonly eventState: EventStateService,
     private readonly toast: ToastService,
     private readonly apiError: ApiErrorService,
-    private readonly dialog: MatDialog
+    private readonly dialog: MatDialog,
+    private readonly households: HouseholdService
   ) {}
 
   ngOnInit(): void {
+    this.households.overview().subscribe({ next: value => { this.canManagePlans = value.household.role === 'OWNER'; this.canCompleteCare = value.household.role !== 'VIEWER'; value.members.forEach(member => this.memberNames.set(member.tutorId, member.firstName)); } });
     this.load();
     this.updates = this.eventState.eventUpdated$.subscribe(() => this.load(true));
   }
@@ -105,6 +111,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     });
   }
   petName(id: number): string { return this.overview?.pets.find(pet => pet.id === id)?.name || `Pet #${id}`; }
+  memberName(id?: number): string { return id ? this.memberNames.get(id) || 'Membro da família' : ''; }
   get greeting(): string { const h = new Date().getHours(); return h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite'; }
   get todayLabel(): string {
     const label = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });

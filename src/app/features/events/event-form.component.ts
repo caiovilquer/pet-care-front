@@ -8,6 +8,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSelectModule } from '@angular/material/select';
 import { CarePlanRequest } from '../../core/models/care.model';
 import { EventType, RecurrenceFrequency } from '../../core/models/event.model';
@@ -18,6 +19,8 @@ import { DateTimeService } from '../../core/services/datetime.service';
 import { EventStateService } from '../../core/services/event-state.service';
 import { PetService } from '../../core/services/pet.service';
 import { ToastService } from '../../core/services/toast.service';
+import { HouseholdService } from '../../core/services/household.service';
+import { HouseholdMember } from '../../core/models/household.model';
 
 export interface CarePlanFormData { planId?: string; petId?: number }
 
@@ -26,7 +29,7 @@ export interface CarePlanFormData { planId?: string; petId?: number }
   standalone: true,
   imports: [
     CommonModule, ReactiveFormsModule, MatDialogModule, MatFormFieldModule, MatInputModule,
-    MatButtonModule, MatSelectModule, MatDatepickerModule, MatIconModule, MatProgressSpinnerModule
+    MatButtonModule, MatSelectModule, MatDatepickerModule, MatIconModule, MatProgressSpinnerModule, MatCheckboxModule
   ],
   templateUrl: './event-form.component.html',
   styleUrls: ['./event-form.component.css']
@@ -37,6 +40,7 @@ export class EventFormComponent implements OnInit {
   isLoading = false;
   isLoadingPlan = false;
   pets: PetSummary[] = [];
+  members: HouseholdMember[] = [];
 
   readonly frequencies: Array<{ value: RecurrenceFrequency; label: string }> = [
     { value: 'DAILY', label: 'Dia(s)' }, { value: 'WEEKLY', label: 'Semana(s)' },
@@ -66,8 +70,12 @@ export class EventFormComponent implements OnInit {
     intervalCount: this.fb.control(1, [Validators.required, Validators.min(1), Validators.max(365)]),
     repetitions: this.fb.control<number | null>(null, [Validators.min(1), Validators.max(10000)]),
     finalDate: this.fb.control<Date | null>(null),
-    reminderMinutesBefore: this.fb.control(30, [Validators.required, Validators.min(0), Validators.max(10080)])
-  }, { validators: [this.finalDateValidator, this.startDateValidator] });
+    reminderMinutesBefore: this.fb.control(30, [Validators.required, Validators.min(0), Validators.max(10080)]),
+    responsibleTutorId: this.fb.control<number | null>(null, Validators.required),
+    critical: this.fb.nonNullable.control(false),
+    escalationDelayMinutes: this.fb.control<number | null>(60),
+    escalationTutorId: this.fb.control<number | null>(null)
+  }, { validators: [this.finalDateValidator, this.startDateValidator, this.escalationValidator] });
 
   constructor(
     private readonly care: CareService,
@@ -75,6 +83,7 @@ export class EventFormComponent implements OnInit {
     private readonly dateTime: DateTimeService,
     private readonly eventsState: EventStateService,
     private readonly toast: ToastService,
+    private readonly households: HouseholdService,
     private readonly apiError: ApiErrorService,
     public readonly dialogRef: MatDialogRef<EventFormComponent>,
     @Inject(MAT_DIALOG_DATA) public readonly data: CarePlanFormData | null
@@ -84,6 +93,12 @@ export class EventFormComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadPets();
+    this.households.overview().subscribe({ next: value => {
+      this.members = value.members;
+      const caregiver = value.members.find(member => member.role !== 'VIEWER');
+      const owner = value.members.find(member => member.role === 'OWNER');
+      if (!this.isEdit && caregiver) this.eventForm.patchValue({ responsibleTutorId: caregiver.tutorId, escalationTutorId: owner?.tutorId || null });
+    }});
     if (this.data?.petId) this.eventForm.patchValue({ petId: this.data.petId });
     if (this.isEdit) this.loadPlan();
   }
@@ -118,7 +133,11 @@ export class EventFormComponent implements OnInit {
       finalDate: value.frequency && finalDate
         ? this.dateTime.formatDateTimeForAPIWithoutTimezone(finalDate)
         : null,
-      reminderMinutesBefore: Number(value.reminderMinutesBefore)
+      reminderMinutesBefore: Number(value.reminderMinutesBefore),
+      responsibleTutorId: value.responsibleTutorId,
+      critical: value.critical,
+      escalationDelayMinutes: value.critical ? Number(value.escalationDelayMinutes) : null,
+      escalationTutorId: value.critical ? value.escalationTutorId : null
     };
 
     this.isLoading = true;
@@ -159,7 +178,11 @@ export class EventFormComponent implements OnInit {
           intervalCount: plan.recurrence?.intervalCount || 1,
           repetitions: plan.recurrence?.repetitions || null,
           finalDate: plan.recurrence?.finalDate ? this.dateTime.parseAPIDate(plan.recurrence.finalDate) : null,
-          reminderMinutesBefore: plan.reminderMinutesBefore
+          reminderMinutesBefore: plan.reminderMinutesBefore,
+          responsibleTutorId: plan.responsibleTutorId,
+          critical: plan.critical,
+          escalationDelayMinutes: plan.escalationDelayMinutes || 60,
+          escalationTutorId: plan.escalationTutorId || null
         });
         this.eventForm.controls.petId.disable();
         this.isLoadingPlan = false;
@@ -186,5 +209,11 @@ export class EventFormComponent implements OnInit {
     return !control.get('petId')?.disabled && start.getTime() < Date.now() - 5 * 60_000
       ? { startInPast: true }
       : null;
+  }
+
+  private escalationValidator(control: AbstractControl): ValidationErrors | null {
+    if (!control.get('critical')?.value) return null;
+    const delay = Number(control.get('escalationDelayMinutes')?.value);
+    return !control.get('escalationTutorId')?.value || delay < 15 || delay > 10080 ? { escalationInvalid: true } : null;
   }
 }

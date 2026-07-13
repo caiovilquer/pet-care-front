@@ -4,6 +4,7 @@ import { BehaviorSubject, Observable, catchError, finalize, map, of, shareReplay
 import { jwtDecode } from 'jwt-decode';
 import { LoginRequest, SignupRequest, TokenResponse, TutorCreatedResult } from '../models/auth.model';
 import { environment } from '../../../environments/environment';
+import { HOUSEHOLD_STORAGE_KEY } from '../models/household.model';
 
 interface JwtPayload {
   sub: string;
@@ -76,6 +77,7 @@ export class AuthService {
   clearSession(): void {
     this.accessToken = null;
     this.currentUserSubject.next(null);
+    localStorage.removeItem(HOUSEHOLD_STORAGE_KEY);
   }
 
   getToken(): string | null {

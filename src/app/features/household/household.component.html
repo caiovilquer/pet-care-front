@@ -1,0 +1,73 @@
+<header class="family-hero">
+  <div><p class="q-overline">Cuidado compartilhado</p><h1>{{ overview?.household?.name || 'Minha família' }}</h1>
+    <p>Todo mundo vê o contexto certo — e cada ação fica ligada a quem realmente cuidou.</p></div>
+  @if (overview) { <span class="role-badge"><mat-icon>verified_user</mat-icon>{{ label(overview.household.role) }}</span> }
+</header>
+
+@if (loading) {
+  <div class="loading" role="status"><mat-spinner diameter="36"></mat-spinner><span>Preparando o cuidado em equipe…</span></div>
+} @else if (overview) {
+  <section class="summary-grid" aria-label="Resumo da família">
+    <article><mat-icon>group</mat-icon><strong>{{ overview.members.length }}</strong><span>pessoas cuidando</span></article>
+    <article><mat-icon>history</mat-icon><strong>{{ overview.recentActivity.length }}</strong><span>ações recentes</span></article>
+    <article><mat-icon>swap_horiz</mat-icon><strong>{{ overview.recentHandoffs.length }}</strong><span>passagens de turno</span></article>
+  </section>
+
+  <div class="family-grid">
+    <section class="panel members-panel">
+      <div class="panel-head"><div><p class="q-overline">Equipe</p><h2>Quem cuida junto</h2></div></div>
+      <div class="member-list">
+        @for (member of overview.members; track member.id) {
+          <article class="member-row">
+            <span class="member-avatar" aria-hidden="true">{{ initials(member) }}</span>
+            <div class="member-copy"><strong>{{ member.firstName }} {{ member.lastName }}</strong><span>{{ member.email }}</span></div>
+            @if (isOwner) {
+              <mat-form-field appearance="outline" subscriptSizing="dynamic" class="role-select">
+                <mat-label>Papel</mat-label>
+                <mat-select [value]="member.role" (selectionChange)="changeRole(member, $event.value)" [disabled]="saving || isLastOwner(member)" [matTooltip]="isLastOwner(member) ? 'Promova outro proprietário antes de alterar este papel' : ''">
+                  <mat-option value="OWNER">Proprietário</mat-option><mat-option value="CAREGIVER">Cuidador</mat-option><mat-option value="VIEWER">Visualizador</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <button mat-icon-button type="button" (click)="remove(member)" [disabled]="saving || cannotRemove(member)" [matTooltip]="isLastOwner(member) ? 'A família precisa manter um proprietário' : member.tutorId === currentTutorId ? 'Sua própria participação não pode ser removida aqui' : 'Remover acesso'" [attr.aria-label]="'Remover ' + member.firstName"><mat-icon>{{ cannotRemove(member) ? 'lock' : 'person_remove' }}</mat-icon></button>
+            } @else { <span class="role-small">{{ label(member.role) }}</span> }
+          </article>
+        }
+      </div>
+    </section>
+
+    @if (isOwner) {
+      <section class="panel invite-panel">
+        <p class="q-overline">Convites seguros</p><h2>Trazer alguém para a rotina</h2>
+        <p class="helper">O link é pessoal, expira em 7 dias e só pode ser usado pelo e-mail convidado.</p>
+        <form [formGroup]="inviteForm" (ngSubmit)="invite()">
+          <mat-form-field appearance="outline"><mat-label>E-mail</mat-label><input matInput type="email" formControlName="email" autocomplete="email"><mat-error>Informe um e-mail válido</mat-error></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Acesso</mat-label><mat-select formControlName="role"><mat-option value="CAREGIVER">Cuidador — registra cuidados e saúde</mat-option><mat-option value="VIEWER">Visualizador — somente consulta</mat-option></mat-select></mat-form-field>
+          <button mat-flat-button type="submit" [disabled]="saving"><mat-icon>person_add</mat-icon>Enviar convite</button>
+        </form>
+        @if (overview.pendingInvitations.length) {
+          <div class="pending"><h3>Convites pendentes</h3>@for (invite of overview.pendingInvitations; track invite.id) {
+            <div><span><strong>{{ invite.email }}</strong><small>{{ label(invite.role) }}</small></span><button mat-icon-button (click)="revoke(invite.id)" aria-label="Cancelar convite"><mat-icon>close</mat-icon></button></div>
+          }</div>
+        }
+      </section>
+    }
+
+    @if (canCare) {
+      <section class="panel handoff-panel">
+        <p class="q-overline">Passagem de turno</p><h2>Deixar o próximo cuidador por dentro</h2>
+        <form [formGroup]="handoffForm" (ngSubmit)="handoff()">
+          <mat-form-field appearance="outline"><mat-label>Para alguém (opcional)</mat-label><mat-select formControlName="toTutorId"><mat-option [value]="null">Toda a família</mat-option>@for (member of overview.members; track member.id) { <mat-option [value]="member.tutorId">{{ member.firstName }}</mat-option> }</mat-select></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>O que a próxima pessoa precisa saber?</mat-label><textarea matInput rows="3" maxlength="1000" formControlName="note"></textarea><mat-error>Escreva uma orientação</mat-error></mat-form-field>
+          <button mat-flat-button type="submit" [disabled]="saving"><mat-icon>swap_horiz</mat-icon>Registrar passagem</button>
+        </form>
+      </section>
+    }
+
+    <section class="panel activity-panel">
+      <p class="q-overline">Transparência</p><h2>Atividade recente</h2>
+      @if (overview.recentActivity.length) { <ol class="timeline">@for (item of overview.recentActivity; track item.id) {
+        <li><span class="timeline-dot"><mat-icon>{{ item.type === 'CARE_COMPLETED' ? 'check' : item.type === 'ESCALATION_SENT' ? 'priority_high' : 'history' }}</mat-icon></span><div><strong>{{ item.summary }}</strong><span>{{ item.actorName || 'RotinaPet' }} · {{ item.happenedAt | date:'dd/MM, HH:mm' }}</span></div></li>
+      }</ol> } @else { <p class="helper">As ações da equipe aparecerão aqui.</p> }
+    </section>
+  </div>
+}

@@ -1,7 +1,7 @@
 <article class="care-card" [class.completed]="isCompleted" [class.overdue]="isOverdue" [class.cancelled]="occurrence.status === 'CANCELLED'">
   <button type="button" class="complete-button"
           [class.checked]="isCompleted"
-          [disabled]="busy || occurrence.status === 'CANCELLED' || (isCompleted && !canUndo)"
+          [disabled]="!canComplete || busy || occurrence.status === 'CANCELLED' || (isCompleted && !canUndo)"
           (click)="isCompleted ? (canUndo && undo.emit(occurrence)) : complete.emit(occurrence)"
           [attr.aria-label]="isCompleted ? (canUndo ? 'Desfazer conclusão de ' + occurrence.title : occurrence.title + ' concluído') : 'Concluir ' + occurrence.title">
     @if (busy) {
@@ -21,6 +21,7 @@
       @if (isOverdue) { <span class="status overdue-label">Atrasado</span> }
       @if (isCompleted) { <span class="status done-label">Concluído</span> }
       @if (occurrence.status === 'CANCELLED') { <span class="status cancelled-label">Cancelado</span> }
+      @if (occurrence.critical) { <span class="status critical-label"><mat-icon>priority_high</mat-icon>Crítico</span> }
     </div>
     <div class="meta">
       @if (showDate) { <span>{{ date }}</span><span aria-hidden="true">·</span> }
@@ -29,15 +30,16 @@
       <span>{{ petName }}</span>
       <span aria-hidden="true">·</span>
       <span>{{ typeLabel }}</span>
+      @if (responsibleName) { <span aria-hidden="true">·</span><span><mat-icon class="meta-icon">person</mat-icon>{{ responsibleName }}</span> }
     </div>
     @if (occurrence.instructions) { <p class="instructions">{{ occurrence.instructions }}</p> }
     @if (isCompleted) {
-      <p class="audit"><mat-icon>verified_user</mat-icon> Confirmado às {{ completedTime }}</p>
+      <p class="audit"><mat-icon>verified_user</mat-icon> {{ completedByName ? 'Confirmado por ' + completedByName : 'Confirmado' }} às {{ completedTime }}</p>
     }
   </div>
 
   <div class="actions">
-    @if (canUndo) {
+    @if (canUndo && canComplete) {
       <button mat-button type="button" (click)="undo.emit(occurrence)" [disabled]="busy">Desfazer</button>
     }
     @if (showPlanActions && occurrence.status !== 'CANCELLED') {

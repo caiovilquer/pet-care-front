@@ -4,6 +4,7 @@ import { catchError, switchMap, throwError } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
+import { HOUSEHOLD_STORAGE_KEY } from '../models/household.model';
 
 const isAuthFreeUrl = (url: string): boolean =>
   url.includes('/public/') ||
@@ -30,9 +31,12 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   let authReq = targetsApi ? req.clone({ withCredentials: true }) : req;
 
   if (targetsApi && token && !isAuthFreeUrl(req.url)) {
+    let householdId: string | null = null;
+    try { householdId = localStorage.getItem(HOUSEHOLD_STORAGE_KEY); } catch { /* armazenamento indisponível */ }
     authReq = authReq.clone({
       setHeaders: {
-        Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
+        ...(householdId ? { 'X-Household-Id': householdId } : {})
       }
     });
   }

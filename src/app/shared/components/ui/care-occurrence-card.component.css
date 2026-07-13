@@ -32,6 +32,7 @@
 .overdue-label { color: var(--q-error); background: var(--q-error-bg); }
 .done-label { color: var(--q-success); background: var(--q-success-bg); }
 .cancelled-label { color: var(--q-text-2); background: var(--q-surface-3); }
+.critical-label { display:inline-flex;align-items:center;gap:2px;color:var(--q-error);background:var(--q-error-bg) }.critical-label mat-icon{font-size:14px;width:14px;height:14px}.meta span:has(.meta-icon){display:inline-flex;align-items:center;gap:3px}.meta-icon{font-size:14px;width:14px;height:14px}
 .audit { display: flex; align-items: center; gap: 5px; color: var(--q-success); font-size: .75rem; margin: 5px 0 0; }
 .audit mat-icon { width: 16px; height: 16px; font-size: 16px; }
 .actions { display: flex; align-items: center; }

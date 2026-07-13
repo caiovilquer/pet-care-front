@@ -1,10 +1,10 @@
 <div class="pets-page">
   <rp-page-header overline="Seu quintal" title="Meus pets"
                   subtitle="Todos os companheiros sob seus cuidados.">
-    <button mat-flat-button (click)="openPetForm()">
+    @if (canManagePets) { <button mat-flat-button (click)="openPetForm()">
       <mat-icon>add</mat-icon>
       Adicionar pet
-    </button>
+    </button> }
   </rp-page-header>
 
   @if (isLoading) {
@@ -27,12 +27,12 @@
                     matTooltip="Agenda de {{ pet.name }}">
               <mat-icon>calendar_month</mat-icon>
             </button>
-            <button mat-icon-button (click)="editPet(pet)" matTooltip="Editar">
+            @if (canManagePets) { <button mat-icon-button (click)="editPet(pet)" matTooltip="Editar">
               <mat-icon>edit</mat-icon>
             </button>
             <button mat-icon-button (click)="deletePet(pet)" matTooltip="Remover" class="danger">
               <mat-icon>delete_outline</mat-icon>
-            </button>
+            </button> }
           </div>
         </article>
       }
@@ -51,10 +51,10 @@
   } @else {
     <rp-empty-state icon="pets" title="Nenhum pet por aqui ainda"
                     message="Cadastre seu primeiro companheiro e comece a cuidar da rotina dele.">
-      <button mat-flat-button (click)="openPetForm()">
+      @if (canManagePets) { <button mat-flat-button (click)="openPetForm()">
         <mat-icon>add</mat-icon>
         Adicionar pet
-      </button>
+      </button> }
     </rp-empty-state>
   }
 </div>

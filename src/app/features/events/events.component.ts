@@ -23,6 +23,7 @@ import { EmptyStateComponent } from '../../shared/components/ui/empty-state.comp
 import { PageHeaderComponent } from '../../shared/components/ui/page-header.component';
 import { SkeletonComponent } from '../../shared/components/ui/skeleton.component';
 import { EventFormComponent } from './event-form.component';
+import { HouseholdService } from '../../core/services/household.service';
 
 type Period = 'PAST_30' | 'NEXT_7' | 'NEXT_30' | 'NEXT_90' | 'YEAR';
 interface CareGroup { key: string; label: string; isToday: boolean; events: CareOccurrence[] }
@@ -52,6 +53,9 @@ export class EventsComponent implements OnInit {
   selectedPeriod: Period = 'NEXT_30';
   isLoading = true;
   readonly busyIds = new Set<string>();
+  readonly memberNames = new Map<number, string>();
+  canManagePlans = false;
+  canCompleteCare = false;
   readonly eventTypes: Array<{ value: EventType; label: string }> = [
     { value: 'VACCINE', label: 'Vacinas' }, { value: 'MEDICINE', label: 'Remédios' },
     { value: 'DIARY', label: 'Rotinas' }, { value: 'BREED', label: 'Reprodução' },
@@ -67,10 +71,12 @@ export class EventsComponent implements OnInit {
     private readonly apiError: ApiErrorService,
     private readonly eventState: EventStateService,
     private readonly route: ActivatedRoute,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly households: HouseholdService
   ) {}
 
   ngOnInit(): void {
+    this.households.overview().subscribe({ next: value => { this.canManagePlans = value.household.role === 'OWNER'; this.canCompleteCare = value.household.role !== 'VIEWER'; value.members.forEach(member => this.memberNames.set(member.tutorId, member.firstName)); } });
     this.petService.getPetsCached().subscribe({
       next: pets => { this.pets = pets; },
       error: () => this.toast.error('Não foi possível carregar os nomes dos pets.')
@@ -165,6 +171,7 @@ export class EventsComponent implements OnInit {
   }
   goBack(): void { this.router.navigate(['/events']); }
   petName(id: number): string { return this.pets.find(pet => pet.id === id)?.name || `Pet #${id}`; }
+  memberName(id?: number): string { return id ? this.memberNames.get(id) || 'Membro da família' : ''; }
   get routePetName(): string { return this.routePetId ? this.petName(this.routePetId) : ''; }
   get hasFilters(): boolean {
     return !!this.selectedType || !!this.selectedStatus || this.selectedPeriod !== 'NEXT_30' || this.selectedPetId !== this.routePetId;

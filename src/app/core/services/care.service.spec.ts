@@ -10,8 +10,8 @@ describe('CareService', () => {
   let service: CareService;
   let http: HttpTestingController;
   const occurrence: CareOccurrence = {
-    id: 'occ-1', planId: 'plan-1', petId: 1, type: 'MEDICINE', title: 'Dose',
-    dueAt: '2026-07-12T10:00:00', status: 'COMPLETED'
+    id: 'occ-1', planId: 'plan-1', petId: 1, responsibleTutorId: 1, type: 'MEDICINE', title: 'Dose',
+    dueAt: '2026-07-12T10:00:00', status: 'COMPLETED', critical: false
   };
 
   beforeEach(() => {

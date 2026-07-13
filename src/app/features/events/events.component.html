@@ -3,7 +3,7 @@
                   [title]="routePetId ? 'Agenda de ' + (routePetName || 'pet') : 'Agenda'"
                   subtitle="Execuções concretas, histórico confiável e tudo que vem pela frente.">
     @if (routePetId) { <button mat-stroked-button (click)="goBack()"><mat-icon>arrow_back</mat-icon>Agenda completa</button> }
-    <button mat-flat-button (click)="openPlan(undefined, routePetId || undefined)"><mat-icon>add</mat-icon>Novo cuidado</button>
+    @if (canManagePlans) { <button mat-flat-button (click)="openPlan(undefined, routePetId || undefined)"><mat-icon>add</mat-icon>Novo cuidado</button> }
   </rp-page-header>
 
   <section class="filters" aria-label="Filtros da agenda">
@@ -46,7 +46,7 @@
         <h2 [class.today]="group.isToday">{{ group.label }}</h2>
         <div class="day-events">
           @for (event of group.events; track event.id) {
-            <rp-care-occurrence-card [occurrence]="event" [petName]="petName(event.petId)" [busy]="busyIds.has(event.id)"
+            <rp-care-occurrence-card [occurrence]="event" [petName]="petName(event.petId)" [busy]="busyIds.has(event.id)" [responsibleName]="memberName(event.responsibleTutorId)" [completedByName]="memberName(event.completedByTutorId)" [showPlanActions]="canManagePlans" [canComplete]="canCompleteCare"
               (complete)="complete($event)" (undo)="undo($event)" (editPlan)="openPlan($event.planId, $event.petId)"
               (endPlan)="endPlan($event)"></rp-care-occurrence-card>
           }
@@ -61,7 +61,7 @@
     <rp-empty-state icon="event_available" [title]="hasFilters ? 'Nada com estes filtros' : 'Agenda tranquila'"
       [message]="hasFilters ? 'Ajuste os filtros para encontrar outros cuidados.' : 'Crie um plano e as execuções aparecerão aqui automaticamente.'">
       @if (hasFilters) { <button mat-stroked-button (click)="clearFilters()">Limpar filtros</button> }
-      <button mat-flat-button (click)="openPlan(undefined, routePetId || undefined)"><mat-icon>add</mat-icon>Novo cuidado</button>
+      @if (canManagePlans) { <button mat-flat-button (click)="openPlan(undefined, routePetId || undefined)"><mat-icon>add</mat-icon>Novo cuidado</button> }
     </rp-empty-state>
   }
 </div>

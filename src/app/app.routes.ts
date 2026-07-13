@@ -67,6 +67,14 @@ export const routes: Routes = [
       {
         path: 'profile',
         loadComponent: () => import('./features/profile/profile.component').then(m => m.ProfileComponent)
+      },
+      {
+        path: 'family',
+        loadComponent: () => import('./features/household/household.component').then(m => m.HouseholdComponent)
+      },
+      {
+        path: 'invite',
+        loadComponent: () => import('./features/household/invitation-accept.component').then(m => m.InvitationAcceptComponent)
       }
     ]
   },

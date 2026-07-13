@@ -20,6 +20,9 @@ export class CareOccurrenceCardComponent {
   @Input() busy = false;
   @Input() showDate = false;
   @Input() showPlanActions = true;
+  @Input() responsibleName = '';
+  @Input() completedByName = '';
+  @Input() canComplete = true;
   @Output() complete = new EventEmitter<CareOccurrence>();
   @Output() undo = new EventEmitter<CareOccurrence>();
   @Output() editPlan = new EventEmitter<CareOccurrence>();

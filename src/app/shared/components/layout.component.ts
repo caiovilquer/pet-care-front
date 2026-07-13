@@ -16,6 +16,8 @@ import { UserStateService } from '../../core/services/user-state.service';
 import { DashboardOverview } from '../../core/models/dashboard.model';
 import { CareOccurrence } from '../../core/models/care.model';
 import { FooterComponent } from './ui/footer.component';
+import { HouseholdService } from '../../core/services/household.service';
+import { HouseholdSummary } from '../../core/models/household.model';
 
 @Component({
   selector: 'app-layout',
@@ -44,12 +46,18 @@ import { FooterComponent } from './ui/footer.component';
           <a routerLink="/today" routerLinkActive="on">Hoje</a>
           <a routerLink="/pets" routerLinkActive="on">Pets</a>
           <a routerLink="/events" routerLinkActive="on">Agenda</a>
+          <a routerLink="/family" routerLinkActive="on">Família</a>
           <a routerLink="/petshops" [class.on]="isNearbyActive">Por perto</a>
         </nav>
 
         <span class="spacer"></span>
 
         <div class="header-actions">
+          @if (currentHousehold) {
+            <button mat-button [matMenuTriggerFor]="householdMenu" class="household-switch" aria-label="Trocar família">
+              <mat-icon>home</mat-icon><span>{{ currentHousehold.name }}</span><mat-icon>expand_more</mat-icon>
+            </button>
+          }
           <button mat-icon-button (click)="toggleTheme()"
                   [matTooltip]="isDark ? 'Tema claro' : 'Tema escuro'"
                   [attr.aria-label]="isDark ? 'Ativar tema claro' : 'Ativar tema escuro'">
@@ -95,11 +103,25 @@ import { FooterComponent } from './ui/footer.component';
         <a routerLink="/petshops" [class.on]="isNearbyActive">
           <mat-icon>near_me</mat-icon><span>Por perto</span>
         </a>
-        <a routerLink="/profile" routerLinkActive="on">
-          <mat-icon>person_outline</mat-icon><span>Perfil</span>
+        <a routerLink="/family" routerLinkActive="on">
+          <mat-icon>group</mat-icon><span>Família</span>
         </a>
       </nav>
     </div>
+
+    <!-- Menu do usuário -->
+    <mat-menu #householdMenu="matMenu" xPosition="before">
+      <div class="family-menu-title" (click)="$event.stopPropagation()"><span>Rotina compartilhada</span><small>Selecione onde você está cuidando</small></div>
+      <mat-divider></mat-divider>
+      @for (item of householdList; track item.id) {
+        <button mat-menu-item (click)="selectHousehold(item)">
+          <mat-icon>{{ currentHousehold?.id === item.id ? 'radio_button_checked' : 'radio_button_unchecked' }}</mat-icon>
+          <span>{{ item.name }}</span>
+        </button>
+      }
+      <mat-divider></mat-divider>
+      <button mat-menu-item routerLink="/family"><mat-icon>manage_accounts</mat-icon><span>Gerenciar família</span></button>
+    </mat-menu>
 
     <!-- Menu do usuário -->
     <mat-menu #userMenu="matMenu" xPosition="before">
@@ -237,6 +259,8 @@ import { FooterComponent } from './ui/footer.component';
       gap: var(--q-space-1);
     }
     .header-actions .mat-mdc-icon-button { color: var(--q-text-2); }
+    .household-switch{max-width:220px;color:var(--q-text-2);border:1px solid var(--q-border);border-radius:999px}.household-switch span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.household-switch mat-icon:last-child{font-size:18px}
+    .family-menu-title{display:grid;padding:13px 16px}.family-menu-title span{font-weight:700}.family-menu-title small{color:var(--q-text-2)}
 
     .bell { position: relative; }
     .badge {
@@ -334,6 +358,7 @@ import { FooterComponent } from './ui/footer.component';
       .rp-main {
         padding: var(--q-space-4) var(--q-space-4) calc(76px + env(safe-area-inset-bottom));
       }
+      .household-switch span,.household-switch mat-icon:last-child{display:none}.household-switch{min-width:42px;padding:0}
     }
 
     /* ---------- menus ---------- */
@@ -383,6 +408,10 @@ export class LayoutComponent implements OnInit, OnDestroy {
   isProduction = environment.production;
   private eventUpdateSubscription?: Subscription;
   private userUpdateSubscription?: Subscription;
+  private householdSubscription?: Subscription;
+  private householdListSubscription?: Subscription;
+  currentHousehold: HouseholdSummary | null = null;
+  householdList: HouseholdSummary[] = [];
 
   constructor(
     private authService: AuthService,
@@ -390,6 +419,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
     private eventStateService: EventStateService,
     private dateTimeService: DateTimeService,
     private userStateService: UserStateService,
+    private householdService: HouseholdService,
     private router: Router
   ) {
     this.isDark = this.resolveIsDark();
@@ -397,6 +427,9 @@ export class LayoutComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadUserProfile();
+    this.householdSubscription = this.householdService.current$.subscribe(item => this.currentHousehold = item);
+    this.householdListSubscription = this.householdService.households$.subscribe(items => this.householdList = items);
+    this.householdService.load().subscribe({ error: () => { this.householdList = []; } });
 
     this.eventUpdateSubscription = this.eventStateService.eventUpdated$.subscribe(() => {
       this.loadOverview(true);
@@ -410,6 +443,8 @@ export class LayoutComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.eventUpdateSubscription?.unsubscribe();
     this.userUpdateSubscription?.unsubscribe();
+    this.householdSubscription?.unsubscribe();
+    this.householdListSubscription?.unsubscribe();
   }
 
   get isNearbyActive(): boolean {
@@ -464,6 +499,11 @@ export class LayoutComponent implements OnInit, OnDestroy {
       next: () => this.router.navigate(['/auth/login']),
       error: () => this.router.navigate(['/auth/login'])
     });
+  }
+
+  selectHousehold(item: HouseholdSummary): void {
+    if (item.id === this.currentHousehold?.id) return;
+    this.householdService.select(item).subscribe({ next: () => { this.eventStateService.notifyEventUpdated(); void this.router.navigate(['/today']); } });
   }
 
   getEventIcon(type: string): string {

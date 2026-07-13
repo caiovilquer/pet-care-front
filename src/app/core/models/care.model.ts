@@ -18,6 +18,9 @@ export interface CarePlan {
     finalDate?: string | null;
   };
   reminderMinutesBefore: number;
+  critical: boolean;
+  escalationDelayMinutes?: number;
+  escalationTutorId?: number;
   active: boolean;
 }
 
@@ -32,6 +35,10 @@ export interface CarePlanRequest {
   repetitions: number | null;
   finalDate: string | null;
   reminderMinutesBefore: number;
+  responsibleTutorId: number | null;
+  critical: boolean;
+  escalationDelayMinutes: number | null;
+  escalationTutorId: number | null;
 }
 
 export interface CareOccurrence {
@@ -39,6 +46,7 @@ export interface CareOccurrence {
   version?: number;
   planId: string;
   petId: number;
+  responsibleTutorId: number;
   type: EventType;
   title: string;
   instructions?: string;
@@ -47,6 +55,9 @@ export interface CareOccurrence {
   completedAt?: string;
   completedByTutorId?: number;
   completionNote?: string;
+  critical: boolean;
+  escalationDelayMinutes?: number;
+  escalationTutorId?: number;
   canUndoUntil?: string;
 }
 

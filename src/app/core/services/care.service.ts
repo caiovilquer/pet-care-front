@@ -87,6 +87,11 @@ export class CareService {
     }));
   }
 
+  assign(id: string, expectedVersion: number, responsibleTutorId: number): Observable<CareOccurrence> {
+    return this.http.put<CareOccurrence>(`${this.occurrencesUrl}/${encodeURIComponent(id)}/responsible`, { expectedVersion, responsibleTutorId })
+      .pipe(tap(() => this.invalidate()));
+  }
+
   private invalidate(): void {
     this.cache.invalidate(CacheKeys.careToday);
     this.cache.invalidate(CacheKeys.dashboard);

@@ -16,6 +16,7 @@ import { PetAvatarComponent } from '../../shared/components/ui/pet-avatar.compon
 import { EmptyStateComponent } from '../../shared/components/ui/empty-state.component';
 import { SkeletonComponent } from '../../shared/components/ui/skeleton.component';
 import { ConfirmDialogComponent } from '../../shared/components/ui/confirm-dialog.component';
+import { HouseholdService } from '../../core/services/household.service';
 
 @Component({
   selector: 'app-pets',
@@ -42,16 +43,19 @@ export class PetsComponent implements OnInit {
   currentPage = 0;
   pageSize = 10;
   isLoading = true;
+  canManagePets = false;
 
   constructor(
     private petService: PetService,
     private dialog: MatDialog,
     private toast: ToastService,
-    private userStateService: UserStateService
+    private userStateService: UserStateService,
+    private householdService: HouseholdService,
   ) { }
 
   ngOnInit(): void {
     this.loadPets();
+    this.householdService.current$.subscribe(item => this.canManagePets = item?.role === 'OWNER');
   }
 
   loadPets(): void {

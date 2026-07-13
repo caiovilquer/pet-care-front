@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { of } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 import { authInterceptor, isApiUrl } from './auth.interceptor';
+import { HOUSEHOLD_STORAGE_KEY } from '../models/household.model';
 
 describe('authInterceptor', () => {
   const auth = {
@@ -12,12 +13,15 @@ describe('authInterceptor', () => {
     clearSession: jasmine.createSpy()
   };
 
-  beforeEach(() => TestBed.configureTestingModule({
+  beforeEach(() => {
+    localStorage.removeItem(HOUSEHOLD_STORAGE_KEY);
+    TestBed.configureTestingModule({
     providers: [
       { provide: AuthService, useValue: auth },
       { provide: Router, useValue: { url: '/', navigate: jasmine.createSpy() } }
     ]
-  }));
+    });
+  });
 
   it('never sends session credentials to a presigned storage URL', done => {
     const original = new HttpRequest('PUT', 'https://bucket.example/staging/file?X-Amz-Signature=abc', 'image', {
@@ -32,10 +36,12 @@ describe('authInterceptor', () => {
   });
 
   it('attaches the access token only to this application API', done => {
+    localStorage.setItem(HOUSEHOLD_STORAGE_KEY, '00000000-0000-0000-0000-000000000001');
     const original = new HttpRequest('GET', '/api/v1/pets');
 
     TestBed.runInInjectionContext(() => authInterceptor(original, request => {
       expect(request.headers.get('Authorization')).toBe('Bearer session-secret');
+      expect(request.headers.get('X-Household-Id')).toBe('00000000-0000-0000-0000-000000000001');
       expect(request.withCredentials).toBeTrue();
       return of(new HttpResponse({ status: 200 }));
     })).subscribe({ complete: done });
