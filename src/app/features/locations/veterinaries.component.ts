@@ -266,7 +266,7 @@ import {
 
     .results-list {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
       gap: var(--q-space-4);
       align-items: stretch;
     }
@@ -331,6 +331,16 @@ import {
     }
 
     .emergency-notice mat-icon { font-size: 18px; width: 18px; height: 18px; }
+
+    @media (max-width: 640px) {
+      .veterinaries-header { align-items: stretch; margin-bottom: var(--q-space-4); }
+      .header-actions { width: 100%; align-items: flex-start; flex-direction: column; }
+      .results-list { grid-template-columns: minmax(0, 1fr); gap: var(--q-space-3); }
+      .results-header { align-items: flex-start; flex-direction: column; }
+      .search-info { max-width: 100%; line-height: 1.45; }
+      .no-results, .welcome-section { padding: var(--q-space-5) var(--q-space-4); }
+      .emergency-notice { align-items: flex-start; }
+    }
   `]
 })
 export class VeterinariesComponent implements OnInit {
@@ -405,10 +415,10 @@ export class VeterinariesComponent implements OnInit {
   onViewDetails(location: Location) {
     const dialogRef = this.dialog.open(LocationDetailComponent, {
       data: { location },
-      width: '90vw',
+      width: 'min(900px, calc(100vw - 32px))',
       maxWidth: '900px',
-      height: '90vh',
-      maxHeight: '800px',
+      height: 'min(800px, calc(100dvh - 32px))',
+      maxHeight: 'calc(100dvh - 16px)',
       panelClass: 'location-detail-dialog',
       autoFocus: 'first-tabbable',
       restoreFocus: true

@@ -146,18 +146,18 @@ import { LocationService } from '../../core/services/location.service';
         </div>
       </mat-card-content>
 
-      <mat-card-actions>
-        <button mat-button (click)="onCall()" *ngIf="location.phone">
+      <mat-card-actions class="card-actions">
+        <button mat-button class="call-button" (click)="onCall()" *ngIf="location.phone">
           <mat-icon>phone</mat-icon>
           Ligar
         </button>
         
-        <button mat-button (click)="onDirections()">
+        <button mat-button class="directions-button" (click)="onDirections()">
           <mat-icon>directions</mat-icon>
           Como chegar
         </button>
         
-        <button mat-raised-button color="primary" (click)="onViewDetails()">
+        <button mat-raised-button color="primary" class="details-button" (click)="onViewDetails()">
           <mat-icon>info</mat-icon>
           Detalhes
         </button>
@@ -172,6 +172,7 @@ import { LocationService } from '../../core/services/location.service';
 
     .location-card {
       height: 100%;
+      min-width: 0;
       display: flex;
       flex-direction: column;
       transition: box-shadow 0.15s ease;
@@ -484,51 +485,71 @@ import { LocationService } from '../../core/services/location.service';
       color: var(--q-text-2) !important;
     }
 
-    mat-card-actions {
+    .card-actions {
       margin-top: auto;
       padding: 1rem;
-      display: flex;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 0.5rem;
-      flex-wrap: wrap;
-      justify-content: space-between;
     }
 
-    mat-card-actions button {
-      flex: 1;
-      min-width: fit-content;
+    .card-actions button {
+      min-width: 0;
+      min-height: 44px;
+      padding: 0 0.5rem;
+      font-size: 0.8125rem;
     }
 
     @media (max-width: 768px) {
       .card-header {
-        flex-direction: column;
-        text-align: center;
+        display: grid;
+        grid-template-columns: 104px minmax(0, 1fr);
+        gap: 0.875rem;
+        text-align: left;
+        padding: 0.875rem;
       }
 
       .location-image {
-        width: 100%;
-        height: 200px;
-        align-self: center;
+        width: 104px;
+        height: 104px;
+        align-self: start;
       }
 
       .location-meta {
-        align-items: center;
+        align-items: flex-start;
       }
 
       .meta-row {
-        justify-content: center;
+        justify-content: flex-start;
       }
 
       .contact-info {
-        justify-content: center;
+        justify-content: flex-start;
       }
 
-      mat-card-actions {
-        flex-direction: column;
+      .location-card mat-card-content {
+        padding: 0 0.875rem 0.875rem;
       }
 
-      mat-card-actions button {
+      .card-actions {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        padding: 0.875rem;
+      }
+
+      .card-actions button {
         width: 100%;
       }
+
+      .details-button { grid-column: 1 / -1; }
+    }
+
+    @media (max-width: 390px) {
+      .card-header { grid-template-columns: 84px minmax(0, 1fr); gap: 0.75rem; }
+      .location-image { width: 84px; height: 84px; }
+      .location-name { font-size: 1rem; }
+      .review-count { display: none; }
+      .meta-row { gap: 0.45rem; }
+      .meta-item { font-size: 0.8125rem; }
     }
   `]
 })

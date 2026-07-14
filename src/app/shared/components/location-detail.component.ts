@@ -443,9 +443,8 @@ import { of } from 'rxjs';
   `,
   styles: [`
     .location-detail-container {
-      max-width: 900px;
-      width: 100vw;
-      max-height: 90vh;
+      width: 100%;
+      height: 100%;
       overflow: hidden;
       display: flex;
       flex-direction: column;
@@ -455,7 +454,7 @@ import { of } from 'rxjs';
       position: relative;
       background: linear-gradient(135deg, #35705A 0%, #1B4033 100%);
       color: white;
-      padding: 2rem;
+      padding: 1.5rem 4rem 1.5rem 1.5rem;
     }
 
     .close-button {
@@ -464,6 +463,7 @@ import { of } from 'rxjs';
       right: 1rem;
       color: white;
       z-index: 10;
+      background: rgba(255,255,255,0.14);
     }
 
     .header-content {
@@ -574,6 +574,7 @@ import { of } from 'rxjs';
 
     .header-info {
       flex: 1;
+      min-width: 0;
     }
 
     .location-name {
@@ -582,6 +583,7 @@ import { of } from 'rxjs';
       font-weight: 700;
       line-height: 1.2;
       color: #FFFFFF;
+      overflow-wrap: anywhere;
     }
 
     .location-type {
@@ -614,9 +616,18 @@ import { of } from 'rxjs';
     }
 
     .quick-actions button {
+      min-height: 44px;
       background: rgba(255,255,255,0.15);
       color: white;
       border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 12px;
+      font-weight: 700;
+    }
+
+    .quick-actions button.mat-primary {
+      color: #102A22;
+      background: #DFA32E;
+      border-color: #DFA32E;
     }
 
     .quick-actions button:hover {
@@ -625,13 +636,27 @@ import { of } from 'rxjs';
 
     .detail-tabs {
       flex: 1;
+      min-height: 0;
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    :host ::ng-deep .detail-tabs .mat-mdc-tab-body-wrapper {
+      flex: 1;
+      min-height: 0;
+    }
+
+    :host ::ng-deep .detail-tabs .mat-mdc-tab-body-content {
+      height: 100%;
     }
 
     .tab-content {
       padding: 1.5rem;
-      height: 400px;
-      overflow-y: auto;
+      box-sizing: border-box;
+      height: 100%;
+      overflow: auto;
+      overscroll-behavior: contain;
     }
 
     .info-card, .hours-card, .services-card, .reviews-card, .details-card {
@@ -1010,36 +1035,34 @@ import { of } from 'rxjs';
 
     /* Responsive */
     @media (max-width: 768px) {
-      .location-detail-container {
-        width: 100vw;
-        max-width: none;
-        height: 100vh;
-        max-height: none;
-        border-radius: 0;
-      }
-
       .header-content {
-        flex-direction: column;
-        gap: 1rem;
+        gap: 0.875rem;
       }
 
       .location-image-large {
-        width: 100%;
-        height: 120px;
+        width: 92px;
+        height: 92px;
       }
 
       .location-name {
-        font-size: 1.5rem;
+        font-size: clamp(1.2rem, 5.5vw, 1.55rem);
+        line-height: 1.12;
       }
 
       .quick-actions {
-        justify-content: center;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.5rem;
       }
 
       .quick-actions button {
-        flex: 1;
+        min-height: 44px;
         min-width: 0;
+        padding: 0 0.5rem;
+        font-size: 0.75rem;
       }
+
+      .quick-actions button:last-child { grid-column: 1 / -1; }
 
       .features-grid {
         grid-template-columns: 1fr;
@@ -1051,8 +1074,21 @@ import { of } from 'rxjs';
 
       .tab-content {
         padding: 1rem;
-        height: 350px;
       }
+
+      .detail-header { padding: 1rem 3.5rem 1rem 1rem; }
+      .close-button { top: 0.5rem; right: 0.5rem; }
+      .location-type { margin-bottom: 0.5rem; font-size: 0.9rem; }
+      .location-meta { gap: 0.25rem; margin-bottom: 0.875rem; font-size: 0.8125rem; }
+      .image-overlay { padding: 0.5rem; }
+      .status-badge, .rating-badge { padding: 0.2rem 0.4rem; font-size: 0.65rem; }
+    }
+
+    @media (max-width: 420px) {
+      .location-image-large { width: 76px; height: 76px; }
+      .header-content { gap: 0.625rem; }
+      .location-meta .duration { display: none; }
+      .quick-actions button { font-size: 0.7rem; }
     }
   `]
 })

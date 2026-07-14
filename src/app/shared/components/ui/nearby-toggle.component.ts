@@ -30,10 +30,11 @@ import { MatIconModule } from '@angular/material/icon';
       border-radius: var(--q-radius-pill);
     }
     .rp-toggle a {
+      min-height: 44px;
       display: inline-flex;
       align-items: center;
       gap: 7px;
-      padding: 7px 16px;
+      padding: 0 16px;
       border-radius: var(--q-radius-pill);
       font-size: 0.875rem;
       font-weight: 600;
@@ -54,7 +55,7 @@ import { MatIconModule } from '@angular/material/icon';
     }
     @media (max-width: 480px) {
       .rp-toggle { width: 100%; }
-      .rp-toggle a { flex: 1; justify-content: center; }
+      .rp-toggle a { flex: 1; justify-content: center; padding: 0 10px; font-size: 0.8125rem; }
     }
   `]
 })

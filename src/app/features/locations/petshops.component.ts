@@ -260,9 +260,18 @@ import {
 
     .results-list {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
       gap: var(--q-space-4);
       align-items: stretch;
+    }
+
+    @media (max-width: 640px) {
+      .petshops-header { align-items: stretch; margin-bottom: var(--q-space-4); }
+      .header-actions { width: 100%; align-items: flex-start; flex-direction: column; }
+      .results-list { grid-template-columns: minmax(0, 1fr); gap: var(--q-space-3); }
+      .results-header { align-items: flex-start; flex-direction: column; }
+      .search-info { max-width: 100%; line-height: 1.45; }
+      .no-results, .welcome-section { padding: var(--q-space-5) var(--q-space-4); }
     }
   `]
 })
@@ -339,10 +348,10 @@ export class PetshopsComponent implements OnInit {
   onViewDetails(location: Location) {
     const dialogRef = this.dialog.open(LocationDetailComponent, {
       data: { location },
-      width: '90vw',
+      width: 'min(900px, calc(100vw - 32px))',
       maxWidth: '900px',
-      height: '90vh',
-      maxHeight: '800px',
+      height: 'min(800px, calc(100dvh - 32px))',
+      maxHeight: 'calc(100dvh - 16px)',
       panelClass: 'location-detail-dialog',
       autoFocus: 'first-tabbable',
       restoreFocus: true

@@ -59,7 +59,7 @@ import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
             </mat-error>
           </mat-form-field>
 
-          <div class="buttons-container">
+          <div class="buttons-container" [class.with-clear]="hasActiveFilters">
             <button 
               mat-raised-button 
               color="primary" 
@@ -382,19 +382,26 @@ import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 
       .main-search {
         flex-direction: column;
-        gap: 1rem;
+        gap: 0.75rem;
       }
+
+      .cep-field { width: 100%; min-width: 0; }
 
       .buttons-container {
         width: 100%;
-        display: flex;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 8px;
       }
       
       .search-button, .clear-button {
-        flex: 1;
-        height: 48px;
+        width: 100%;
+        height: 52px;
+        min-width: 0;
+        border-radius: var(--q-radius-md);
       }
+
+      .buttons-container:not(.with-clear) .search-button { grid-column: 1 / -1; }
       
       .filter-actions {
         flex-direction: column;
