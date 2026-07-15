@@ -48,6 +48,7 @@ import { FooterComponent } from './ui/footer.component';
           <a routerLink="/today" routerLinkActive="on"><mat-icon>wb_sunny</mat-icon>Hoje</a>
           <a routerLink="/pets" routerLinkActive="on"><mat-icon>pets</mat-icon>Pets</a>
           <a routerLink="/events" routerLinkActive="on"><mat-icon>calendar_month</mat-icon>Agenda</a>
+          <a routerLink="/assistant" routerLinkActive="on"><mat-icon>auto_awesome</mat-icon>Assistente</a>
           <button mat-button [matMenuTriggerFor]="exploreMenu" [class.on]="isMoreActive">
             <span>Mais</span><mat-icon>expand_more</mat-icon>
           </button>
@@ -57,9 +58,15 @@ import { FooterComponent } from './ui/footer.component';
 
         <div class="header-actions">
           @if (canAddContent) {
-            <button mat-flat-button class="primary-action" (click)="startPrimaryAction()">
-              <mat-icon>add</mat-icon><span>{{ hasPets ? 'Planejar cuidado' : 'Cadastrar pet' }}</span>
-            </button>
+            @if (hasPets) {
+              <button mat-flat-button class="primary-action" [matMenuTriggerFor]="createMenu">
+                <mat-icon>add</mat-icon><span>Planejar cuidado</span>
+              </button>
+            } @else {
+              <button mat-flat-button class="primary-action" (click)="startPrimaryAction()">
+                <mat-icon>add</mat-icon><span>Cadastrar pet</span>
+              </button>
+            }
           }
           @if (currentHousehold) {
             <button mat-icon-button [matMenuTriggerFor]="householdMenu" class="household-switch"
@@ -94,9 +101,15 @@ import { FooterComponent } from './ui/footer.component';
         <a routerLink="/today" routerLinkActive="on"><mat-icon>wb_sunny</mat-icon><span>Hoje</span></a>
         <a routerLink="/pets" routerLinkActive="on"><mat-icon>pets</mat-icon><span>Pets</span></a>
         @if (canAddContent) {
-          <button type="button" class="bottom-create" (click)="startPrimaryAction()" [attr.aria-label]="hasPets ? 'Planejar cuidado' : 'Cadastrar pet'">
-            <mat-icon>add</mat-icon><span>Adicionar</span>
-          </button>
+          @if (hasPets) {
+            <button type="button" class="bottom-create" [matMenuTriggerFor]="createMenu" aria-label="Adicionar cuidado">
+              <mat-icon>add</mat-icon><span>Adicionar</span>
+            </button>
+          } @else {
+            <button type="button" class="bottom-create" (click)="startPrimaryAction()" aria-label="Cadastrar pet">
+              <mat-icon>add</mat-icon><span>Adicionar</span>
+            </button>
+          }
         }
         <a routerLink="/events" routerLinkActive="on"><mat-icon>calendar_month</mat-icon><span>Agenda</span></a>
         <button type="button" [matMenuTriggerFor]="exploreMenu" [class.on]="isMoreActive" aria-label="Abrir mais opções">
@@ -107,9 +120,16 @@ import { FooterComponent } from './ui/footer.component';
 
     <mat-menu #exploreMenu="matMenu" xPosition="before">
       <div class="menu-section-title" (click)="$event.stopPropagation()">Outros espaços</div>
+      <button mat-menu-item routerLink="/assistant"><mat-icon>auto_awesome</mat-icon><span>Assistente</span></button>
       <button mat-menu-item routerLink="/care-center"><mat-icon>assignment</mat-icon><span>Saúde e finanças</span></button>
       <button mat-menu-item routerLink="/family"><mat-icon>group</mat-icon><span>Quem cuida</span></button>
       <button mat-menu-item routerLink="/petshops"><mat-icon>near_me</mat-icon><span>Por perto</span></button>
+    </mat-menu>
+
+    <mat-menu #createMenu="matMenu" xPosition="before">
+      <div class="menu-section-title" (click)="$event.stopPropagation()">Adicionar cuidado</div>
+      <button mat-menu-item (click)="openAssistant()"><mat-icon>auto_awesome</mat-icon><span>Descrever com o assistente</span></button>
+      <button mat-menu-item (click)="openPlan()"><mat-icon>edit_note</mat-icon><span>Preencher manualmente</span></button>
     </mat-menu>
 
     <mat-menu #householdMenu="matMenu" xPosition="before">
@@ -386,6 +406,8 @@ export class LayoutComponent implements OnInit, OnDestroy {
     });
   }
 
+  openAssistant(): void { void this.router.navigate(['/assistant']); }
+
   selectHousehold(item: HouseholdSummary): void {
     if (item.id === this.currentHousehold?.id) return;
     this.householdService.select(item).subscribe({ next: () => { this.eventStateService.notifyEventUpdated(); void this.router.navigate(['/today']); } });
@@ -429,6 +451,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
     if (url.startsWith('/pets/')) return 'Perfil do pet';
     if (url.startsWith('/pets')) return 'Pets';
     if (url.startsWith('/events')) return 'Agenda';
+    if (url.startsWith('/assistant')) return 'Assistente';
     if (url.startsWith('/care-center')) return 'Saúde e finanças';
     if (url.startsWith('/family')) return 'Quem cuida';
     if (url.startsWith('/petshops') || url.startsWith('/veterinaries')) return 'Por perto';

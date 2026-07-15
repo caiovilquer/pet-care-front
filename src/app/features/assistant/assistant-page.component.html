@@ -1,0 +1,115 @@
+<section class="assistant-shell" aria-labelledby="assistant-title">
+  <header class="assistant-hero">
+    <div>
+      <p class="q-overline">Assistente</p>
+      <h1 id="assistant-title">Descreva o cuidado. Você decide o que será salvo.</h1>
+      <p>A IA organiza apenas o que você informou em um rascunho. Nenhum plano é criado sem sua confirmação.</p>
+    </div>
+    @if (canCreate) { <button mat-stroked-button type="button" (click)="openManual()"><mat-icon>edit_note</mat-icon>Preencher manualmente</button> }
+  </header>
+
+  @if (!canCreate) {
+    <div class="access-card" role="status">
+      <mat-icon>lock</mat-icon>
+      <div><strong>Criação disponível para proprietários</strong><p>Seu papel nesta família permite consultar a rotina, mas não criar novos planos.</p></div>
+    </div>
+  } @else if (!draft) {
+    <section class="composer-card" aria-labelledby="composer-title">
+      <div class="section-heading"><mat-icon>auto_awesome</mat-icon><div><h2 id="composer-title">Criar um rascunho</h2><p>Inclua pet, cuidado, data, horário e repetição.</p></div></div>
+      <form [formGroup]="composer" (ngSubmit)="generate()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Descreva o cuidado</mat-label>
+          <textarea matInput formControlName="instruction" rows="5" maxlength="4000"
+                    placeholder="Ex.: Dar o remédio da Luna amanhã às 08:00 e 20:00, todos os dias por 7 dias"></textarea>
+          <mat-hint align="end">{{ composer.controls.instruction.value.length }}/4000</mat-hint>
+          <mat-error>Escreva uma instrução antes de continuar</mat-error>
+        </mat-form-field>
+        <div class="composer-safety"><mat-icon>verified_user</mat-icon><span>O assistente não diagnostica, prescreve nem completa doses ausentes.</span></div>
+        <button mat-flat-button type="submit" [disabled]="isLoading">
+          @if (isLoading) { <mat-spinner diameter="18"></mat-spinner> }
+          {{ isLoading ? 'Organizando…' : 'Gerar rascunho' }}
+        </button>
+      </form>
+    </section>
+
+    @if (recentDrafts.length) {
+      <section class="recent" aria-labelledby="recent-title">
+        <h2 id="recent-title">Rascunhos recentes</h2>
+        <div class="recent-grid">
+          @for (item of recentDrafts; track item.id) {
+            <a [routerLink]="['/assistant/drafts', item.id]">
+              <span class="status status-{{ item.status.toLowerCase() }}">{{ statusLabel(item.status) }}</span>
+              <strong>{{ item.fields.title || 'Rascunho sem título' }}</strong>
+              <small>{{ item.updatedAt | date:'dd/MM/yyyy HH:mm' }}</small>
+            </a>
+          }
+        </div>
+      </section>
+    }
+  } @else {
+    <div class="draft-toolbar">
+      <a mat-button routerLink="/assistant"><mat-icon>arrow_back</mat-icon>Novo rascunho</a>
+      <span class="status status-{{ draft.status.toLowerCase() }}" role="status">{{ statusLabel(draft.status) }}</span>
+    </div>
+
+    @if (draft.warnings.length) {
+      <div class="warnings" aria-live="polite">
+        @for (warning of draft.warnings; track warning.code) {
+          <div [class.blocking]="warning.blocking"><mat-icon>{{ warning.blocking ? 'error_outline' : 'info' }}</mat-icon><span>{{ warning.message }}</span></div>
+        }
+      </div>
+    }
+
+    @if (draft.status === 'FAILED') {
+      <section class="result-card failure" role="alert">
+        <mat-icon>cloud_off</mat-icon><div><h2>Não foi possível gerar o rascunho</h2><p>Seus dados não foram transformados em plano. Continue pelo formulário manual.</p><button mat-flat-button type="button" (click)="openManual()">Preencher manualmente</button></div>
+      </section>
+    } @else if (draft.status === 'CONFIRMED') {
+      <section class="result-card success" aria-live="polite">
+        <mat-icon>check_circle</mat-icon><div><h2>Plano confirmado</h2><p>O cuidado já está na agenda. Repetir a confirmação não cria outro plano.</p><a mat-flat-button routerLink="/events">Abrir agenda</a><div class="feedback"><span>O rascunho ajudou?</span><button mat-icon-button (click)="sendFeedback(true)" aria-label="Rascunho útil"><mat-icon>thumb_up</mat-icon></button><button mat-icon-button (click)="sendFeedback(false)" aria-label="Rascunho não útil"><mat-icon>thumb_down</mat-icon></button></div></div>
+      </section>
+    } @else if (draft.status === 'CANCELLED' || draft.status === 'EXPIRED') {
+      <section class="result-card"><mat-icon>event_busy</mat-icon><div><h2>Rascunho {{ draft.status === 'EXPIRED' ? 'expirado' : 'cancelado' }}</h2><p>Gere um novo rascunho ou use o formulário manual.</p></div></section>
+    } @else {
+      <section class="review-card" aria-labelledby="review-title">
+        <div class="section-heading"><mat-icon>fact_check</mat-icon><div><h2 id="review-title">Revise antes de confirmar</h2><p>Os marcadores explicam de onde veio cada valor.</p></div></div>
+        @if (draft.missingFields.length) { <p class="missing-summary" role="status">Ainda faltam {{ draft.missingFields.length }} campo(s) obrigatório(s).</p> }
+        <form [formGroup]="review" (ngSubmit)="saveReview()">
+          <div class="field-block">
+            <span class="provenance p-{{ provenance('PET')?.toLowerCase() }}">{{ provenanceLabel('PET') }}</span>
+            <mat-form-field appearance="outline"><mat-label>Pet</mat-label><mat-select formControlName="petId">@for (pet of pets; track pet.id) { <mat-option [value]="pet.id">{{ pet.name }}</mat-option> }</mat-select><mat-error>Escolha o pet</mat-error></mat-form-field>
+          </div>
+          <div class="two-col">
+            <div class="field-block"><span class="provenance p-{{ provenance('TYPE')?.toLowerCase() }}">{{ provenanceLabel('TYPE') }}</span><mat-form-field appearance="outline"><mat-label>Tipo</mat-label><mat-select formControlName="type">@for (type of eventTypes; track type.value) { <mat-option [value]="type.value">{{ type.label }}</mat-option> }</mat-select></mat-form-field></div>
+            <div class="field-block"><span class="provenance p-{{ provenance('TITLE')?.toLowerCase() }}">{{ provenanceLabel('TITLE') }}</span><mat-form-field appearance="outline"><mat-label>Nome do cuidado</mat-label><input matInput formControlName="title" maxlength="120"></mat-form-field></div>
+          </div>
+          <div class="field-block"><span class="provenance p-{{ provenance('INSTRUCTIONS')?.toLowerCase() }}">{{ provenanceLabel('INSTRUCTIONS') }}</span><mat-form-field appearance="outline"><mat-label>Orientações explícitas (opcional)</mat-label><textarea matInput formControlName="instructions" rows="2" maxlength="2000"></textarea></mat-form-field></div>
+          <div class="two-col">
+            <div class="field-block"><span class="provenance p-{{ provenance('START_AT')?.toLowerCase() }}">{{ provenanceLabel('START_AT') }}</span><mat-form-field appearance="outline"><mat-label>Primeira data</mat-label><input matInput type="date" formControlName="dateStart"></mat-form-field></div>
+            <div class="field-block"><span class="provenance">Horário local</span><mat-form-field appearance="outline"><mat-label>Horário</mat-label><input matInput type="time" formControlName="timeStart"></mat-form-field></div>
+          </div>
+          <section class="schedule-box">
+            <span class="provenance p-{{ provenance('SCHEDULE')?.toLowerCase() }}">{{ provenanceLabel('SCHEDULE') }}</span>
+            <mat-form-field appearance="outline"><mat-label>Repetição</mat-label><mat-select formControlName="scheduleKind">@for (kind of scheduleKinds; track kind.value) { <mat-option [value]="kind.value">{{ kind.label }}</mat-option> }</mat-select></mat-form-field>
+            @if (review.controls.scheduleKind.value === 'CALENDAR_INTERVAL') { <div class="two-col"><mat-form-field appearance="outline"><mat-label>A cada</mat-label><input matInput type="number" formControlName="intervalCount"></mat-form-field><mat-form-field appearance="outline"><mat-label>Unidade</mat-label><mat-select formControlName="calendarUnit">@for (unit of calendarUnits; track unit.value) { <mat-option [value]="unit.value">{{ unit.label }}</mat-option> }</mat-select></mat-form-field></div> }
+            @if (review.controls.scheduleKind.value === 'FIXED_INTERVAL') { <mat-form-field appearance="outline"><mat-label>Intervalo em horas</mat-label><input matInput type="number" formControlName="fixedIntervalHours" min="1" step="0.5"></mat-form-field> }
+            @if (review.controls.scheduleKind.value === 'DAILY_TIMES') { <mat-form-field appearance="outline"><mat-label>Horários diários</mat-label><input matInput formControlName="dailyTimes" placeholder="08:00, 20:00"><mat-hint>Separe horários únicos por vírgula</mat-hint></mat-form-field> }
+            @if (isRecurring) { <div class="two-col"><mat-form-field appearance="outline"><mat-label>Total de ocorrências</mat-label><input matInput type="number" formControlName="repetitions" min="1"></mat-form-field><mat-form-field appearance="outline"><mat-label>Ou repetir até</mat-label><input matInput type="date" formControlName="endDate"></mat-form-field></div> }
+          </section>
+          <div class="two-col">
+            <div class="field-block"><span class="provenance p-{{ provenance('RESPONSIBLE')?.toLowerCase() }}">{{ provenanceLabel('RESPONSIBLE') }}</span><mat-form-field appearance="outline"><mat-label>Responsável</mat-label><mat-select formControlName="responsibleTutorId">@for (member of members; track member.id) { @if (member.role !== 'VIEWER') { <mat-option [value]="member.tutorId">{{ member.firstName }} {{ member.lastName }}</mat-option> } }</mat-select></mat-form-field></div>
+            <div class="field-block"><span class="provenance p-{{ provenance('REMINDER')?.toLowerCase() }}">{{ provenanceLabel('REMINDER') }}</span><mat-form-field appearance="outline"><mat-label>Lembrete</mat-label><mat-select formControlName="reminderMinutesBefore">@for (item of reminders; track item.value) { <mat-option [value]="item.value">{{ item.label }}</mat-option> }</mat-select></mat-form-field></div>
+          </div>
+          <section class="optional-box"><mat-checkbox formControlName="critical">Cuidado crítico</mat-checkbox>@if (review.controls.critical.value) { <div class="two-col"><mat-form-field appearance="outline"><mat-label>Alertar após (minutos)</mat-label><input matInput type="number" formControlName="escalationDelayMinutes"></mat-form-field><mat-form-field appearance="outline"><mat-label>Proprietário avisado</mat-label><mat-select formControlName="escalationTutorId">@for (member of members; track member.id) { @if (member.role === 'OWNER') { <mat-option [value]="member.tutorId">{{ member.firstName }} {{ member.lastName }}</mat-option> } }</mat-select></mat-form-field></div> }</section>
+          <section class="optional-box"><strong>Custo previsto por execução (opcional)</strong><div class="two-col"><mat-form-field appearance="outline"><mat-label>Valor</mat-label><input matInput type="number" formControlName="estimatedCostAmount" step="0.01"></mat-form-field><mat-form-field appearance="outline"><mat-label>Moeda</mat-label><mat-select formControlName="estimatedCostCurrency">@for (currency of currencies; track currency.code) { <mat-option [value]="currency.code">{{ currency.code }}</mat-option> }</mat-select></mat-form-field></div></section>
+          <div class="review-actions">
+            <button mat-button type="button" (click)="cancel()">Cancelar rascunho</button>
+            <button mat-stroked-button type="submit" [disabled]="isSaving">{{ isSaving ? 'Salvando…' : 'Salvar revisão' }}</button>
+            <button mat-flat-button type="button" (click)="confirm()" [disabled]="!canConfirm || isConfirming">{{ isConfirming ? 'Confirmando…' : 'Confirmar e criar plano' }}</button>
+          </div>
+          @if (review.dirty && draft.status === 'READY') { <p class="dirty-hint" role="status">Salve suas alterações antes de confirmar.</p> }
+        </form>
+      </section>
+    }
+  }
+</section>

@@ -1,4 +1,4 @@
-import { buildScheduleRule, parseDailyTimes } from './event-form.component';
+import { buildScheduleRule, parseDailyTimes } from '../../shared/components/care-plan-fields';
 
 describe('care schedule form mapping', () => {
   it('maps a twelve hour fixed interval to canonical minutes', () => {

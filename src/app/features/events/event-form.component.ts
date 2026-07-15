@@ -10,7 +10,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSelectModule } from '@angular/material/select';
-import { CalendarIntervalUnit, CarePlanRequest, CareScheduleRule, ScheduleKind } from '../../core/models/care.model';
+import { CalendarIntervalUnit, CarePlanRequest, ScheduleKind } from '../../core/models/care.model';
 import { EventType } from '../../core/models/event.model';
 import { PetSummary } from '../../core/models/pet.model';
 import { ApiErrorService } from '../../core/services/api-error.service';
@@ -22,33 +22,9 @@ import { ToastService } from '../../core/services/toast.service';
 import { HouseholdService } from '../../core/services/household.service';
 import { DEFAULT_HOUSEHOLD_TIMEZONE, HouseholdMember } from '../../core/models/household.model';
 import { CURRENCY_OPTIONS, currencySymbol, isListedCurrency, normalizeCurrency } from '../../core/models/currency.model';
+import { buildScheduleRule, parseDailyTimes } from '../../shared/components/care-plan-fields';
 
 export interface CarePlanFormData { planId?: string; petId?: number }
-
-export function parseDailyTimes(value: string): string[] {
-  const times = value.split(',').map(item => item.trim()).filter(item => /^([01]\d|2[0-3]):[0-5]\d$/.test(item));
-  return [...new Set(times)].sort();
-}
-
-export function buildScheduleRule(
-  kind: ScheduleKind,
-  calendarUnit: CalendarIntervalUnit,
-  intervalCount: number,
-  fixedIntervalHours: number,
-  dailyTimesInput: string,
-  repetitions: number | null,
-  endAt: string | null
-): CareScheduleRule {
-  return {
-    kind,
-    calendarUnit: kind === 'CALENDAR_INTERVAL' ? calendarUnit : null,
-    intervalCount: kind === 'CALENDAR_INTERVAL' ? intervalCount : null,
-    fixedIntervalMinutes: kind === 'FIXED_INTERVAL' ? Math.round(fixedIntervalHours * 60) : null,
-    dailyTimes: kind === 'DAILY_TIMES' ? parseDailyTimes(dailyTimesInput) : [],
-    repetitions: kind === 'ONE_TIME' ? null : repetitions,
-    endAt: kind === 'ONE_TIME' ? null : endAt
-  };
-}
 
 @Component({
   selector: 'app-event-form',
