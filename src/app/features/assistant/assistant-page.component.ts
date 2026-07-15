@@ -12,12 +12,14 @@ import { MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { CareDraft, CareDraftField, CareDraftProvenance } from '../../core/models/care-draft.model';
+import { AssistantCitation, PetHistoryAnswer } from '../../core/models/assistant.model';
 import { CalendarIntervalUnit, CarePlanRequest, ScheduleKind } from '../../core/models/care.model';
 import { CURRENCY_OPTIONS, normalizeCurrency } from '../../core/models/currency.model';
 import { EventType } from '../../core/models/event.model';
 import { DEFAULT_HOUSEHOLD_TIMEZONE, HouseholdMember, HouseholdSummary } from '../../core/models/household.model';
 import { PetSummary } from '../../core/models/pet.model';
 import { ApiErrorService } from '../../core/services/api-error.service';
+import { AssistantService } from '../../core/services/assistant.service';
 import { CareDraftService } from '../../core/services/care-draft.service';
 import { DateTimeService } from '../../core/services/datetime.service';
 import { EventStateService } from '../../core/services/event-state.service';
@@ -48,6 +50,21 @@ export class AssistantPageComponent implements OnInit, OnDestroy {
   isLoading = false;
   isSaving = false;
   isConfirming = false;
+  isAsking = false;
+  answer: PetHistoryAnswer | null = null;
+  answerFeedbackSent = false;
+
+  readonly questionSuggestions = [
+    'Quando foi a última vacina?',
+    'Quais cuidados estão atrasados?',
+    'Como evoluiu o peso nos últimos meses?',
+    'O que consta nas notas e documentos?',
+  ];
+
+  readonly question = this.fb.group({
+    petId: this.fb.control<number | null>(null, Validators.required),
+    text: this.fb.nonNullable.control('', [Validators.required, Validators.maxLength(1000)])
+  });
 
   readonly composer = this.fb.group({
     instruction: this.fb.nonNullable.control('', [Validators.required, Validators.maxLength(4000)])
@@ -100,6 +117,7 @@ export class AssistantPageComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly drafts: CareDraftService,
+    private readonly assistant: AssistantService,
     private readonly petsService: PetService,
     private readonly households: HouseholdService,
     private readonly dateTime: DateTimeService,
@@ -125,7 +143,12 @@ export class AssistantPageComponent implements OnInit, OnDestroy {
       error: () => { this.members = []; }
     });
     this.petsService.getAllCached(0, 100).subscribe({
-      next: page => this.pets = page.items,
+      next: page => {
+        this.pets = page.items;
+        const requestedPetId = Number(this.route.snapshot.queryParamMap.get('petId'));
+        const selected = page.items.find(item => item.id === requestedPetId) || page.items[0];
+        if (selected) this.question.controls.petId.setValue(selected.id);
+      },
       error: error => this.toast.error(this.apiError.message(error, 'Não foi possível carregar seus pets.'))
     });
     this.subscriptions.add(this.route.paramMap.subscribe(params => {
@@ -141,6 +164,66 @@ export class AssistantPageComponent implements OnInit, OnDestroy {
   get isRecurring(): boolean { return this.review.controls.scheduleKind.value !== 'ONE_TIME'; }
   get canEdit(): boolean { return !!this.draft && ['READY', 'NEEDS_INPUT'].includes(this.draft.status); }
   get canConfirm(): boolean { return this.draft?.status === 'READY' && !this.review.dirty; }
+
+  askQuestion(): void {
+    if (this.question.invalid) {
+      this.question.markAllAsTouched();
+      return;
+    }
+    const value = this.question.getRawValue();
+    this.isAsking = true;
+    this.answer = null;
+    this.answerFeedbackSent = false;
+    this.assistant.ask(value.petId!, value.text).subscribe({
+      next: answer => { this.answer = answer; this.isAsking = false; },
+      error: error => {
+        this.isAsking = false;
+        this.toast.error(this.apiError.message(error, 'Não foi possível consultar o histórico agora.'));
+      }
+    });
+  }
+
+  useQuestionSuggestion(value: string): void {
+    this.question.controls.text.setValue(value);
+    this.askQuestion();
+  }
+
+  sendAnswerFeedback(positive: boolean): void {
+    if (!this.answer || this.answerFeedbackSent) return;
+    this.assistant.feedback(this.answer.answerId, positive).subscribe({
+      next: () => { this.answerFeedbackSent = true; this.toast.success('Obrigado pelo feedback.'); },
+      error: () => this.toast.error('Não foi possível registrar o feedback.')
+    });
+  }
+
+  openCitation(citation: AssistantCitation): void {
+    if (citation.sourceType !== 'HEALTH_ATTACHMENT') return;
+    this.assistant.attachmentUrl(citation).subscribe({
+      next: result => {
+        const anchor = document.createElement('a');
+        anchor.href = result.url; anchor.target = '_blank'; anchor.rel = 'noopener noreferrer';
+        document.body.appendChild(anchor); anchor.click(); anchor.remove();
+      },
+      error: error => this.toast.error(this.apiError.message(error, 'Não foi possível abrir esta fonte.'))
+    });
+  }
+
+  citationType(citation: AssistantCitation): string {
+    return ({
+      HEALTH_RECORD: 'Registro de saúde', HEALTH_MEASUREMENT: 'Medição de saúde', HEALTH_ATTACHMENT: 'Documento', CARE_PLAN: 'Agenda',
+      VETERINARY_SUMMARY_NOTE: 'Nota do resumo'
+    } as Record<AssistantCitation['sourceType'], string>)[citation.sourceType];
+  }
+
+  answerTitle(answer: PetHistoryAnswer): string {
+    if (answer.kind === 'REFUSAL') return 'Limite de segurança';
+    return answer.insufficientEvidence ? 'Informação insuficiente' : 'Encontrei estas informações';
+  }
+
+  answerIcon(answer: PetHistoryAnswer): string {
+    if (answer.kind === 'REFUSAL') return 'health_and_safety';
+    return answer.insufficientEvidence ? 'manage_search' : 'verified';
+  }
 
   generate(): void {
     if (this.composer.invalid || !this.canCreate) {

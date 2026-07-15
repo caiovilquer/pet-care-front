@@ -2,49 +2,94 @@
   <header class="assistant-hero">
     <div>
       <p class="q-overline">Assistente</p>
-      <h1 id="assistant-title">Descreva o cuidado. Você decide o que será salvo.</h1>
-      <p>A IA organiza apenas o que você informou em um rascunho. Nenhum plano é criado sem sua confirmação.</p>
+      <h1 id="assistant-title">Pergunte sobre a rotina ou organize um novo cuidado.</h1>
+      <p>Respostas usam dados da agenda ou fontes do histórico. Novos planos só são criados depois da sua confirmação.</p>
     </div>
     @if (canCreate) { <button mat-stroked-button type="button" (click)="openManual()"><mat-icon>edit_note</mat-icon>Preencher manualmente</button> }
   </header>
 
-  @if (!canCreate) {
-    <div class="access-card" role="status">
-      <mat-icon>lock</mat-icon>
-      <div><strong>Criação disponível para proprietários</strong><p>Seu papel nesta família permite consultar a rotina, mas não criar novos planos.</p></div>
-    </div>
-  } @else if (!draft) {
-    <section class="composer-card" aria-labelledby="composer-title">
-      <div class="section-heading"><mat-icon>auto_awesome</mat-icon><div><h2 id="composer-title">Criar um rascunho</h2><p>Inclua pet, cuidado, data, horário e repetição.</p></div></div>
-      <form [formGroup]="composer" (ngSubmit)="generate()">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Descreva o cuidado</mat-label>
-          <textarea matInput formControlName="instruction" rows="5" maxlength="4000"
-                    placeholder="Ex.: Dar o remédio da Luna amanhã às 08:00 e 20:00, todos os dias por 7 dias"></textarea>
-          <mat-hint align="end">{{ composer.controls.instruction.value.length }}/4000</mat-hint>
-          <mat-error>Escreva uma instrução antes de continuar</mat-error>
+  @if (!draft) {
+    <section class="question-card" aria-labelledby="question-title">
+      <div class="section-heading"><mat-icon>search</mat-icon><div><h2 id="question-title">Consultar o histórico</h2><p>Agenda e medições usam consultas exatas. Notas e PDFs aparecem com a fonte utilizada.</p></div></div>
+      <form [formGroup]="question" (ngSubmit)="askQuestion()">
+        <mat-form-field appearance="outline">
+          <mat-label>Pet</mat-label>
+          <mat-select formControlName="petId">@for (pet of pets; track pet.id) { <mat-option [value]="pet.id">{{ pet.name }}</mat-option> }</mat-select>
+          <mat-error>Escolha o pet</mat-error>
         </mat-form-field>
-        <div class="composer-safety"><mat-icon>verified_user</mat-icon><span>O assistente não diagnostica, prescreve nem completa doses ausentes.</span></div>
-        <button mat-flat-button type="submit" [disabled]="isLoading">
-          @if (isLoading) { <mat-spinner diameter="18"></mat-spinner> }
-          {{ isLoading ? 'Organizando…' : 'Gerar rascunho' }}
+        <mat-form-field appearance="outline" class="question-input">
+          <mat-label>O que você quer encontrar?</mat-label>
+          <textarea matInput formControlName="text" rows="3" maxlength="1000" placeholder="Ex.: Quando foi a última vacina?"></textarea>
+          <mat-hint align="end">{{ question.controls.text.value.length }}/1000</mat-hint>
+          <mat-error>Escreva uma pergunta</mat-error>
+        </mat-form-field>
+        <button mat-flat-button type="submit" [disabled]="isAsking || !pets.length">
+          @if (isAsking) { <mat-spinner diameter="18"></mat-spinner> }
+          {{ isAsking ? 'Consultando…' : 'Consultar' }}
         </button>
       </form>
+      <div class="question-suggestions" aria-label="Perguntas sugeridas">
+        @for (suggestion of questionSuggestions; track suggestion) { <button type="button" (click)="useQuestionSuggestion(suggestion)" [disabled]="isAsking">{{ suggestion }}</button> }
+      </div>
+
+      @if (isAsking) { <div class="answer-loading" role="status"><mat-spinner diameter="24"></mat-spinner><span>Consultando somente as informações autorizadas deste pet…</span></div> }
+      @if (answer) {
+        <article class="answer-card" aria-live="polite" aria-labelledby="answer-title" [class.insufficient]="answer.insufficientEvidence">
+          <header><mat-icon>{{ answerIcon(answer) }}</mat-icon><div><p class="q-overline">Resposta do assistente</p><h3 id="answer-title">{{ answerTitle(answer) }}</h3></div></header>
+          <p class="answer-text">{{ answer.answer }}</p>
+          @if (answer.citations.length) {
+            <section class="sources" aria-labelledby="sources-title"><h4 id="sources-title">Fontes</h4><ol>
+              @for (citation of answer.citations; track citation.sourceId + ':' + citation.page + ':' + $index) {
+                <li><div><span>{{ citationType(citation) }} @if (citation.page) { · página {{ citation.page }} }</span><strong>{{ citation.title }}</strong><p>{{ citation.excerpt }}</p></div>
+                  @if (citation.sourceType === 'HEALTH_ATTACHMENT') { <button mat-stroked-button type="button" (click)="openCitation(citation)"><mat-icon>open_in_new</mat-icon>Abrir fonte</button> }
+                </li>
+              }
+            </ol></section>
+          }
+          @if (answer.suggestedFollowUps.length) { <ul class="follow-ups">@for (item of answer.suggestedFollowUps; track item) { <li>{{ item }}</li> }</ul> }
+          <div class="answer-feedback"><span>{{ answerFeedbackSent ? 'Feedback registrado' : 'Esta resposta ajudou?' }}</span><button mat-icon-button type="button" (click)="sendAnswerFeedback(true)" [disabled]="answerFeedbackSent" aria-label="Resposta útil"><mat-icon>thumb_up</mat-icon></button><button mat-icon-button type="button" (click)="sendAnswerFeedback(false)" [disabled]="answerFeedbackSent" aria-label="Resposta não útil"><mat-icon>thumb_down</mat-icon></button></div>
+        </article>
+      }
     </section>
 
-    @if (recentDrafts.length) {
-      <section class="recent" aria-labelledby="recent-title">
-        <h2 id="recent-title">Rascunhos recentes</h2>
-        <div class="recent-grid">
-          @for (item of recentDrafts; track item.id) {
-            <a [routerLink]="['/assistant/drafts', item.id]">
-              <span class="status status-{{ item.status.toLowerCase() }}">{{ statusLabel(item.status) }}</span>
-              <strong>{{ item.fields.title || 'Rascunho sem título' }}</strong>
-              <small>{{ item.updatedAt | date:'dd/MM/yyyy HH:mm' }}</small>
-            </a>
-          }
-        </div>
+    @if (!canCreate) {
+      <div class="access-card" role="status">
+        <mat-icon>lock</mat-icon>
+        <div><strong>Criação disponível para proprietários</strong><p>Seu papel nesta família permite consultar a rotina, mas não criar novos planos.</p></div>
+      </div>
+    } @else {
+      <section class="composer-card" aria-labelledby="composer-title">
+        <div class="section-heading"><mat-icon>auto_awesome</mat-icon><div><h2 id="composer-title">Criar um rascunho</h2><p>Inclua pet, cuidado, data, horário e repetição.</p></div></div>
+        <form [formGroup]="composer" (ngSubmit)="generate()">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Descreva o cuidado</mat-label>
+            <textarea matInput formControlName="instruction" rows="5" maxlength="4000"
+                      placeholder="Ex.: Dar o remédio da Luna amanhã às 08:00 e 20:00, todos os dias por 7 dias"></textarea>
+            <mat-hint align="end">{{ composer.controls.instruction.value.length }}/4000</mat-hint>
+            <mat-error>Escreva uma instrução antes de continuar</mat-error>
+          </mat-form-field>
+          <div class="composer-safety"><mat-icon>verified_user</mat-icon><span>O assistente não diagnostica, prescreve nem completa doses ausentes.</span></div>
+          <button mat-flat-button type="submit" [disabled]="isLoading">
+            @if (isLoading) { <mat-spinner diameter="18"></mat-spinner> }
+            {{ isLoading ? 'Organizando…' : 'Gerar rascunho' }}
+          </button>
+        </form>
       </section>
+
+      @if (recentDrafts.length) {
+        <section class="recent" aria-labelledby="recent-title">
+          <h2 id="recent-title">Rascunhos recentes</h2>
+          <div class="recent-grid">
+            @for (item of recentDrafts; track item.id) {
+              <a [routerLink]="['/assistant/drafts', item.id]">
+                <span class="status status-{{ item.status.toLowerCase() }}">{{ statusLabel(item.status) }}</span>
+                <strong>{{ item.fields.title || 'Rascunho sem título' }}</strong>
+                <small>{{ item.updatedAt | date:'dd/MM/yyyy HH:mm' }}</small>
+              </a>
+            }
+          </div>
+        </section>
+      }
     }
   } @else {
     <div class="draft-toolbar">
