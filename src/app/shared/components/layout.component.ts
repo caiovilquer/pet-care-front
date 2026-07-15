@@ -154,6 +154,7 @@ import { FooterComponent } from './ui/footer.component';
         <mat-divider></mat-divider>
       }
       <button mat-menu-item routerLink="/profile"><mat-icon>person_outline</mat-icon><span>Meu perfil</span></button>
+      <button mat-menu-item routerLink="/integrations/whatsapp"><mat-icon>chat</mat-icon><span>WhatsApp</span></button>
       <button mat-menu-item (click)="toggleTheme()"><mat-icon>{{ isDark ? 'light_mode' : 'dark_mode' }}</mat-icon><span>{{ isDark ? 'Usar tema claro' : 'Usar tema escuro' }}</span></button>
       <mat-divider></mat-divider>
       <button mat-menu-item (click)="logout()"><mat-icon>logout</mat-icon><span>Sair</span></button>
@@ -456,6 +457,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
     if (url.startsWith('/family')) return 'Quem cuida';
     if (url.startsWith('/petshops') || url.startsWith('/veterinaries')) return 'Por perto';
     if (url.startsWith('/profile')) return 'Meu perfil';
+    if (url.startsWith('/integrations/whatsapp')) return 'WhatsApp';
     return 'Hoje';
   }
 

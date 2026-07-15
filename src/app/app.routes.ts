@@ -81,6 +81,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/profile/profile.component').then(m => m.ProfileComponent)
       },
       {
+        path: 'integrations/whatsapp',
+        loadComponent: () => import('./features/integrations/whatsapp-integration.component').then(m => m.WhatsAppIntegrationComponent)
+      },
+      {
         path: 'care-center',
         loadComponent: () => import('./features/reports/care-center.component').then(m => m.CareCenterComponent)
       },
